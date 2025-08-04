@@ -21,7 +21,8 @@
 
 ## DTO Structure Diagram
 각 컨트롤러에서 사용하는 Request/Response DTO를 한눈에 정리한 구조도입니다. 실제 서비스 흐름과 연결되는 DTO 간 관계, 필드 구성, 타입 확장 등을 시각적으로 표현했습니다.
-<img width="2609" height="1424" alt="dto-diagram" src="https://github.com/user-attachments/assets/b4dd006f-9fa8-4c10-a61b-414ee9006641" />
+<img width="2549" height="856" alt="dto-diagram" src="https://github.com/user-attachments/assets/d2a9e695-654c-42e5-b453-92a59c818971" />
+
 
 
 ## Entity-Relationship Diagram (ERD)
