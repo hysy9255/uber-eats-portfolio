@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { DishEntity } from './dish.orm.entity';
+import { DishEntity } from '../../restaurant/orm-entities/dish.orm.entity';
 import { OrderEntity } from './order.orm.entity';
 
 @Entity('orderItems')
