@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { UserEntity } from './user.orm.entity';
-import { RejectedDeliveryOrderEntity } from './rejected-delivery-order.orm.entity';
-import { OrderEntity } from './order.orm.entity';
+import { UserEntity } from '../user.orm.entity';
+import { RejectedDeliveryOrderEntity } from 'src/order/rejected-delivery-order.orm.entity';
+import { OrderEntity } from 'src/order/orm-entities/order.orm.entity';
 
 @Entity('drivers')
 export class DriverEntity {

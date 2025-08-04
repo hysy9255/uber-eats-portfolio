@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { DriverEntity } from './driver.orm.entity';
-import { OrderEntity } from './order.orm.entity';
+import { OrderEntity } from './orm-entities/order.orm.entity';
+import { DriverEntity } from 'src/user/orm-entities/driver.orm.entity';
 
 @Entity('rejectedDeliveryOrders')
 export class RejectedDeliveryOrderEntity {

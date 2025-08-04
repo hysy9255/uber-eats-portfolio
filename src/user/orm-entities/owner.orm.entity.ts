@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
-import { UserEntity } from './user.orm.entity';
-import { RestaurantEntity } from './restaurant.orm.entity';
+import { UserEntity } from '../user.orm.entity';
+import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurant.orm.entity';
 
 @Entity('owners')
 export class OwnerEntity {
