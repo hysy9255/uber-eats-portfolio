@@ -7,35 +7,39 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { CreateUserInput, UpdateUserInput } from '../dto/user-input';
+import {
+  CreateUserInput,
+  DeleteUserInput,
+  UpdateUserInput,
+} from '../dto/user-input';
+import { UserService } from '../service/user.service';
 
 @Controller('users')
 export class UserController {
-  constructor() {}
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   createUser(@Body() createUserInput: CreateUserInput) {
-    console.log(createUserInput);
+    this.userService.createUser(createUserInput);
   }
-
-  @Get()
-  getUsers() {}
 
   @Get('/:id')
   getUser(@Param('id') userId: string) {
-    console.log(userId);
+    return this.userService.getUser(userId);
   }
 
-  @Patch('/:id')
-  updateUser(
-    @Param('id') userId: string,
-    @Body() updateUserInput: UpdateUserInput,
-  ) {
-    console.log(updateUserInput);
+  @Get('me')
+  getMe() {
+    this.userService.getMe();
   }
 
-  @Delete('/:id')
-  deleteUser(@Param('id') userId: string) {
-    console.log(userId);
+  @Patch('me')
+  updateMe(@Body() updateUserInput: UpdateUserInput) {
+    this.userService.updateMe(updateUserInput);
+  }
+
+  @Delete('me')
+  deleteMe(@Body() deleteUserInput: DeleteUserInput) {
+    console.log(deleteUserInput);
   }
 }

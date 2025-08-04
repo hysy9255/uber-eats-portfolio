@@ -7,9 +7,8 @@ export class CreateUserInput {
   role: UserRole;
 }
 
-export class UpdateUserInput extends PickType(CreateUserInput, [
-  'email',
-  'password',
-]) {
+export class UpdateUserInput extends PickType(CreateUserInput, ['password']) {
   newPassword: string;
 }
+
+export class DeleteUserInput extends PickType(CreateUserInput, ['password']) {}
