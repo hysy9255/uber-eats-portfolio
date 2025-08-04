@@ -22,9 +22,20 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## API Endpoint Overview
+전체 API의 엔드포인트, 메서드, DTO, 권한까지 정리된 요약표입니다.
+<img width="612" height="489" alt="controller" src="https://github.com/user-attachments/assets/9ceaf235-dc9d-4c0d-b70d-f1b606e107ee" />
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+
+
+## Entity-Relationship Diagram (ERD)
+이 다이어그램은 프로젝트의 주요 테이블(User, Restaurant, Order 등)과 각 테이블 간의 관계를 시각화한 ERD입니다. 실제 데이터베이스 설계를 기반으로 하며, 각 엔티티의 식별자와 외래키 관계를 명확히 보여줍니다.
+<img width="1561" height="960" alt="uber-eats-erd" src="https://github.com/user-attachments/assets/9ca7204e-8897-4170-8a50-d20df9c69422" />
+
+
+
+
+
 
 ## Project setup
 
