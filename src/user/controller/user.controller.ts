@@ -35,12 +35,18 @@ export class UserController {
   }
 
   @Patch('me')
-  updateMe(@Body() updateUserInput: UpdateUserInput) {
-    this.userService.updateMe(updateUserInput);
+  async updateMe(
+    @Req() req: Request,
+    @Body() updateUserInput: UpdateUserInput,
+  ) {
+    await this.userService.updateMe(req['userId'] as string, updateUserInput);
   }
 
   @Delete('me')
-  deleteMe(@Body() deleteUserInput: DeleteUserInput) {
-    console.log(deleteUserInput);
+  async deleteMe(
+    @Req() req: Request,
+    @Body() deleteUserInput: DeleteUserInput,
+  ) {
+    await this.userService.deleteMe(req['userId'] as string, deleteUserInput);
   }
 }

@@ -20,6 +20,13 @@ export class AuthService {
     return await bcrypt.hash(password, 10);
   }
 
+  async comparePassword(plainPassword: string, hashedPassword: string) {
+    const match = await bcrypt.compare(plainPassword, hashedPassword);
+    if (!match) {
+      throw new Error('Invalid credentials');
+    }
+  }
+
   async login({ email, password }: LoginInput) {
     const user = await this.userRepository.getUserByEmail(email);
     if (!user) {

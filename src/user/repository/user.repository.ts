@@ -11,25 +11,36 @@ export class UserRepository {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  createUser(userId: string, email: string, password: string, role: UserRole) {
-    const user = this.userRepository.create({ userId, email, password, role });
-    return this.userRepository.save(user);
+  async saveUser(
+    userId: string,
+    email: string,
+    password: string,
+    role: UserRole,
+  ) {
+    await this.userRepository.save(
+      this.userRepository.create({ userId, email, password, role }),
+    );
   }
 
-  async getUser(userId: string) {
-    console.log(userId);
-    const user = await this.userRepository.findOne({
-      where: { userId },
-    });
-    console.log(user);
-    return user;
+  async getUserById(userId: string): Promise<UserEntity | undefined> {
+    const result: UserEntity[] = await this.userRepository.query(
+      'SELECT * FROM users WHERE userId = $1',
+      [userId],
+    );
+
+    return result[0];
   }
 
-  getUserByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email } });
+  async getUserByEmail(email: string): Promise<UserEntity | undefined> {
+    const result: UserEntity[] = await this.userRepository.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email],
+    );
+
+    return result[0];
   }
 
-  //   getMe() {}
-  //   updateMe() {}
-  //   deleteMe() {}
+  deleteUser(userId: string) {
+    return this.userRepository.delete({ userId });
+  }
 }
