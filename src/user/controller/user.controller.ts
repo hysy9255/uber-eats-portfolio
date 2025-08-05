@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import {
   CreateUserInput,
@@ -23,14 +24,14 @@ export class UserController {
     await this.userService.createUser(createUserInput);
   }
 
+  @Get('me')
+  getMe(@Req() req: Request) {
+    return this.userService.getUser(req['userId'] as string);
+  }
+
   @Get('/:id')
   getUser(@Param('id') userId: string) {
     return this.userService.getUser(userId);
-  }
-
-  @Get('me')
-  getMe() {
-    this.userService.getMe();
   }
 
   @Patch('me')

@@ -16,10 +16,13 @@ export class UserRepository {
     return this.userRepository.save(user);
   }
 
-  getUser(userId: string) {
-    return this.userRepository.findOne({
+  async getUser(userId: string) {
+    console.log(userId);
+    const user = await this.userRepository.findOne({
       where: { userId },
     });
+    console.log(user);
+    return user;
   }
 
   getUserByEmail(email: string) {

@@ -30,8 +30,6 @@ export class UserService {
     return new UserOutput(user.userId, user.email, user.role);
   }
 
-  getMe() {}
-
   updateMe({ password, newPassword }: UpdateUserInput) {
     console.log(password, newPassword);
   }
