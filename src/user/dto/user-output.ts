@@ -5,7 +5,9 @@ export enum UserRole {
 }
 
 export class UserOutput {
-  userId: string;
-  email: string;
-  role: UserRole;
+  constructor(
+    public userId: string,
+    public email: string,
+    public role: string,
+  ) {}
 }

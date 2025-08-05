@@ -22,6 +22,10 @@ export class UserRepository {
     });
   }
 
+  getUserByEmail(email: string) {
+    return this.userRepository.findOne({ where: { email } });
+  }
+
   //   getMe() {}
   //   updateMe() {}
   //   deleteMe() {}

@@ -6,7 +6,6 @@ import { DishEntity } from './restaurant/orm-entities/dish.orm.entity';
 import { RestaurantModule } from './restaurant/restaurant.module';
 import { UserModule } from './user/user.module';
 import { OrderModule } from './order/order.module';
-import { AuthController } from './user/controller/auth.controller';
 import { UserEntity } from './user/user.orm.entity';
 import { ClientEntity } from './user/orm-entities/client.orm.entity';
 import { OwnerEntity } from './user/orm-entities/owner.orm.entity';
@@ -45,7 +44,7 @@ import { OrderEntity } from './order/orm-entities/order.orm.entity';
     UserModule,
     OrderModule,
   ],
-  controllers: [AuthController],
+  controllers: [],
   providers: [],
 })
 export class AppModule {}
