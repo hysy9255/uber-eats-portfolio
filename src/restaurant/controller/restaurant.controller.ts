@@ -6,39 +6,52 @@ import {
   Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import {
   CreateRestaurantInput,
   UpdateRestaurantInput,
 } from '../dto/restaurant-input';
+import { RestaurantService } from '../service/restaurant.service';
 
 @Controller('restaurants')
 export class RestaurantController {
-  constructor() {}
+  constructor(private readonly restaurantService: RestaurantService) {}
 
   @Post()
-  createRestaurant(@Body() createRestaurantInput: CreateRestaurantInput) {
-    console.log(createRestaurantInput);
+  async createRestaurant(
+    @Req() req: Request,
+    @Body() createRestaurantInput: CreateRestaurantInput,
+  ) {
+    await this.restaurantService.createRestaurant(
+      req['userId'] as string,
+      createRestaurantInput,
+    );
   }
 
   @Get()
-  getRestaurants() {}
+  getRestaurants() {
+    return this.restaurantService.getRestaurants();
+  }
 
   @Get('/:id')
   getRestaurant(@Param('id') restaurantId: string) {
-    console.log(restaurantId);
+    return this.restaurantService.getRestaurant(restaurantId);
   }
 
   @Patch('/:id')
-  updateRestaurant(
+  async updateRestaurant(
     @Param('id') restaurantId: string,
     @Body() updateRestaurantInput: UpdateRestaurantInput,
   ) {
-    console.group(updateRestaurantInput);
+    await this.restaurantService.updateRestaurant(
+      restaurantId,
+      updateRestaurantInput,
+    );
   }
 
   @Delete('/:id')
-  deleteRestaurant(@Param('id') restaurantId: string) {
-    console.log(restaurantId);
+  async deleteRestaurant(@Param('id') restaurantId: string) {
+    await this.restaurantService.deleteResetaurant(restaurantId);
   }
 }
