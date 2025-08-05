@@ -2,6 +2,7 @@ import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { DriverEntity } from './driver.orm.entity';
 import { OwnerEntity } from './owner.orm.entity';
 import { ClientEntity } from './client.orm.entity';
+import { UserRole } from '../dto/user-output';
 
 @Entity('users')
 export class UserEntity {
@@ -15,7 +16,7 @@ export class UserEntity {
   password: string;
 
   @Column()
-  role: string;
+  role: UserRole;
 
   @OneToMany(() => OwnerEntity, (owner) => owner.user, { onDelete: 'CASCADE' })
   owners: OwnerEntity[];
