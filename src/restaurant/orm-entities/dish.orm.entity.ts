@@ -14,7 +14,7 @@ export class DishEntity {
   name: string;
 
   @Column()
-  price: string;
+  price: number;
 
   @ManyToOne(() => RestaurantEntity, (restaurant) => restaurant.dishes)
   restaurant: RestaurantEntity;

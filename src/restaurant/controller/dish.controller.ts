@@ -8,34 +8,40 @@ import {
   Post,
 } from '@nestjs/common';
 import { CreateDishInput, UpdateDishInput } from '../dto/dish-input';
+import { DishService } from '../service/dish.service';
 
-@Controller('dishes')
+@Controller('/restaurants/:restaurantId/dishes')
 export class DishController {
-  constructor() {}
+  constructor(private readonly dishService: DishService) {}
 
   @Post()
-  createDish(@Body() createDishInput: CreateDishInput) {
-    console.log(createDishInput);
+  createDish(
+    @Param('restaurantId') restaurantId: string,
+    @Body() createDishInput: CreateDishInput,
+  ) {
+    this.dishService.createDish(restaurantId, createDishInput);
   }
 
   @Get()
-  getDishes() {}
-
-  @Get('/:id')
-  getDish(@Param('id') dishId: string) {
-    console.log(dishId);
+  getDishes(@Param('restaurantId') restaurantId: string) {
+    this.dishService.getDishes(restaurantId);
   }
 
-  @Patch('/:id')
+  @Get('/:dishId')
+  getDish(@Param('dishId') dishId: string) {
+    this.dishService.getDish(dishId);
+  }
+
+  @Patch('/:dishId')
   updateDish(
-    @Param('id') dishId: string,
+    @Param('dishId') dishId: string,
     @Body() updateDishInput: UpdateDishInput,
   ) {
-    console.log(updateDishInput);
+    this.dishService.updateDish(dishId, updateDishInput);
   }
 
-  @Delete('/:id')
-  deleteDish(@Param('id') dishId: string) {
-    console.log(dishId);
+  @Delete('/:dishId')
+  deleteDish(@Param('dishId') dishId: string) {
+    this.dishService.deleteDish(dishId);
   }
 }

@@ -35,7 +35,7 @@ export class RestaurantService {
   }
 
   async getRestaurant(restaurantId: string) {
-    return await this.restaurantRepository.getRestaurant(restaurantId);
+    return await this.restaurantRepository.getRestaurantById(restaurantId);
   }
 
   async updateRestaurant(
@@ -43,7 +43,7 @@ export class RestaurantService {
     { name, address }: UpdateRestaurantInput,
   ) {
     const restaurant =
-      await this.restaurantRepository.getRestaurant(restaurantId);
+      await this.restaurantRepository.getRestaurantById(restaurantId);
     if (!restaurant) {
       throw new Error('Restaurant not found');
     }

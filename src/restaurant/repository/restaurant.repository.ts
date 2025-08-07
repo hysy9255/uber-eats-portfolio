@@ -34,7 +34,7 @@ export class RestaurantRepository {
     return result;
   }
 
-  async getRestaurant(restaurantId: string) {
+  async getRestaurantById(restaurantId: string) {
     const result: RestaurantEntity[] = await this.restaurantRepository.query(
       'SELECT * FROM restaurants WHERE restaurantId = $1',
       [restaurantId],

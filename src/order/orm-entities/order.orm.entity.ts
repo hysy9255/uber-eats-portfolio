@@ -4,14 +4,15 @@ import { OrderItemEntity } from './order-item.orm.entity';
 import { RejectedDeliveryOrderEntity } from '../rejected-delivery-order.orm.entity';
 import { ClientEntity } from 'src/user/orm-entities/client.orm.entity';
 import { DriverEntity } from 'src/user/orm-entities/driver.orm.entity';
+import { OrderStatus } from '../dto/order-output';
 
 @Entity('orders')
 export class OrderEntity {
   @PrimaryColumn()
   orderId: string;
 
-  @Column()
-  status: string;
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Pending })
+  status: OrderStatus;
 
   @Column()
   totalPrice: string;
@@ -28,8 +29,8 @@ export class OrderEntity {
   @Column()
   clientId: string;
 
-  @Column()
-  driverId: string;
+  @Column({ type: 'varchar', nullable: true })
+  driverId: string | null;
 
   @ManyToOne(() => ClientEntity, (client) => client.orders)
   client: ClientEntity;

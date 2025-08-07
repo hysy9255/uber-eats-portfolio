@@ -14,7 +14,7 @@ export class OrderItemEntity {
   orderId: string;
 
   @Column()
-  quantity: string;
+  quantity: number;
 
   @ManyToOne(() => DishEntity, (dish) => dish.orderItems)
   dish: DishEntity;

@@ -1,26 +1,32 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { CreateOrderInput } from '../dto/order-input';
+import { OrderService } from '../service/order.service';
 
 @Controller('orders')
 export class OrderController {
-  constructor() {}
+  constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  createOrder(@Body() createOrderInput: CreateOrderInput) {
-    console.log(createOrderInput);
+  async createOrder(
+    @Req() req: Request,
+    @Body() createOrderInput: CreateOrderInput,
+  ) {
+    const clientId = req['userId'] as string;
+    await this.orderService.createOrder(clientId, createOrderInput);
   }
 
   @Get()
   getOrders() {}
 
   @Get('/:id')
-  getOrder(@Param('id') orderId: string) {
-    console.log(orderId);
+  async getOrder(@Req() req: Request, @Param('id') orderId: string) {
+    const requesterId = req['userId'] as string;
+    return await this.orderService.getOrder(orderId, requesterId);
   }
 
   @Patch('/:id/accept')
-  ownerAcceptOrder(@Param('id') orderId: string) {
-    console.log(orderId);
+  async ownerAcceptOrder(@Param('id') orderId: string) {
+    await this.orderService.acceptOrder(orderId);
   }
 
   @Patch('/:id/ready')
