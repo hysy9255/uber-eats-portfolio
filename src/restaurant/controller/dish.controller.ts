@@ -6,42 +6,64 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateDishInput, UpdateDishInput } from '../dto/dish-input';
 import { DishService } from '../service/dish.service';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { UserOutput } from 'src/user/dto/user-output';
 
 @Controller('/restaurants/:restaurantId/dishes')
 export class DishController {
   constructor(private readonly dishService: DishService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
-  createDish(
+  async createDish(
+    @Req() req: Request,
     @Param('restaurantId') restaurantId: string,
     @Body() createDishInput: CreateDishInput,
   ) {
-    this.dishService.createDish(restaurantId, createDishInput);
+    const { userId } = req['authUser'] as UserOutput;
+    await this.dishService.createDish(userId, restaurantId, createDishInput);
   }
 
   @Get()
-  getDishes(@Param('restaurantId') restaurantId: string) {
-    this.dishService.getDishes(restaurantId);
+  async getDishes(@Param('restaurantId') restaurantId: string) {
+    return await this.dishService.getDishes(restaurantId);
   }
 
   @Get('/:dishId')
-  getDish(@Param('dishId') dishId: string) {
-    this.dishService.getDish(dishId);
+  async getDish(@Param('dishId') dishId: string) {
+    await this.dishService.getDish(dishId);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:dishId')
-  updateDish(
+  async updateDish(
+    @Req() req: Request,
+    @Param('restaurantId') restaurantId: string,
     @Param('dishId') dishId: string,
     @Body() updateDishInput: UpdateDishInput,
   ) {
-    this.dishService.updateDish(dishId, updateDishInput);
+    const { userId } = req['authUser'] as UserOutput;
+    await this.dishService.updateDish(
+      userId,
+      restaurantId,
+      dishId,
+      updateDishInput,
+    );
   }
 
+  @UseGuards(AuthGuard)
   @Delete('/:dishId')
-  deleteDish(@Param('dishId') dishId: string) {
-    this.dishService.deleteDish(dishId);
+  async deleteDish(
+    @Req() req: Request,
+    @Param('restaurantId') restaurantId: string,
+    @Param('dishId') dishId: string,
+  ) {
+    const { userId } = req['authUser'] as UserOutput;
+    await this.dishService.deleteDish(userId, restaurantId, dishId);
   }
 }

@@ -1,27 +1,41 @@
-import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateOrderInput } from '../dto/order-input';
 import { OrderService } from '../service/order.service';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { UserOutput } from 'src/user/dto/user-output';
 
-@Controller('orders')
+@Controller('restaurants/:restaurantId/orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   async createOrder(
     @Req() req: Request,
+    @Param('restaurantId') restaurantId: string,
     @Body() createOrderInput: CreateOrderInput,
   ) {
-    const clientId = req['userId'] as string;
-    await this.orderService.createOrder(clientId, createOrderInput);
+    const { userId } = req['authUser'] as UserOutput;
+    await this.orderService.createOrder(userId, restaurantId, createOrderInput);
   }
 
   @Get()
   getOrders() {}
 
+  @UseGuards(AuthGuard)
   @Get('/:id')
   async getOrder(@Req() req: Request, @Param('id') orderId: string) {
-    const requesterId = req['userId'] as string;
-    return await this.orderService.getOrder(orderId, requesterId);
+    const requester = req['authUser'] as UserOutput;
+    return await this.orderService.getOrder(orderId, requester);
   }
 
   @Patch('/:id/accept')

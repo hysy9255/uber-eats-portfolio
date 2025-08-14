@@ -35,14 +35,10 @@ export class RestaurantRepository {
   }
 
   async getRestaurantById(restaurantId: string) {
-    const result: RestaurantEntity[] = await this.restaurantRepository.query(
-      'SELECT * FROM restaurants WHERE restaurantId = $1',
-      [restaurantId],
-    );
-    if (result.length === 0) {
-      return null;
-    }
-    return result[0];
+    return await this.restaurantRepository
+      .createQueryBuilder('restaurant')
+      .where('restaurant.restaurantId = :restaurantId', { restaurantId })
+      .getOne();
   }
 
   async deleteRestaurant(restaurantId: string) {

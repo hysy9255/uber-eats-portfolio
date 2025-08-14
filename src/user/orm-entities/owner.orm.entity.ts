@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { UserEntity } from '../user.orm.entity';
 import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurant.orm.entity';
 
@@ -10,7 +17,8 @@ export class OwnerEntity {
   @Column()
   userId: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.owners)
+  @ManyToOne(() => UserEntity, (user) => user.owners, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
   @OneToOne(() => RestaurantEntity, (restaurant) => restaurant.owner, {

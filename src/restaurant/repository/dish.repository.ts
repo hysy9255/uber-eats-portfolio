@@ -23,7 +23,7 @@ export class DishRepository {
 
   async getDishesByRestaurantId(restaurantId: string) {
     const result: DishEntity[] = await this.dishRepository.query(
-      'SELECT * FROM dishes WHERE restaurantId = $1',
+      'SELECT * FROM dishes WHERE "restaurantId" = $1',
       [restaurantId],
     );
 
@@ -32,7 +32,7 @@ export class DishRepository {
 
   async getDishById(dishId: string) {
     const result: DishEntity[] = await this.dishRepository.query(
-      'SELECT * FROM dishes WHERE dishId = $1',
+      'SELECT * FROM dishes WHERE "dishId" = $1',
       [dishId],
     );
     return result[0];

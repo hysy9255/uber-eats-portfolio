@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { RestaurantEntity } from '../../restaurant/orm-entities/restaurant.orm.entity';
 import { OrderItemEntity } from './order-item.orm.entity';
 import { RejectedDeliveryOrderEntity } from '../rejected-delivery-order.orm.entity';
@@ -33,12 +40,15 @@ export class OrderEntity {
   driverId: string | null;
 
   @ManyToOne(() => ClientEntity, (client) => client.orders)
+  @JoinColumn({ name: 'clientId' })
   client: ClientEntity;
 
   @ManyToOne(() => RestaurantEntity, (restaurant) => restaurant.orders)
+  @JoinColumn({ name: 'restaurantId' })
   restaurant: RestaurantEntity;
 
   @ManyToOne(() => DriverEntity, (driver) => driver.orders)
+  @JoinColumn({ name: 'driverId' })
   driver: DriverEntity;
 
   @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.order, {

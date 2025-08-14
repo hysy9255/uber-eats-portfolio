@@ -7,24 +7,29 @@ import {
   Patch,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
   CreateRestaurantInput,
   UpdateRestaurantInput,
 } from '../dto/restaurant-input';
 import { RestaurantService } from '../service/restaurant.service';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { UserOutput } from 'src/user/dto/user-output';
 
 @Controller('restaurants')
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   async createRestaurant(
     @Req() req: Request,
     @Body() createRestaurantInput: CreateRestaurantInput,
   ) {
+    const { userId } = req['authUser'] as UserOutput;
     await this.restaurantService.createRestaurant(
-      req['userId'] as string,
+      userId,
       createRestaurantInput,
     );
   }
@@ -39,19 +44,28 @@ export class RestaurantController {
     return this.restaurantService.getRestaurant(restaurantId);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:id')
   async updateRestaurant(
+    @Req() req: Request,
     @Param('id') restaurantId: string,
     @Body() updateRestaurantInput: UpdateRestaurantInput,
   ) {
+    const { userId } = req['authUser'] as UserOutput;
     await this.restaurantService.updateRestaurant(
+      userId,
       restaurantId,
       updateRestaurantInput,
     );
   }
 
+  @UseGuards(AuthGuard)
   @Delete('/:id')
-  async deleteRestaurant(@Param('id') restaurantId: string) {
-    await this.restaurantService.deleteResetaurant(restaurantId);
+  async deleteRestaurant(
+    @Req() req: Request,
+    @Param('id') restaurantId: string,
+  ) {
+    const { userId } = req['authUser'] as UserOutput;
+    await this.restaurantService.deleteResetaurant(userId, restaurantId);
   }
 }

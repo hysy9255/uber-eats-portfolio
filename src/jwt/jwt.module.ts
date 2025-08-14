@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { UserModule } from 'src/user/user.module';
 import { JwtMiddleWare } from './jwt.middleware';
+import { JwtService } from './jwt.service';
 
 @Module({
-  imports: [UserModule],
+  imports: [],
   controllers: [],
-  providers: [JwtMiddleWare],
-  exports: [],
+  providers: [JwtMiddleWare, JwtService],
+  exports: [JwtService],
 })
 export class JwtModule {}

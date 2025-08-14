@@ -1,35 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../repository/order.repository';
 import { CreateOrderInput } from '../dto/order-input';
-import { RestaurantRepository } from 'src/restaurant/repository/restaurant.repository';
 import { OrderItem } from '../dto/order-output';
-import { DishRepository } from 'src/restaurant/repository/dish.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { OrderItemRepository } from '../repository/orderItem.repository';
-import { Transactional } from 'typeorm-transactional';
+import { UserOutput, UserRole } from 'src/user/dto/user-output';
+import { OrderDomainService } from './order.domain.service';
+import { Order } from '../domain/order';
+import { OrderEntity } from '../orm-entities/order.orm.entity';
+// import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly orderItemRepository: OrderItemRepository,
-    private readonly restaurantRepository: RestaurantRepository,
-    private readonly dishRepository: DishRepository,
-    // private readonly userRepository: UserRepository,
+    private readonly orderDomainService: OrderDomainService,
   ) {}
 
-  @Transactional()
+  // @Transactional()
   async createOrder(
-    clientId: string,
-    { restaurantId, items, note, deliveryAddress }: CreateOrderInput,
+    userId: string,
+    restaurantId: string,
+    { items, note, deliveryAddress }: CreateOrderInput,
   ) {
-    const restaurant =
-      await this.restaurantRepository.getRestaurantById(restaurantId);
-    if (!restaurant) {
-      throw new Error('Restaurant not found');
-    }
+    await this.orderDomainService.validateRestaurantExists(restaurantId);
+    const clientId = await this.orderDomainService.validateClientExists(userId);
 
-    const totalPrice = await this.calculateTotalPrice(items);
+    const totalPrice = await this.orderDomainService.calculateTotalPrice(items);
+    const driverId = null;
 
     const orderId = uuidv4();
     await this.orderRepository.saveOrder(
@@ -39,22 +38,10 @@ export class OrderService {
       deliveryAddress,
       restaurantId,
       clientId,
+      driverId,
     );
 
     await this.createOrderItems(orderId, items);
-  }
-
-  async calculateTotalPrice(orderItems: OrderItem[]) {
-    const dishIds = orderItems.map((item) => item.dishId);
-    const dishes = await this.dishRepository.getDishesByIds(dishIds);
-    const totalPrice = orderItems.reduce((total, item) => {
-      const dish = dishes.find((d) => d.dishId === item.dishId);
-      if (dish) {
-        return total + dish.price * item.quantity;
-      }
-      return total;
-    }, 0);
-    return totalPrice.toFixed(2);
   }
 
   async createOrderItems(orderId: string, items: OrderItem[]) {
@@ -70,24 +57,34 @@ export class OrderService {
     await this.orderItemRepository.saveOrderItems(orderItems);
   }
 
-  async getOrder(orderId: string, requesterId: string) {
+  async getOrder(orderId: string, requester: UserOutput) {
     const order = await this.orderRepository.getOrderById(orderId);
-    if (!order) {
-      throw new Error('Order not found');
+    if (!order) throw new Error('Order not found');
+
+    switch (requester.role) {
+      case UserRole.Client: {
+        const clientId = await this.orderDomainService.validateClientExists(
+          requester.userId,
+        );
+        if (order.clientId !== clientId)
+          throw new Error('You are not the client of this order');
+        break;
+      }
+      case UserRole.Owner: {
+        const restaurantId =
+          await this.orderDomainService.validateOwnersRestaurantExists(
+            requester.userId,
+          );
+
+        if (order.restaurantId !== restaurantId)
+          throw new Error('You are not the owner of this restaurant');
+        break;
+      }
+      case UserRole.Driver: {
+        await this.orderDomainService.validateDriverExists(requester.userId);
+        break;
+      }
     }
-
-    console.log(requesterId);
-
-    // const user = await this.userRepository.getUserById(requesterId);
-    // if (!user) {
-    //   throw new Error('User not found');
-    // }
-
-    // if (user.role === UserRole.Client) {
-    //   if (order.clientId !== requesterId) {
-    //     throw new Error('You are not authorized to view this order');
-    //   }
-    // }
 
     return order;
   }
@@ -97,6 +94,19 @@ export class OrderService {
     if (!order) {
       throw new Error('Order not found');
     }
+
+    const orderModel = Order.fromPersistance(order.orderId, order.status);
+
+    orderModel.markAccepted();
+
+    const record = new OrderEntity();
+    record.orderId = orderModel.orderId;
+    record.status = orderModel.status;
+
+    await this.orderRepository.saveOrder2(
+      orderModel.orderId,
+      orderModel.status,
+    );
   }
 
   async markOrderRead() {}

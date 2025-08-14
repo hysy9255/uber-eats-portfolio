@@ -3,20 +3,35 @@ import { CreateDishInput, UpdateDishInput } from '../dto/dish-input';
 import { DishRepository } from '../repository/dish.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { RestaurantRepository } from '../repository/restaurant.repository';
+import { OwnerRepository } from 'src/user/repository/owner.repository';
 
 @Injectable()
 export class DishService {
   constructor(
     private readonly dishRepository: DishRepository,
     private readonly restaurantRepository: RestaurantRepository,
+    private readonly ownerRepository: OwnerRepository,
   ) {}
 
-  async createDish(restaurantId: string, { name, price }: CreateDishInput) {
-    const restaurantExists =
+  async createDish(
+    userId: string,
+    restaurantId: string,
+    { name, price }: CreateDishInput,
+  ) {
+    const restaurant =
       await this.restaurantRepository.getRestaurantById(restaurantId);
 
-    if (!restaurantExists) {
+    if (!restaurant) {
       throw new Error('Restaurant does not exist');
+    }
+
+    const ownerId = await this.ownerRepository.getOwnerIdByUserId(userId);
+    if (!ownerId) {
+      throw new Error('Owner not found');
+    }
+
+    if (restaurant.ownerId !== ownerId) {
+      throw new Error('You are not the owner of this restaurant');
     }
     const dishId = uuidv4();
     await this.dishRepository.saveDish(dishId, restaurantId, name, price);
@@ -30,10 +45,35 @@ export class DishService {
     return this.dishRepository.getDishById(dishId);
   }
 
-  async updateDish(dishId: string, { name, price }: UpdateDishInput) {
+  async updateDish(
+    userId: string,
+    restaurantId: string,
+    dishId: string,
+    { name, price }: UpdateDishInput,
+  ) {
+    const restaurant =
+      await this.restaurantRepository.getRestaurantById(restaurantId);
+
+    if (!restaurant) {
+      throw new Error('Restaurant does not exist');
+    }
+
+    const ownerId = await this.ownerRepository.getOwnerIdByUserId(userId);
+    if (!ownerId) {
+      throw new Error('Owner not found');
+    }
+
+    if (restaurant.ownerId !== ownerId) {
+      throw new Error('You are not the owner of this restaurant');
+    }
+
     const dish = await this.dishRepository.getDishById(dishId);
     if (!dish) {
       throw new Error('Dish does not exist');
+    }
+
+    if (dish.restaurantId !== restaurantId) {
+      throw new Error('Dish does not belong to this restaurant');
     }
 
     await this.dishRepository.saveDish(
@@ -44,7 +84,31 @@ export class DishService {
     );
   }
 
-  async deleteDish(dishId: string) {
+  async deleteDish(userId: string, restaurantId: string, dishId: string) {
+    const restaurant =
+      await this.restaurantRepository.getRestaurantById(restaurantId);
+
+    if (!restaurant) {
+      throw new Error('Restaurant does not exist');
+    }
+
+    const ownerId = await this.ownerRepository.getOwnerIdByUserId(userId);
+    if (!ownerId) {
+      throw new Error('Owner not found');
+    }
+
+    if (restaurant.ownerId !== ownerId) {
+      throw new Error('You are not the owner of this restaurant');
+    }
+
+    const dish = await this.dishRepository.getDishById(dishId);
+    if (!dish) {
+      throw new Error('Dish does not exist');
+    }
+
+    if (dish.restaurantId !== restaurantId) {
+      throw new Error('Dish does not belong to this restaurant');
+    }
     await this.dishRepository.deleteDish(dishId);
   }
 }

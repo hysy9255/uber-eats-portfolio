@@ -1,7 +1,7 @@
 import { OrderItem } from './order-output';
 
 export class CreateOrderInput {
-  restaurantId: string;
+  // restaurantId: string;
   deliveryAddress: string;
   note: string;
   items: OrderItem[];

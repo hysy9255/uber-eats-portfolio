@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { DishEntity } from '../../restaurant/orm-entities/dish.orm.entity';
 import { OrderEntity } from './order.orm.entity';
 
@@ -17,8 +17,10 @@ export class OrderItemEntity {
   quantity: number;
 
   @ManyToOne(() => DishEntity, (dish) => dish.orderItems)
+  @JoinColumn({ name: 'dishId' })
   dish: DishEntity;
 
   @ManyToOne(() => OrderEntity, (order) => order.orderItems)
+  @JoinColumn({ name: 'orderId' })
   order: OrderEntity;
 }

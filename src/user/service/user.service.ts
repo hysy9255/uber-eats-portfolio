@@ -6,24 +6,54 @@ import {
 } from '../dto/user-input';
 import { UserRepository } from '../repository/user.repository';
 import { v4 as uuidv4 } from 'uuid';
-
+import * as bcrypt from 'bcrypt';
 import { UserOutput, UserRole } from '../dto/user-output';
-import { AuthService } from './auth.service';
+import { LoginInput } from '../dto/login-input';
+import { JwtService } from 'src/jwt/jwt.service';
+import { BcryptService } from 'src/bcrypt/bcrypt.service';
+import { SharedService } from 'src/shared/shared.service';
+import { ClientRepository } from '../repository/client.repository';
+import { DriverRepository } from '../repository/driver.repository';
+import { OwnerRepository } from '../repository/owner.repository';
 
 @Injectable()
 export class UserService {
   constructor(
+    private readonly sharedService: SharedService,
     private readonly userRepository: UserRepository,
-    private readonly authService: AuthService,
+    private readonly clientRepository: ClientRepository,
+    private readonly driverRepository: DriverRepository,
+    private readonly ownerRepository: OwnerRepository,
+    private readonly bcryptService: BcryptService,
+    private readonly jwtService: JwtService,
   ) {}
 
+  async login({ email, password }: LoginInput) {
+    const user = await this.userRepository.getUserByEmail(email);
+    if (!user) {
+      throw new Error(`User with email ${email} not found`);
+    }
+    await this.bcryptService.comparePassword(password, user.password);
+    const token = this.jwtService.signToken(user.userId);
+
+    return { token };
+  }
+
   async createUser({ email, password, role }: CreateUserInput) {
-    await this.userRepository.saveUser(
-      uuidv4(),
+    const existingUser = await this.userRepository.getUserByEmail(email);
+    if (existingUser) {
+      throw new Error(`User with email ${email} already exists`);
+    }
+    if (!Object.values(UserRole).includes(role)) {
+      throw new Error(`Invalid user role: ${role}`);
+    }
+    const { userId } = await this.userRepository.saveUser(
+      this.sharedService.generateId(),
       email,
-      await this.authService.hashPassword(password),
+      await this.bcryptService.hashPassword(password),
       role,
     );
+    return userId;
   }
 
   async getUser(userId: string) {
@@ -39,11 +69,13 @@ export class UserService {
     if (!me) {
       throw new Error(`User with ID ${myUserId} not found`);
     }
-    await this.authService.comparePassword(password, me.password);
+
+    await this.bcryptService.comparePassword(password, me.password);
+
     await this.userRepository.saveUser(
       me.userId,
       me.email,
-      await this.authService.hashPassword(newPassword),
+      await bcrypt.hash(newPassword, 10),
       UserRole[me.role] as UserRole,
     );
   }
@@ -53,7 +85,19 @@ export class UserService {
     if (!me) {
       throw new Error(`User with ID ${myUserId} not found`);
     }
-    await this.authService.comparePassword(password, me.password);
+    await this.bcryptService.comparePassword(password, me.password);
     await this.userRepository.deleteUser(myUserId);
+  }
+
+  async createOwner(userId: string) {
+    await this.ownerRepository.saveOwner(userId, uuidv4());
+  }
+
+  async createClient(userId: string) {
+    await this.clientRepository.saveClient(userId, uuidv4());
+  }
+
+  async createDriver(userId: string) {
+    await this.driverRepository.saveDriver(userId, uuidv4());
   }
 }

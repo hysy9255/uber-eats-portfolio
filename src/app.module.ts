@@ -20,6 +20,9 @@ import { RejectedDeliveryOrderEntity } from './order/rejected-delivery-order.orm
 import { OrderEntity } from './order/orm-entities/order.orm.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleWare } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
+import { BcryptModule } from './bcrypt/bcrypt.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -51,6 +54,9 @@ import { JwtMiddleWare } from './jwt/jwt.middleware';
     UserModule,
     OrderModule,
     JwtModule,
+    AuthModule,
+    BcryptModule,
+    SharedModule,
   ],
   controllers: [],
   providers: [],

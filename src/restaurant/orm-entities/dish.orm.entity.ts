@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
 import { OrderItemEntity } from 'src/order/orm-entities/order-item.orm.entity';
 import { RestaurantEntity } from './restaurant.orm.entity';
 
@@ -17,6 +24,7 @@ export class DishEntity {
   price: number;
 
   @ManyToOne(() => RestaurantEntity, (restaurant) => restaurant.dishes)
+  @JoinColumn({ name: 'restaurantId' })
   restaurant: RestaurantEntity;
 
   @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.dish, {
