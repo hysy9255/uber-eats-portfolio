@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../repository/order.repository';
 import { CreateOrderInput } from '../dto/order-input';
 import { OrderItem } from '../dto/order-output';
-import { v4 as uuidv4 } from 'uuid';
 import { OrderItemRepository } from '../repository/orderItem.repository';
-import { UserOutput, UserRole } from 'src/user/dto/user-output';
+import { UserOutput } from 'src/user/dto/user-output';
 import { OrderDomainService } from './order.domain.service';
+import { UserDomainService } from 'src/user/service/user.domain.service';
+import { OrderAccessPolicy } from './order.access.policy';
+import { SharedService } from 'src/shared/shared.service';
+import { RejectedDeliveryOrderRepository } from '../repository/rejectedDeliveryOrder.repository';
 import { Order } from '../domain/order';
-import { OrderEntity } from '../orm-entities/order.orm.entity';
 // import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
@@ -16,6 +18,11 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
     private readonly orderItemRepository: OrderItemRepository,
     private readonly orderDomainService: OrderDomainService,
+    private readonly userDomainService: UserDomainService,
+    private readonly orderDomainSerivce: OrderDomainService,
+    private readonly orderAccessPolicy: OrderAccessPolicy,
+    private readonly sharedService: SharedService,
+    private readonly rejectedDeliveryOrderRepository: RejectedDeliveryOrderRepository,
   ) {}
 
   // @Transactional()
@@ -30,7 +37,7 @@ export class OrderService {
     const totalPrice = await this.orderDomainService.calculateTotalPrice(items);
     const driverId = null;
 
-    const orderId = uuidv4();
+    const orderId = this.sharedService.generateId();
     await this.orderRepository.saveOrder(
       orderId,
       totalPrice,
@@ -47,7 +54,7 @@ export class OrderService {
   async createOrderItems(orderId: string, items: OrderItem[]) {
     const orderItems = items.map((item) => {
       return {
-        orderItemId: uuidv4(),
+        orderItemId: this.sharedService.generateId(),
         dishId: item.dishId,
         quantity: item.quantity,
         orderId,
@@ -61,61 +68,65 @@ export class OrderService {
     const order = await this.orderRepository.getOrderById(orderId);
     if (!order) throw new Error('Order not found');
 
-    switch (requester.role) {
-      case UserRole.Client: {
-        const clientId = await this.orderDomainService.validateClientExists(
-          requester.userId,
-        );
-        if (order.clientId !== clientId)
-          throw new Error('You are not the client of this order');
-        break;
-      }
-      case UserRole.Owner: {
-        const restaurantId =
-          await this.orderDomainService.validateOwnersRestaurantExists(
-            requester.userId,
-          );
-
-        if (order.restaurantId !== restaurantId)
-          throw new Error('You are not the owner of this restaurant');
-        break;
-      }
-      case UserRole.Driver: {
-        await this.orderDomainService.validateDriverExists(requester.userId);
-        break;
-      }
-    }
-
+    await this.orderAccessPolicy.ensureCanView(orderId, requester);
     return order;
   }
 
-  async acceptOrder(orderId: string) {
-    const order = await this.orderRepository.getOrderById(orderId);
-    if (!order) {
-      throw new Error('Order not found');
-    }
+  async acceptOrder(orderId: string, userId: string) {
+    const owner = await this.userDomainService.getOwnerDomainByUserId(userId);
+    const order = await this.orderDomainService.getOrderDomainById(orderId);
+    owner.accept(order);
 
-    const orderModel = Order.fromPersistance(order.orderId, order.status);
-
-    orderModel.markAccepted();
-
-    const record = new OrderEntity();
-    record.orderId = orderModel.orderId;
-    record.status = orderModel.status;
-
-    await this.orderRepository.saveOrder2(
-      orderModel.orderId,
-      orderModel.status,
-    );
+    const updatedOrder = Order.toOrmEntity(order);
+    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+    // await this.orderEventPublisher.broadcastOrderStatusUpdate(order.id);
   }
 
-  async markOrderRead() {}
+  async markOrderReady(orderId: string, userId: string) {
+    const owner = await this.userDomainService.getOwnerDomainByUserId(userId);
+    const order = await this.orderDomainService.getOrderDomainById(orderId);
+    owner.donePreparing(order);
 
-  async driverAcceptOrder() {}
+    const updatedOrder = Order.toOrmEntity(order);
+    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+    // await this.orderEventPublisher.broadcastOrderStatusUpdate(order.id);
+  }
 
-  async driverDeclineOrder() {}
+  async driverAcceptOrder(orderId: string, userId: string) {
+    const driver = await this.userDomainService.getDriverDomainByUserId(userId);
+    const order = await this.orderDomainService.getOrderDomainById(orderId);
+    driver.accept(order);
+    // fix this to save order
+    // await this.orderRepository.setDriver(order.orderId, driver.driverId);
+    const updatedOrder = Order.toOrmEntity(order);
+    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+  }
 
-  async driverPickupOrder() {}
+  async driverDeclineOrder(orderId: string, userId: string) {
+    const driver = await this.userDomainService.getDriverDomainByUserId(userId);
+    const order = await this.orderDomainService.getOrderDomainById(orderId);
+    driver.decline(order);
+    await this.rejectedDeliveryOrderRepository.save({
+      orderId: order.orderId,
+      driverId: driver.driverId,
+    });
+  }
 
-  async driverCompleteDelivery() {}
+  async driverPickupOrder(orderId: string, userId: string) {
+    const driver = await this.userDomainService.getDriverDomainByUserId(userId);
+    const order = await this.orderDomainService.getOrderDomainById(orderId);
+    driver.pickup(order);
+    // await this.orderRepository.updateOrderStatus(order.orderId, order.status);
+    const updatedOrder = Order.toOrmEntity(order);
+    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+  }
+
+  async driverCompleteDelivery(orderId: string, userId: string) {
+    const driver = await this.userDomainService.getDriverDomainByUserId(userId);
+    const order = await this.orderDomainService.getOrderDomainById(orderId);
+    driver.complete(order);
+    // await this.orderRepository.updateOrderStatus(order.orderId, order.status);
+    const updatedOrder = Order.toOrmEntity(order);
+    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+  }
 }

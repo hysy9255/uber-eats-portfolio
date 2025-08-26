@@ -13,16 +13,25 @@ import { DishEntity } from 'src/restaurant/orm-entities/dish.orm.entity';
 import { OrderDomainService } from './service/order.domain.service';
 import { DishRepository } from 'src/restaurant/repository/dish.repository';
 import { UserModule } from 'src/user/user.module';
+import { OrderAccessPolicy } from './service/order.access.policy';
+import { RejectedDeliveryOrderEntity } from './orm-entities/rejected-delivery-order.orm.entity';
+import { RejectedDeliveryOrderRepository } from './repository/rejectedDeliveryOrder.repository';
 
 const entities = [
   OrderEntity,
   OrderItemEntity,
   DishEntity,
   OwnerEntity,
+  RejectedDeliveryOrderEntity,
   // RestaurantEntity,
 ];
 
-const repositories = [OrderRepository, OrderItemRepository, DishRepository];
+const repositories = [
+  OrderRepository,
+  OrderItemRepository,
+  DishRepository,
+  RejectedDeliveryOrderRepository,
+];
 
 @Module({
   imports: [
@@ -32,6 +41,11 @@ const repositories = [OrderRepository, OrderItemRepository, DishRepository];
     TypeOrmModule.forFeature(entities),
   ],
   controllers: [OrderController],
-  providers: [OrderService, OrderDomainService, ...repositories],
+  providers: [
+    OrderService,
+    OrderDomainService,
+    OrderAccessPolicy,
+    ...repositories,
+  ],
 })
 export class OrderModule {}

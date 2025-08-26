@@ -16,13 +16,14 @@ import { ClientEntity } from './user/orm-entities/client.orm.entity';
 import { OwnerEntity } from './user/orm-entities/owner.orm.entity';
 import { DriverEntity } from './user/orm-entities/driver.orm.entity';
 import { OrderItemEntity } from './order/orm-entities/order-item.orm.entity';
-import { RejectedDeliveryOrderEntity } from './order/rejected-delivery-order.orm.entity';
+
 import { OrderEntity } from './order/orm-entities/order.orm.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleWare } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { BcryptModule } from './bcrypt/bcrypt.module';
 import { SharedModule } from './shared/shared.module';
+import { RejectedDeliveryOrderEntity } from './order/orm-entities/rejected-delivery-order.orm.entity';
 
 @Module({
   imports: [

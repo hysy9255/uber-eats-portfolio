@@ -5,7 +5,6 @@ import {
   UpdateUserInput,
 } from '../dto/user-input';
 import { UserRepository } from '../repository/user.repository';
-import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcrypt';
 import { UserOutput, UserRole } from '../dto/user-output';
 import { LoginInput } from '../dto/login-input';
@@ -90,14 +89,23 @@ export class UserService {
   }
 
   async createOwner(userId: string) {
-    await this.ownerRepository.saveOwner(userId, uuidv4());
+    await this.ownerRepository.saveOwner(
+      userId,
+      this.sharedService.generateId(),
+    );
   }
 
   async createClient(userId: string) {
-    await this.clientRepository.saveClient(userId, uuidv4());
+    await this.clientRepository.saveClient(
+      userId,
+      this.sharedService.generateId(),
+    );
   }
 
   async createDriver(userId: string) {
-    await this.driverRepository.saveDriver(userId, uuidv4());
+    await this.driverRepository.saveDriver(
+      userId,
+      this.sharedService.generateId(),
+    );
   }
 }

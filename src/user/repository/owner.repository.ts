@@ -23,10 +23,10 @@ export class OwnerRepository {
       .where('owner.userId = :userId', { userId })
       .select([
         'restaurant.restaurantId AS "restaurantId"',
-        'restaurant.name AS "name"',
-        'restaurant.address AS "address"',
+        'owner.ownerId AS "ownerId"',
+        'owner.userId AS "userId"',
       ])
-      .getRawOne<{ restaurantId: string; name: string; address: string }>();
+      .getRawOne<{ restaurantId: string; userId: string; ownerId: string }>();
   }
 
   async getOwnerIdByUserId(userId: string) {

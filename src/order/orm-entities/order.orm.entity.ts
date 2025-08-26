@@ -8,10 +8,10 @@ import {
 } from 'typeorm';
 import { RestaurantEntity } from '../../restaurant/orm-entities/restaurant.orm.entity';
 import { OrderItemEntity } from './order-item.orm.entity';
-import { RejectedDeliveryOrderEntity } from '../rejected-delivery-order.orm.entity';
 import { ClientEntity } from 'src/user/orm-entities/client.orm.entity';
 import { DriverEntity } from 'src/user/orm-entities/driver.orm.entity';
 import { OrderStatus } from '../dto/order-output';
+import { RejectedDeliveryOrderEntity } from './rejected-delivery-order.orm.entity';
 
 @Entity('orders')
 export class OrderEntity {

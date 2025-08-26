@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDishInput, UpdateDishInput } from '../dto/dish-input';
 import { DishRepository } from '../repository/dish.repository';
-import { v4 as uuidv4 } from 'uuid';
 import { RestaurantRepository } from '../repository/restaurant.repository';
 import { OwnerRepository } from 'src/user/repository/owner.repository';
+import { SharedService } from 'src/shared/shared.service';
 
 @Injectable()
 export class DishService {
@@ -11,6 +11,7 @@ export class DishService {
     private readonly dishRepository: DishRepository,
     private readonly restaurantRepository: RestaurantRepository,
     private readonly ownerRepository: OwnerRepository,
+    private readonly sharedService: SharedService,
   ) {}
 
   async createDish(
@@ -33,7 +34,7 @@ export class DishService {
     if (restaurant.ownerId !== ownerId) {
       throw new Error('You are not the owner of this restaurant');
     }
-    const dishId = uuidv4();
+    const dishId = this.sharedService.generateId();
     await this.dishRepository.saveDish(dishId, restaurantId, name, price);
   }
 

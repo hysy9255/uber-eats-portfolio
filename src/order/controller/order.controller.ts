@@ -38,33 +38,48 @@ export class OrderController {
     return await this.orderService.getOrder(orderId, requester);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:id/accept')
-  async ownerAcceptOrder(@Param('id') orderId: string) {
-    await this.orderService.acceptOrder(orderId);
+  async ownerAcceptOrder(@Req() req: Request, @Param('id') orderId: string) {
+    const requester = req['authUser'] as UserOutput;
+    await this.orderService.acceptOrder(orderId, requester.userId);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:id/ready')
-  ownerMarkOrderReady(@Param('id') orderId: string) {
-    console.log(orderId);
+  async ownerMarkOrderReady(@Req() req: Request, @Param('id') orderId: string) {
+    const requester = req['authUser'] as UserOutput;
+    await this.orderService.markOrderReady(orderId, requester.userId);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:id/delivery/accept')
-  driverAcceptOrder(@Param('id') orderId: string) {
-    console.log(orderId);
+  async driverAcceptOrder(@Req() req: Request, @Param('id') orderId: string) {
+    const requester = req['authUser'] as UserOutput;
+    await this.orderService.driverAcceptOrder(orderId, requester.userId);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:id/delivery/decline')
-  driverDeclineOrder(@Param('id') orderId: string) {
-    console.log(orderId);
+  async driverDeclineOrder(@Req() req: Request, @Param('id') orderId: string) {
+    const requester = req['authUser'] as UserOutput;
+    await this.orderService.driverDeclineOrder(orderId, requester.userId);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:id/delivery/pickup')
-  driverPickupOrder(@Param('id') orderId: string) {
-    console.log(orderId);
+  async driverPickupOrder(@Req() req: Request, @Param('id') orderId: string) {
+    const requester = req['authUser'] as UserOutput;
+    await this.orderService.driverPickupOrder(orderId, requester.userId);
   }
 
+  @UseGuards(AuthGuard)
   @Patch('/:id/delivery/complete')
-  driverCompleteDelivery(@Param('id') orderId: string) {
-    console.log(orderId);
+  async driverCompleteDelivery(
+    @Req() req: Request,
+    @Param('id') orderId: string,
+  ) {
+    const requester = req['authUser'] as UserOutput;
+    await this.orderService.driverCompleteDelivery(orderId, requester.userId);
   }
 }

@@ -14,6 +14,22 @@ import { AuthModule } from 'src/auth/auth.module';
 import { ClientRepository } from './repository/client.repository';
 import { DriverRepository } from './repository/driver.repository';
 import { OwnerRepository } from './repository/owner.repository';
+import { UserDomainService } from './service/user.domain.service';
+import { ClientIdReader } from './repository/reader/client.id.reader';
+import { DriverIdReader } from './repository/reader/driver.id.reader';
+import { RestaurantIdReader } from './repository/reader/restaurant.id.reader';
+import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurant.orm.entity';
+
+const services = [UserService, UserDomainService];
+const repositories = [ClientRepository, DriverRepository, OwnerRepository];
+const readers = [ClientIdReader, DriverIdReader, RestaurantIdReader];
+const entities = [
+  UserEntity,
+  OwnerEntity,
+  ClientEntity,
+  DriverEntity,
+  RestaurantEntity,
+];
 
 @Module({
   imports: [
@@ -21,21 +37,10 @@ import { OwnerRepository } from './repository/owner.repository';
     SharedModule,
     JwtModule,
     BcryptModule,
-    TypeOrmModule.forFeature([
-      UserEntity,
-      OwnerEntity,
-      ClientEntity,
-      DriverEntity,
-    ]),
+    TypeOrmModule.forFeature([...entities]),
   ],
   controllers: [UserController],
-  providers: [
-    UserService,
-    UserRepository,
-    ClientRepository,
-    DriverRepository,
-    OwnerRepository,
-  ],
-  exports: [UserService, ClientRepository, DriverRepository, OwnerRepository],
+  providers: [...services, ...repositories, UserRepository, ...readers],
+  exports: [...services, ...repositories, ...readers],
 })
 export class UserModule {}

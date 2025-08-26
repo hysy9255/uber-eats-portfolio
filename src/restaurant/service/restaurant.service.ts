@@ -4,14 +4,16 @@ import {
   CreateRestaurantInput,
   UpdateRestaurantInput,
 } from '../dto/restaurant-input';
-import { v4 as uuidv4 } from 'uuid';
+
 import { OwnerRepository } from 'src/user/repository/owner.repository';
+import { SharedService } from 'src/shared/shared.service';
 
 @Injectable()
 export class RestaurantService {
   constructor(
     private readonly restaurantRepository: RestaurantRepository,
     private readonly ownerRepository: OwnerRepository,
+    private readonly sharedService: SharedService,
   ) {}
 
   async createRestaurant(
@@ -23,7 +25,7 @@ export class RestaurantService {
       throw new Error('Owner not found');
     }
     await this.restaurantRepository.saveRestaurant(
-      uuidv4(),
+      this.sharedService.generateId(),
       ownerId,
       name,
       address,

@@ -1,13 +1,93 @@
+import { Driver } from 'src/user/domain/driver';
 import { OrderStatus } from '../dto/order-output';
+import { OrderEntity } from '../orm-entities/order.orm.entity';
 
 export class Order {
   constructor(
     private readonly _orderId: string,
-    private _status: OrderStatus,
+    private _status: OrderStatus = OrderStatus.Pending,
+    private readonly _clientId: string,
+    private readonly _restaurantId: string,
+    private _driverId: string | null = null,
+    private _rejectedDriverIds: string[] = [],
   ) {}
 
-  static fromPersistance(orderId: string, status: OrderStatus) {
-    return new Order(orderId, status);
+  static fromPersistance(
+    orderId: string,
+    status: OrderStatus,
+    clientId: string,
+    restaurantId: string,
+    driverId: string | null,
+    rejectedDriverIds: string[] = [],
+  ) {
+    return new Order(
+      orderId,
+      status,
+      clientId,
+      restaurantId,
+      driverId,
+      rejectedDriverIds,
+    );
+  }
+
+  static toOrmEntity(order: Order) {
+    const orderEntity = new OrderEntity();
+    orderEntity.orderId = order._orderId;
+    orderEntity.status = order._status;
+    orderEntity.clientId = order._clientId;
+    orderEntity.restaurantId = order._restaurantId;
+    orderEntity.driverId = order._driverId;
+    return orderEntity;
+  }
+
+  ensureStatus(expected: OrderStatus[]) {
+    if (!expected.includes(this._status)) {
+      throw new Error('Error');
+    }
+  }
+
+  ensureNoDriverAssigned() {
+    const driverAssigned = Boolean(this._driverId);
+    if (driverAssigned) {
+      throw new Error('This order is already assigned to a driver.');
+    }
+  }
+
+  ensureNotDeclinedBy(driver: Driver) {
+    const hasDeclined = this._rejectedDriverIds.includes(driver.driverId);
+    if (hasDeclined) {
+      throw new Error('You have already declined this delivery.');
+    }
+  }
+
+  addInRejected(driver: Driver) {
+    this._rejectedDriverIds.push(driver.driverId);
+  }
+
+  ensureTakenBy(driver: Driver) {
+    if (this._driverId !== driver.driverId) {
+      throw new Error('Error');
+    }
+  }
+
+  markAccepted() {
+    this._status = OrderStatus.Cooking;
+  }
+
+  markReady() {
+    this._status = OrderStatus.Ready;
+  }
+
+  assign(driver: Driver) {
+    this._driverId = driver.driverId;
+  }
+
+  markPickedup() {
+    this._status = OrderStatus.PickedUp;
+  }
+
+  markDelivered() {
+    this._status = OrderStatus.Delivered;
   }
 
   get orderId(): string {
@@ -16,6 +96,22 @@ export class Order {
 
   get status(): OrderStatus {
     return this._status;
+  }
+
+  get clientId(): string {
+    return this._clientId;
+  }
+
+  get restaurantId(): string {
+    return this._restaurantId;
+  }
+
+  get driverId(): string | null {
+    return this._driverId;
+  }
+
+  get rejectedDriverIds(): string[] {
+    return this._rejectedDriverIds;
   }
   // constructor(
   //   private readonly _orderId: string,
@@ -57,11 +153,6 @@ export class Order {
   //     return this._clientId === client.id;
   //   }
 
-  private ensureStatus(expected: OrderStatus[]) {
-    if (!expected.includes(this._status)) {
-      throw new Error('Error');
-    }
-  }
   //   private ensureNotRejectedBy(driver: DriverEntity) {
   //     if (this._rejectedDriverIds.includes(driver.id)) throw new Error('Error');
   //   }
@@ -92,28 +183,6 @@ export class Order {
   //     this.ensureTakenBySomeDriver();
   //     // 오더에 다른 드라이버가 할당 되어있으면 안됨
   //     this.ensureNotTakenByAnother(driver);
-  //   }
-
-  //   // ==== OWNER ACTIONS ====
-  markAccepted() {
-    this.ensureStatus([OrderStatus.Pending]);
-    this._status = OrderStatus.Cooking;
-  }
-
-  markReady() {
-    this.ensureStatus([OrderStatus.Cooking]);
-    this._status = OrderStatus.Ready;
-  }
-
-  //   // ==== DRIVER ACTIONS ====
-  //   assignDriver(driver: DriverEntity) {
-  //     this.ensureStatus(
-  //       [OrderStatus.Accepted, OrderStatus.Ready],
-  //       StatusErrMsg.notAcceptedNorReady,
-  //     );
-  //     this.ensureDriverCanAcceptOrReject(driver);
-  //     driver.markOrderAccepted();
-  //     this._driverId = driver.id;
   //   }
 
   //   markRejectedByDriver(driver: DriverEntity) {
