@@ -9,7 +9,7 @@ import { UserDomainService } from 'src/user/service/user.domain.service';
 import { OrderAccessPolicy } from './order.access.policy';
 import { SharedService } from 'src/shared/shared.service';
 import { RejectedDeliveryOrderRepository } from '../repository/rejectedDeliveryOrder.repository';
-import { Order } from '../domain/order';
+import { OrderMapper } from '../order.mapper';
 // import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
@@ -64,6 +64,8 @@ export class OrderService {
     await this.orderItemRepository.saveOrderItems(orderItems);
   }
 
+  async getOrders() {}
+
   async getOrder(orderId: string, requester: UserOutput) {
     const order = await this.orderRepository.getOrderById(orderId);
     if (!order) throw new Error('Order not found');
@@ -77,8 +79,10 @@ export class OrderService {
     const order = await this.orderDomainService.getOrderDomainById(orderId);
     owner.accept(order);
 
-    const updatedOrder = Order.toOrmEntity(order);
-    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+    await this.orderRepository.updateOrder(
+      order.orderId,
+      OrderMapper.toOrmEntity(order),
+    );
     // await this.orderEventPublisher.broadcastOrderStatusUpdate(order.id);
   }
 
@@ -87,8 +91,10 @@ export class OrderService {
     const order = await this.orderDomainService.getOrderDomainById(orderId);
     owner.donePreparing(order);
 
-    const updatedOrder = Order.toOrmEntity(order);
-    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+    await this.orderRepository.updateOrder(
+      order.orderId,
+      OrderMapper.toOrmEntity(order),
+    );
     // await this.orderEventPublisher.broadcastOrderStatusUpdate(order.id);
   }
 
@@ -96,16 +102,18 @@ export class OrderService {
     const driver = await this.userDomainService.getDriverDomainByUserId(userId);
     const order = await this.orderDomainService.getOrderDomainById(orderId);
     driver.accept(order);
-    // fix this to save order
-    // await this.orderRepository.setDriver(order.orderId, driver.driverId);
-    const updatedOrder = Order.toOrmEntity(order);
-    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+
+    await this.orderRepository.updateOrder(
+      order.orderId,
+      OrderMapper.toOrmEntity(order),
+    );
   }
 
   async driverDeclineOrder(orderId: string, userId: string) {
     const driver = await this.userDomainService.getDriverDomainByUserId(userId);
     const order = await this.orderDomainService.getOrderDomainById(orderId);
     driver.decline(order);
+
     await this.rejectedDeliveryOrderRepository.save({
       orderId: order.orderId,
       driverId: driver.driverId,
@@ -116,17 +124,21 @@ export class OrderService {
     const driver = await this.userDomainService.getDriverDomainByUserId(userId);
     const order = await this.orderDomainService.getOrderDomainById(orderId);
     driver.pickup(order);
-    // await this.orderRepository.updateOrderStatus(order.orderId, order.status);
-    const updatedOrder = Order.toOrmEntity(order);
-    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+
+    await this.orderRepository.updateOrder(
+      order.orderId,
+      OrderMapper.toOrmEntity(order),
+    );
   }
 
   async driverCompleteDelivery(orderId: string, userId: string) {
     const driver = await this.userDomainService.getDriverDomainByUserId(userId);
     const order = await this.orderDomainService.getOrderDomainById(orderId);
     driver.complete(order);
-    // await this.orderRepository.updateOrderStatus(order.orderId, order.status);
-    const updatedOrder = Order.toOrmEntity(order);
-    await this.orderRepository.updateOrder(order.orderId, updatedOrder);
+
+    await this.orderRepository.updateOrder(
+      order.orderId,
+      OrderMapper.toOrmEntity(order),
+    );
   }
 }

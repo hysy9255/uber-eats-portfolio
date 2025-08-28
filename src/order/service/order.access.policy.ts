@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserOutput, UserRole } from 'src/user/dto/user-output';
+import { UserRole } from 'src/user/dto/user-output';
 import { ClientIdReader } from 'src/user/repository/reader/client.id.reader';
 import { DriverIdReader } from 'src/user/repository/reader/driver.id.reader';
 import { RestaurantIdReader } from 'src/user/repository/reader/restaurant.id.reader';
 import { OrderEntity } from '../orm-entities/order.orm.entity';
 import { Repository } from 'typeorm';
+import { AccessTokenPayload } from 'src/jwt/jwt.service';
 
 @Injectable()
 export class OrderAccessPolicy {
@@ -17,7 +18,7 @@ export class OrderAccessPolicy {
     private readonly restaurantIdReader: RestaurantIdReader,
   ) {}
 
-  async ensureCanView(orderId: string, requester: UserOutput) {
+  async ensureCanView(orderId: string, requester: AccessTokenPayload) {
     const a = await this.order
       .createQueryBuilder('o')
       .where('o.orderId = :orderId', { orderId })

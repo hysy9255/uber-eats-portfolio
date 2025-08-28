@@ -12,24 +12,6 @@ export class Order {
     private _rejectedDriverIds: string[] = [],
   ) {}
 
-  static fromPersistance(
-    orderId: string,
-    status: OrderStatus,
-    clientId: string,
-    restaurantId: string,
-    driverId: string | null,
-    rejectedDriverIds: string[] = [],
-  ) {
-    return new Order(
-      orderId,
-      status,
-      clientId,
-      restaurantId,
-      driverId,
-      rejectedDriverIds,
-    );
-  }
-
   static toOrmEntity(order: Order) {
     const orderEntity = new OrderEntity();
     orderEntity.orderId = order._orderId;

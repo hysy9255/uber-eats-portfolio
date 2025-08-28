@@ -5,10 +5,19 @@ import { RestaurantRepository } from 'src/restaurant/repository/restaurant.repos
 import { ClientRepository } from 'src/user/repository/client.repository';
 import { DriverRepository } from 'src/user/repository/driver.repository';
 import { OwnerRepository } from 'src/user/repository/owner.repository';
-import { Order } from '../domain/order';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from '../orm-entities/order.orm.entity';
 import { Repository } from 'typeorm';
+import { OrderMapper } from '../order.mapper';
+
+export type RawOrder = {
+  orderId: string;
+  status: OrderStatus;
+  clientId: string;
+  restaurantId: string;
+  driverId: string | null;
+  rejectedDriverIds: string[];
+};
 
 @Injectable()
 export class OrderDomainService {
@@ -38,26 +47,12 @@ export class OrderDomainService {
         'rejectedDriverIds',
       )
       .groupBy(`o.orderId, o.status, o.clientId, o.restaurantId, o.driverId`)
-      .getRawOne<{
-        orderId: string;
-        status: OrderStatus;
-        clientId: string;
-        restaurantId: string;
-        driverId: string;
-        rejectedDriverIds: string[];
-      }>();
+      .getRawOne<RawOrder>();
 
     if (!order) {
       throw new Error('Order not found');
     }
-    return Order.fromPersistance(
-      order.orderId,
-      order.status,
-      order.clientId,
-      order.restaurantId,
-      order.driverId ? order.driverId : null,
-      order.rejectedDriverIds,
-    );
+    return OrderMapper.toDomain(order);
   }
 
   async calculateTotalPrice(orderItems: OrderItem[]) {

@@ -1,7 +1,9 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 
 export class CreateDishInput {
+  @ApiProperty({ example: 'Lobster', description: 'dish name' })
   name: string;
+  @ApiProperty({ example: 23, description: 'dish price' })
   price: number;
 }
 

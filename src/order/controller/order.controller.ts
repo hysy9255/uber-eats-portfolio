@@ -11,13 +11,23 @@ import {
 import { CreateOrderInput } from '../dto/order-input';
 import { OrderService } from '../service/order.service';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { UserOutput } from 'src/user/dto/user-output';
+import { UserOutput, UserRole } from 'src/user/dto/user-output';
+import { Roles } from 'src/auth/roles.decorator';
+import { ApiOperation, ApiParam, ApiSecurity } from '@nestjs/swagger';
 
+@ApiSecurity('jwt-token')
+@ApiParam({
+  name: 'restaurantId',
+  required: true,
+  type: String,
+})
 @Controller('restaurants/:restaurantId/orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  @ApiOperation({ summary: 'Make an order' })
   @UseGuards(AuthGuard)
+  @Roles(UserRole.Client)
   @Post()
   async createOrder(
     @Req() req: Request,
@@ -28,56 +38,80 @@ export class OrderController {
     await this.orderService.createOrder(userId, restaurantId, createOrderInput);
   }
 
+  @ApiOperation({ summary: 'Get orders' })
   @Get()
   getOrders() {}
 
+  @ApiOperation({ summary: 'Get an order' })
   @UseGuards(AuthGuard)
-  @Get('/:id')
-  async getOrder(@Req() req: Request, @Param('id') orderId: string) {
+  @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
+  @Get('/:orderId')
+  async getOrder(@Req() req: Request, @Param('orderId') orderId: string) {
     const requester = req['authUser'] as UserOutput;
     return await this.orderService.getOrder(orderId, requester);
   }
 
+  @ApiOperation({ summary: 'Restaurant accepts an order' })
   @UseGuards(AuthGuard)
-  @Patch('/:id/accept')
-  async ownerAcceptOrder(@Req() req: Request, @Param('id') orderId: string) {
+  @Patch('/:orderId/accept')
+  async ownerAcceptOrder(
+    @Req() req: Request,
+    @Param('orderId') orderId: string,
+  ) {
     const requester = req['authUser'] as UserOutput;
     await this.orderService.acceptOrder(orderId, requester.userId);
   }
 
+  @ApiOperation({ summary: 'Restaurant marks an order ready' })
   @UseGuards(AuthGuard)
-  @Patch('/:id/ready')
-  async ownerMarkOrderReady(@Req() req: Request, @Param('id') orderId: string) {
+  @Patch('/:orderId/ready')
+  async ownerMarkOrderReady(
+    @Req() req: Request,
+    @Param('orderId') orderId: string,
+  ) {
     const requester = req['authUser'] as UserOutput;
     await this.orderService.markOrderReady(orderId, requester.userId);
   }
 
+  @ApiOperation({ summary: 'Driver accepts delivering an order' })
   @UseGuards(AuthGuard)
-  @Patch('/:id/delivery/accept')
-  async driverAcceptOrder(@Req() req: Request, @Param('id') orderId: string) {
+  @Patch('/:orderId/delivery/accept')
+  async driverAcceptOrder(
+    @Req() req: Request,
+    @Param('orderId') orderId: string,
+  ) {
     const requester = req['authUser'] as UserOutput;
     await this.orderService.driverAcceptOrder(orderId, requester.userId);
   }
 
+  @ApiOperation({ summary: 'Driver declines delivering an order' })
   @UseGuards(AuthGuard)
-  @Patch('/:id/delivery/decline')
-  async driverDeclineOrder(@Req() req: Request, @Param('id') orderId: string) {
+  @Patch('/:orderId/delivery/decline')
+  async driverDeclineOrder(
+    @Req() req: Request,
+    @Param('orderId') orderId: string,
+  ) {
     const requester = req['authUser'] as UserOutput;
     await this.orderService.driverDeclineOrder(orderId, requester.userId);
   }
 
+  @ApiOperation({ summary: 'Driver picks up an order' })
   @UseGuards(AuthGuard)
-  @Patch('/:id/delivery/pickup')
-  async driverPickupOrder(@Req() req: Request, @Param('id') orderId: string) {
+  @Patch('/:orderId/delivery/pickup')
+  async driverPickupOrder(
+    @Req() req: Request,
+    @Param('orderId') orderId: string,
+  ) {
     const requester = req['authUser'] as UserOutput;
     await this.orderService.driverPickupOrder(orderId, requester.userId);
   }
 
+  @ApiOperation({ summary: 'Driver completes deliverying an order' })
   @UseGuards(AuthGuard)
-  @Patch('/:id/delivery/complete')
+  @Patch('/:orderId/delivery/complete')
   async driverCompleteDelivery(
     @Req() req: Request,
-    @Param('id') orderId: string,
+    @Param('orderId') orderId: string,
   ) {
     const requester = req['authUser'] as UserOutput;
     await this.orderService.driverCompleteDelivery(orderId, requester.userId);

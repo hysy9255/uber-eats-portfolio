@@ -33,7 +33,7 @@ export class UserService {
       throw new Error(`User with email ${email} not found`);
     }
     await this.bcryptService.comparePassword(password, user.password);
-    const token = this.jwtService.signToken(user.userId);
+    const token = this.jwtService.signToken(user.userId, user.role);
 
     return { token };
   }

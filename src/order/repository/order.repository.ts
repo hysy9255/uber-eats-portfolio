@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from '../orm-entities/order.orm.entity';
 import { Repository } from 'typeorm';
-// import { OrderStatus } from '../dto/order-output';
 
 @Injectable()
 export class OrderRepository {
@@ -11,24 +10,9 @@ export class OrderRepository {
     private readonly orderRepository: Repository<OrderEntity>,
   ) {}
 
-  // async updateOrderStatus(orderId: string, status: OrderStatus) {
-  //   await this.orderRepository.save(
-  //     this.orderRepository.create({
-  //       orderId,
-  //       status,
-  //     }),
-  //   );
-  // }
-
   async updateOrder(orderId: string, fields: Partial<OrderEntity>) {
     await this.orderRepository.update({ orderId }, fields);
   }
-
-  // async setDriver(orderId: string, driverId: string) {
-  //   await this.orderRepository.save(
-  //     this.orderRepository.create({ orderId, driverId }),
-  //   );
-  // }
 
   async saveOrder(
     orderId: string,

@@ -1,14 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
+import { UserRole } from 'src/user/dto/user-output';
 
 export interface AccessTokenPayload extends jwt.JwtPayload {
   userId: string;
+  role: UserRole;
 }
 
 @Injectable()
 export class JwtService {
-  signToken(userId: string) {
-    return jwt.sign({ userId: userId }, 'this.privateKey');
+  signToken(userId: string, role: UserRole) {
+    return jwt.sign({ userId, role }, 'this.privateKey');
   }
 
   verifyToken(token: string) {
