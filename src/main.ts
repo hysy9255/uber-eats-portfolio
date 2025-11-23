@@ -16,6 +16,13 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
+
+  app.enableCors({
+    origin: 'http://localhost:5173', // your Vite dev URL
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'jwt-token'],
+    credentials: true, // only if you plan to send cookies
+  });
   await app.listen(process.env.SERVER_PORT ?? 3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }

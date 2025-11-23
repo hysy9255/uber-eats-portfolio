@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import {
   CreateUserInput,
   DeleteUserInput,
+  UpdatePasswordInput,
   UpdateUserInput,
 } from '../dto/user-input';
 import { UserRepository } from '../repository/user.repository';
 import * as bcrypt from 'bcrypt';
-import { UserOutput, UserRole } from '../dto/user-output';
+import { UserRole } from '../dto/user-output';
 import { LoginInput } from '../dto/login-input';
 import { JwtService } from 'src/jwt/jwt.service';
 import { BcryptService } from 'src/bcrypt/bcrypt.service';
@@ -14,6 +15,7 @@ import { SharedService } from 'src/shared/shared.service';
 import { ClientRepository } from '../repository/client.repository';
 import { DriverRepository } from '../repository/driver.repository';
 import { OwnerRepository } from '../repository/owner.repository';
+import { CustomerRepository } from '../repository/\bcustomer.repository';
 
 @Injectable()
 export class UserService {
@@ -21,6 +23,7 @@ export class UserService {
     private readonly sharedService: SharedService,
     private readonly userRepository: UserRepository,
     private readonly clientRepository: ClientRepository,
+    private readonly customerRepository: CustomerRepository,
     private readonly driverRepository: DriverRepository,
     private readonly ownerRepository: OwnerRepository,
     private readonly bcryptService: BcryptService,
@@ -35,10 +38,25 @@ export class UserService {
     await this.bcryptService.comparePassword(password, user.password);
     const token = this.jwtService.signToken(user.userId, user.role);
 
-    return { token };
+    return { token, role: user.role };
   }
 
-  async createUser({ email, password, role }: CreateUserInput) {
+  async getOwnerId(userId: string): Promise<string> {
+    const ownerId = await this.ownerRepository.getOwnerIdByUserId(userId);
+    if (!ownerId) {
+      throw new Error('OwnerId is not found');
+    }
+    return ownerId;
+  }
+
+  async createUser({
+    email,
+    password,
+    role,
+    name,
+    phoneNumber,
+    profileImgUrl,
+  }: CreateUserInput) {
     const existingUser = await this.userRepository.getUserByEmail(email);
     if (existingUser) {
       throw new Error(`User with email ${email} already exists`);
@@ -51,6 +69,9 @@ export class UserService {
       email,
       await this.bcryptService.hashPassword(password),
       role,
+      name,
+      phoneNumber,
+      profileImgUrl,
     );
     return userId;
   }
@@ -60,10 +81,30 @@ export class UserService {
     if (!user) {
       throw new Error(`User with ID ${userId} not found`);
     }
-    return new UserOutput(user.userId, user.email, user.role);
+    // return new UserOutput(user.userId, user.email, user.role);
+    return user;
   }
 
-  async updateMe(myUserId: string, { password, newPassword }: UpdateUserInput) {
+  async updateUserInfo(
+    myUserId: string,
+    { phoneNumber, profileImgUrl }: UpdateUserInput,
+  ) {
+    const me = await this.userRepository.getUserById(myUserId);
+    if (!me) {
+      throw new Error(`User with ID ${myUserId} not found`);
+    }
+
+    await this.userRepository.updateUserInfo(
+      me.userId,
+      phoneNumber,
+      profileImgUrl,
+    );
+  }
+
+  async updatePassword(
+    myUserId: string,
+    { password, newPassword }: UpdatePasswordInput,
+  ) {
     const me = await this.userRepository.getUserById(myUserId);
     if (!me) {
       throw new Error(`User with ID ${myUserId} not found`);
@@ -88,11 +129,10 @@ export class UserService {
     await this.userRepository.deleteUser(myUserId);
   }
 
-  async createOwner(userId: string) {
-    await this.ownerRepository.saveOwner(
-      userId,
-      this.sharedService.generateId(),
-    );
+  async createOwner(userId: string): Promise<string> {
+    const ownerId = this.sharedService.generateId();
+    await this.ownerRepository.saveOwner(userId, ownerId);
+    return ownerId;
   }
 
   async createClient(userId: string) {
@@ -102,10 +142,22 @@ export class UserService {
     );
   }
 
-  async createDriver(userId: string) {
-    await this.driverRepository.saveDriver(
+  async createDriver(userId: string): Promise<string> {
+    const driverId = this.sharedService.generateId();
+    await this.driverRepository.saveDriver(userId, driverId);
+    return driverId;
+  }
+
+  async createCustomer(
+    userId: string,
+    deliveryAddress: string,
+    deliveryNotes: string,
+  ) {
+    await this.customerRepository.saveClient(
       userId,
       this.sharedService.generateId(),
+      deliveryAddress,
+      deliveryNotes,
     );
   }
 }

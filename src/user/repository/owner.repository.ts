@@ -33,7 +33,7 @@ export class OwnerRepository {
     const row = await this.ownerRepository
       .createQueryBuilder('owner')
       .where('owner.userId = :userId', { userId })
-      .select(['owner.ownerId'])
+      .select(['owner.ownerId AS "ownerId"'])
       .getRawOne<{ ownerId: string }>();
 
     return row?.ownerId ?? null;

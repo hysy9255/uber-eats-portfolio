@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -9,7 +9,10 @@ export class BcryptService {
   async comparePassword(plainPassword: string, hashedPassword: string) {
     const match = await bcrypt.compare(plainPassword, hashedPassword);
     if (!match) {
-      throw new Error('Invalid credentials');
+      throw new HttpException(
+        { message: 'Incorrect Password' },
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

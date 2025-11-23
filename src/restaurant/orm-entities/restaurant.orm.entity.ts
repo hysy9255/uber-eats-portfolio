@@ -24,6 +24,15 @@ export class RestaurantEntity {
   @Column()
   address: string;
 
+  @Column()
+  restaurantImgUrl: string;
+
+  @Column({ nullable: true })
+  restaurantImgUrl2: string;
+
+  @Column({ nullable: true })
+  restaurantImgUrl3: string;
+
   @OneToOne(() => OwnerEntity, (owner) => owner.restaurant)
   @JoinColumn({ name: 'ownerId' })
   owner: OwnerEntity;

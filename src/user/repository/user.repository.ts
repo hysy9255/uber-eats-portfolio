@@ -20,14 +20,39 @@ export class UserRepository {
     private readonly driverRepository: Repository<DriverEntity>,
   ) {}
 
+  async updateUserInfo(
+    userId: string,
+    phoneNumber?: string,
+    profileImgUrl?: string,
+  ) {
+    return await this.userRepository.save(
+      this.userRepository.create({
+        userId,
+        phoneNumber,
+        profileImgUrl,
+      }),
+    );
+  }
+
   async saveUser(
     userId: string,
     email: string,
     password: string,
     role: UserRole,
+    name?: string,
+    phoneNumber?: string,
+    profileImgUrl?: string,
   ) {
     return await this.userRepository.save(
-      this.userRepository.create({ userId, email, password, role }),
+      this.userRepository.create({
+        userId,
+        email,
+        password,
+        role,
+        name,
+        phoneNumber,
+        profileImgUrl,
+      }),
     );
   }
 

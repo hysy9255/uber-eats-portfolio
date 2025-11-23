@@ -1,115 +1,115 @@
 import { Injectable } from '@nestjs/common';
-import { CreateDishInput, UpdateDishInput } from '../dto/dish-input';
-import { DishRepository } from '../repository/dish.repository';
+import { MenuInput, UpdateDishInput } from '../dto/dish-input';
 import { RestaurantRepository } from '../repository/restaurant.repository';
 import { OwnerRepository } from 'src/user/repository/owner.repository';
 import { SharedService } from 'src/shared/shared.service';
+import { CreateMenuInput } from '../orm-entities/dish.orm.entity';
+import { DishRepositoryV2 } from '../repository/dish.repositoryV2';
 
 @Injectable()
 export class DishService {
   constructor(
-    private readonly dishRepository: DishRepository,
+    private readonly dishRepositoryV2: DishRepositoryV2,
     private readonly restaurantRepository: RestaurantRepository,
     private readonly ownerRepository: OwnerRepository,
     private readonly sharedService: SharedService,
   ) {}
 
-  async createDish(
-    userId: string,
-    restaurantId: string,
-    { name, price }: CreateDishInput,
-  ) {
-    const restaurant =
-      await this.restaurantRepository.getRestaurantById(restaurantId);
-
-    if (!restaurant) {
-      throw new Error('Restaurant does not exist');
-    }
-
+  async createMenus(userId: string, menuItems: MenuInput[]) {
     const ownerId = await this.ownerRepository.getOwnerIdByUserId(userId);
     if (!ownerId) {
       throw new Error('Owner not found');
     }
 
-    if (restaurant.ownerId !== ownerId) {
-      throw new Error('You are not the owner of this restaurant');
+    const restaurant =
+      await this.restaurantRepository.getRestaurantByOwnerIdV2(ownerId);
+
+    if (!restaurant) {
+      throw new Error('Restaurant not found');
     }
-    const dishId = this.sharedService.generateId();
-    await this.dishRepository.saveDish(dishId, restaurantId, name, price);
+
+    const createBulkMenusInput = menuItems.map((item) => ({
+      dishId: this.sharedService.generateId(),
+      restaurantId: restaurant.restaurantId,
+      name: item.name,
+      price: Number(item.price),
+      description: item.description,
+      category: item.category,
+      dishImgUrl: item.dishImgUrl,
+    })) as CreateMenuInput[];
+
+    await this.dishRepositoryV2.bulkSaveDishes(createBulkMenusInput);
   }
 
-  getDishes(restaurantId: string) {
-    return this.dishRepository.getDishesByRestaurantId(restaurantId);
+  listByRestaurant(restaurantId: string) {
+    return this.dishRepositoryV2.findManyByRestaurantId(restaurantId);
   }
 
-  getDish(dishId: string) {
-    return this.dishRepository.getDishById(dishId);
+  getDishesV2(restaurantId: string) {
+    return this.dishRepositoryV2.findManyByRestaurantId(restaurantId);
   }
 
-  async updateDish(
+  getDishV2(id: string) {
+    return this.dishRepositoryV2.findOneById(id);
+  }
+
+  async updateDishV2(
     userId: string,
-    restaurantId: string,
     dishId: string,
-    { name, price }: UpdateDishInput,
+    { name, price, description, category, dishImgUrl }: UpdateDishInput,
   ) {
-    const restaurant =
-      await this.restaurantRepository.getRestaurantById(restaurantId);
-
-    if (!restaurant) {
-      throw new Error('Restaurant does not exist');
-    }
-
     const ownerId = await this.ownerRepository.getOwnerIdByUserId(userId);
     if (!ownerId) {
       throw new Error('Owner not found');
     }
 
-    if (restaurant.ownerId !== ownerId) {
-      throw new Error('You are not the owner of this restaurant');
+    const restaurant =
+      await this.restaurantRepository.getRestaurantByOwnerIdV2(ownerId);
+
+    if (!restaurant) {
+      throw new Error('Restaurant not found');
     }
 
-    const dish = await this.dishRepository.getDishById(dishId);
+    const dish = await this.dishRepositoryV2.findOneById(dishId);
     if (!dish) {
       throw new Error('Dish does not exist');
     }
 
-    if (dish.restaurantId !== restaurantId) {
+    if (dish.restaurantId !== restaurant.restaurantId) {
       throw new Error('Dish does not belong to this restaurant');
     }
 
-    await this.dishRepository.saveDish(
-      dishId,
-      dish.restaurantId,
-      name ?? dish.name,
-      price ?? dish.price,
-    );
+    await this.dishRepositoryV2.updateOneById({
+      dishId: dishId,
+      name: name,
+      price: price,
+      description: description,
+      category: category,
+      dishImgUrl: dishImgUrl,
+    });
   }
 
-  async deleteDish(userId: string, restaurantId: string, dishId: string) {
-    const restaurant =
-      await this.restaurantRepository.getRestaurantById(restaurantId);
-
-    if (!restaurant) {
-      throw new Error('Restaurant does not exist');
-    }
-
+  async deleteDishV2(userId: string, dishId: string) {
     const ownerId = await this.ownerRepository.getOwnerIdByUserId(userId);
     if (!ownerId) {
       throw new Error('Owner not found');
     }
 
-    if (restaurant.ownerId !== ownerId) {
-      throw new Error('You are not the owner of this restaurant');
+    const restaurant =
+      await this.restaurantRepository.getRestaurantByOwnerIdV2(ownerId);
+
+    if (!restaurant) {
+      throw new Error('Restaurant not found');
     }
 
-    const dish = await this.dishRepository.getDishById(dishId);
+    const dish = await this.dishRepositoryV2.findOneById(dishId);
     if (!dish) {
       throw new Error('Dish does not exist');
     }
 
-    if (dish.restaurantId !== restaurantId) {
+    if (dish.restaurantId !== restaurant.restaurantId) {
       throw new Error('Dish does not belong to this restaurant');
     }
-    await this.dishRepository.deleteDish(dishId);
+    await this.dishRepositoryV2.deleteOneById(dishId);
   }
 }

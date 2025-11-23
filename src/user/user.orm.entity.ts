@@ -18,6 +18,15 @@ export class UserEntity {
   @Column()
   role: UserRole;
 
+  @Column({ nullable: true })
+  name: string;
+
+  @Column({ nullable: true })
+  phoneNumber: string;
+
+  @Column({ nullable: true })
+  profileImgUrl: string;
+
   @OneToMany(() => OwnerEntity, (owner) => owner.user, { onDelete: 'CASCADE' })
   owners: OwnerEntity[];
 
