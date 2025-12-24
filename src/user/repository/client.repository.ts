@@ -10,9 +10,9 @@ export class ClientRepository {
     private readonly clientRepository: Repository<ClientEntity>,
   ) {}
 
-  async saveClient(userId: string, clientId: string) {
+  async saveClient(userId: string, clientId: string, deliveryAddress: string) {
     await this.clientRepository.save(
-      this.clientRepository.create({ userId, clientId }),
+      this.clientRepository.create({ userId, clientId, deliveryAddress }),
     );
   }
 

@@ -3,8 +3,10 @@ import { MenuInput, UpdateDishInput } from '../dto/dish-input';
 import { RestaurantRepository } from '../repository/restaurant.repository';
 import { OwnerRepository } from 'src/user/repository/owner.repository';
 import { SharedService } from 'src/shared/shared.service';
-import { CreateMenuInput } from '../orm-entities/dish.orm.entity';
+import { CreateMenuInput, DishEntityV2 } from '../orm-entities/dish.orm.entity';
 import { DishRepositoryV2 } from '../repository/dish.repositoryV2';
+
+export type DishesByCategory = Record<string, DishEntityV2[]>;
 
 @Injectable()
 export class DishService {
@@ -45,12 +47,28 @@ export class DishService {
     return this.dishRepositoryV2.findManyByRestaurantId(restaurantId);
   }
 
+  async listByCategory(restaurantId: string) {
+    const dishes =
+      await this.dishRepositoryV2.findManyByRestaurantId(restaurantId);
+
+    return dishes.reduce((grouped, dish) => {
+      const key = dish.category;
+      if (!grouped[key]) {
+        grouped[key] = [];
+      }
+      grouped[key].push(dish);
+      return grouped;
+    }, {} as DishesByCategory);
+  }
+
   getDishesV2(restaurantId: string) {
     return this.dishRepositoryV2.findManyByRestaurantId(restaurantId);
   }
 
-  getDishV2(id: string) {
-    return this.dishRepositoryV2.findOneById(id);
+  async getDishV2(id: string) {
+    const dish = await this.dishRepositoryV2.findOneById(id);
+    if (!dish) throw new Error('Dish not found');
+    return dish;
   }
 
   async updateDishV2(

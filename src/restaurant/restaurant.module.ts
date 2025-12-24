@@ -3,9 +3,9 @@ import { RestaurantController } from './controller/restaurant.controller';
 import { RestaurantService } from './service/restaurant.service';
 import { RestaurantRepository } from './repository/restaurant.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RestaurantEntity } from './orm-entities/restaurant.orm.entity';
-import { DishEntity, DishEntityV2 } from './orm-entities/dish.orm.entity';
-import { DishRepository } from './repository/dish.repository';
+// import { RestaurantEntity } from './orm-entities/restaurant.orm.entity';
+import { DishEntityV2 } from './orm-entities/dish.orm.entity';
+
 import { AuthModule } from 'src/auth/auth.module';
 import { DishController } from './controller/dish.controller';
 import { DishService } from './service/dish.service';
@@ -19,8 +19,8 @@ import { OperatingHoursEntity } from './orm-entities/operatingHours.entity';
     AuthModule,
     UserModule,
     TypeOrmModule.forFeature([
-      RestaurantEntity,
-      DishEntity,
+      // RestaurantEntity,
+      // DishEntity,
       DishEntityV2,
       RestaurantEntityV2,
       OperatingHoursEntity,
@@ -31,9 +31,9 @@ import { OperatingHoursEntity } from './orm-entities/operatingHours.entity';
     RestaurantService,
     RestaurantRepository,
     DishService,
-    DishRepository,
+
     DishRepositoryV2,
   ],
-  exports: [RestaurantRepository, DishRepository],
+  exports: [RestaurantRepository],
 })
 export class RestaurantModule {}

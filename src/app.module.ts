@@ -6,11 +6,8 @@ import {
 } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { RestaurantEntity } from './restaurant/orm-entities/restaurant.orm.entity';
-import {
-  DishEntity,
-  DishEntityV2,
-} from './restaurant/orm-entities/dish.orm.entity';
+// import { RestaurantEntity } from './restaurant/orm-entities/restaurant.orm.entity';
+import { DishEntityV2 } from './restaurant/orm-entities/dish.orm.entity';
 import { RestaurantModule } from './restaurant/restaurant.module';
 import { UserModule } from './user/user.module';
 import { OrderModule } from './order/order.module';
@@ -29,7 +26,7 @@ import { SharedModule } from './shared/shared.module';
 import { RejectedDeliveryOrderEntity } from './order/orm-entities/rejected-delivery-order.orm.entity';
 import { UploadsController } from './uploads/uploads.controller';
 import { OwnerDraftModule } from './owner-draft/owner-draft.module';
-import { CustomerEntity } from './user/orm-entities/customer.orm.entity';
+// import { CustomerEntity } from './user/orm-entities/customer.orm.entity';
 import { RestaurantEntityV2 } from './restaurant/orm-entities/restaurantV2.orm.entity';
 import { OperatingHoursEntity } from './restaurant/orm-entities/operatingHours.entity';
 import { VehicleEntity } from './user/orm-entities/vehicle.orm.entity';
@@ -55,15 +52,13 @@ import { DriverDocsEntity } from './user/orm-entities/driver.document.entity';
         ClientEntity,
         OwnerEntity,
         DriverEntity,
-        RestaurantEntity,
         RestaurantEntityV2,
         OperatingHoursEntity,
         OrderEntity,
-        DishEntity,
         DishEntityV2,
         OrderItemEntity,
         RejectedDeliveryOrderEntity,
-        CustomerEntity,
+        // CustomerEntity,
       ],
       synchronize: true,
     }),

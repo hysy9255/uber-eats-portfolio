@@ -10,11 +10,10 @@ import { OrderItemRepository } from './repository/orderItem.repository';
 import { AuthModule } from 'src/auth/auth.module';
 import { OwnerEntity } from 'src/user/orm-entities/owner.orm.entity';
 import {
-  DishEntity,
+  // DishEntity,
   DishEntityV2,
 } from 'src/restaurant/orm-entities/dish.orm.entity';
 import { OrderDomainService } from './service/order.domain.service';
-import { DishRepository } from 'src/restaurant/repository/dish.repository';
 import { UserModule } from 'src/user/user.module';
 import { OrderAccessPolicy } from './service/order.access.policy';
 import { RejectedDeliveryOrderEntity } from './orm-entities/rejected-delivery-order.orm.entity';
@@ -23,7 +22,7 @@ import { RejectedDeliveryOrderRepository } from './repository/rejectedDeliveryOr
 const entities = [
   OrderEntity,
   OrderItemEntity,
-  DishEntity,
+  // DishEntity,
   DishEntityV2,
   OwnerEntity,
   RejectedDeliveryOrderEntity,
@@ -33,7 +32,7 @@ const entities = [
 const repositories = [
   OrderRepository,
   OrderItemRepository,
-  DishRepository,
+
   RejectedDeliveryOrderRepository,
 ];
 

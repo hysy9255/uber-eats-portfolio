@@ -15,7 +15,7 @@ import { SharedService } from 'src/shared/shared.service';
 import { ClientRepository } from '../repository/client.repository';
 import { DriverRepository } from '../repository/driver.repository';
 import { OwnerRepository } from '../repository/owner.repository';
-import { CustomerRepository } from '../repository/\bcustomer.repository';
+// import { CustomerRepository } from '../repository/\bcustomer.repository';
 
 @Injectable()
 export class UserService {
@@ -23,7 +23,7 @@ export class UserService {
     private readonly sharedService: SharedService,
     private readonly userRepository: UserRepository,
     private readonly clientRepository: ClientRepository,
-    private readonly customerRepository: CustomerRepository,
+    // private readonly customerRepository: CustomerRepository,
     private readonly driverRepository: DriverRepository,
     private readonly ownerRepository: OwnerRepository,
     private readonly bcryptService: BcryptService,
@@ -47,6 +47,12 @@ export class UserService {
       throw new Error('OwnerId is not found');
     }
     return ownerId;
+  }
+
+  async checkEmailAvailability(email: string): Promise<{ available: boolean }> {
+    const exists = await this.userRepository.existsByEmail(email);
+    console.log(exists);
+    return { available: !exists };
   }
 
   async createUser({
@@ -135,10 +141,11 @@ export class UserService {
     return ownerId;
   }
 
-  async createClient(userId: string) {
+  async createClient(userId: string, deliveryAddress: string) {
     await this.clientRepository.saveClient(
       userId,
       this.sharedService.generateId(),
+      deliveryAddress,
     );
   }
 
@@ -148,16 +155,16 @@ export class UserService {
     return driverId;
   }
 
-  async createCustomer(
-    userId: string,
-    deliveryAddress: string,
-    deliveryNotes: string,
-  ) {
-    await this.customerRepository.saveClient(
-      userId,
-      this.sharedService.generateId(),
-      deliveryAddress,
-      deliveryNotes,
-    );
-  }
+  // async createCustomer(
+  //   userId: string,
+  //   deliveryAddress: string,
+  //   deliveryNotes: string,
+  // ) {
+  //   await this.customerRepository.saveClient(
+  //     userId,
+  //     this.sharedService.generateId(),
+  //     deliveryAddress,
+  //     deliveryNotes,
+  //   );
+  // }
 }

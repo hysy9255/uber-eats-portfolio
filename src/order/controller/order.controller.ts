@@ -14,6 +14,10 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UserOutput, UserRole } from 'src/user/dto/user-output';
 import { Roles } from 'src/auth/roles.decorator';
 import { ApiOperation, ApiParam, ApiSecurity } from '@nestjs/swagger';
+import {
+  OrderDetailForRestaurantDashboardDTO,
+  OrderForRestaurantDashboardDTO,
+} from '../dto/order-output';
 
 @ApiSecurity('jwt-token')
 @ApiParam({
@@ -21,7 +25,7 @@ import { ApiOperation, ApiParam, ApiSecurity } from '@nestjs/swagger';
   required: true,
   type: String,
 })
-@Controller('restaurants/:restaurantId/orders')
+@Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
@@ -31,25 +35,43 @@ export class OrderController {
   @Post()
   async createOrder(
     @Req() req: Request,
-    @Param('restaurantId') restaurantId: string,
     @Body() createOrderInput: CreateOrderInput,
   ) {
     const { userId } = req['authUser'] as UserOutput;
-    await this.orderService.createOrder(userId, restaurantId, createOrderInput);
+    await this.orderService.createOrder(userId, createOrderInput);
   }
 
   @ApiOperation({ summary: 'Get orders' })
-  @Get()
-  getOrders() {}
-
-  @ApiOperation({ summary: 'Get an order' })
   @UseGuards(AuthGuard)
-  @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
-  @Get('/:orderId')
-  async getOrder(@Req() req: Request, @Param('orderId') orderId: string) {
-    const requester = req['authUser'] as UserOutput;
-    return await this.orderService.getOrder(orderId, requester);
+  @Roles(UserRole.Owner)
+  @Get()
+  getOrdersView(
+    @Req() req: Request,
+  ): Promise<OrderForRestaurantDashboardDTO[]> {
+    const { userId } = req['authUser'] as UserOutput;
+    return this.orderService.getOrdersView(userId);
   }
+
+  @ApiOperation({ summary: 'Get order detail' })
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.Owner)
+  @Get('/:orderId')
+  getOrderDetailView(
+    @Req() req: Request,
+    @Param('orderId') orderId: string,
+  ): Promise<OrderDetailForRestaurantDashboardDTO> {
+    const { userId } = req['authUser'] as UserOutput;
+    return this.orderService.getOrderDetailView(userId, orderId);
+  }
+
+  // @ApiOperation({ summary: 'Get an order' })
+  // @UseGuards(AuthGuard)
+  // @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
+  // @Get('/:orderId')
+  // async getOrder(@Req() req: Request, @Param('orderId') orderId: string) {
+  //   const requester = req['authUser'] as UserOutput;
+  //   return await this.orderService.getOrder(orderId, requester);
+  // }
 
   @ApiOperation({ summary: 'Restaurant accepts an order' })
   @UseGuards(AuthGuard)

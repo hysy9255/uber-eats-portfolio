@@ -16,6 +16,8 @@ import { UserOutput, UserRole } from 'src/user/dto/user-output';
 import { ApiOperation, ApiParam, ApiSecurity } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles.decorator';
 import { CreateMenuInput } from 'src/restaurant/dto/dish-input';
+import { RestaurantService } from '../service/restaurant.service';
+import { DishPageOutput } from '../dto/dishPage-output';
 
 @ApiSecurity('jwt-token')
 @ApiParam({
@@ -25,7 +27,10 @@ import { CreateMenuInput } from 'src/restaurant/dto/dish-input';
 })
 @Controller()
 export class DishController {
-  constructor(private readonly dishService: DishService) {}
+  constructor(
+    private readonly dishService: DishService,
+    private readonly restaurantService: RestaurantService,
+  ) {}
 
   @ApiOperation({ summary: 'Create Dish v2' })
   @UseGuards(AuthGuard)
@@ -38,6 +43,20 @@ export class DishController {
     const { userId } = req['authUser'] as UserOutput;
     const menuItems = createMenuInput.items;
     await this.dishService.createMenus(userId, menuItems);
+  }
+
+  @ApiOperation({ summary: 'Get dish page view' })
+  @Get('/dishes/:dishId/page')
+  async getDishPage(@Param('dishId') dishId: string): Promise<DishPageOutput> {
+    const dish = await this.dishService.getDishV2(dishId);
+    const restaurantId = dish.restaurantId;
+    const { dba } = await this.restaurantService.getRestaurantV2(restaurantId);
+    const dishes = await this.dishService.getDishesV2(restaurantId);
+    return {
+      dish,
+      dba,
+      dishes,
+    };
   }
 
   @ApiOperation({ summary: 'Get dishes' })

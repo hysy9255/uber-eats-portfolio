@@ -3,7 +3,7 @@ import { DriverEntity } from './driver.orm.entity';
 import { OwnerEntity } from './owner.orm.entity';
 import { ClientEntity } from './client.orm.entity';
 import { UserRole } from '../dto/user-output';
-import { CustomerEntity } from './customer.orm.entity';
+// import { CustomerEntity } from './customer.orm.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -19,21 +19,17 @@ export class UserEntity {
   @Column()
   role: UserRole;
 
-  @OneToMany(() => CustomerEntity, (customer) => customer.user, {
-    onDelete: 'CASCADE',
-  })
-  customers: CustomerEntity[];
+  // @OneToMany(() => CustomerEntity, (customer) => customer.user, {
+  //   onDelete: 'CASCADE',
+  // })
+  // customers: CustomerEntity[];
 
-  @OneToMany(() => OwnerEntity, (owner) => owner.user, { onDelete: 'CASCADE' })
+  @OneToMany(() => OwnerEntity, (owner) => owner.user)
   owners: OwnerEntity[];
 
-  @OneToMany(() => ClientEntity, (client) => client.user, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => ClientEntity, (client) => client.user)
   clients: ClientEntity[];
 
-  @OneToMany(() => DriverEntity, (driver) => driver.user, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => DriverEntity, (driver) => driver.user)
   drivers: DriverEntity[];
 }

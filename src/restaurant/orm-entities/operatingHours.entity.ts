@@ -37,6 +37,7 @@ export class OperatingHoursEntity {
   @ManyToOne(
     () => RestaurantEntityV2,
     (restaurant) => restaurant.operatingHours,
+    { onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'restaurantId' })
   restaurant: RestaurantEntityV2;

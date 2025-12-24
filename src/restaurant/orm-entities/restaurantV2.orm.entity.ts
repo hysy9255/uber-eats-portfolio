@@ -34,32 +34,29 @@ export class RestaurantEntityV2 {
   @Column()
   businessEmail: string;
 
-  @Column()
-  website: string;
+  @Column({ type: 'varchar', nullable: true })
+  website: string | null;
 
-  @Column()
-  instagram: string;
+  @Column({ type: 'varchar', nullable: true })
+  instagram: string | null;
 
-  // @Column()
-  // country: string;
+  @Column({ type: 'varchar', nullable: true })
+  mainImgUrl: string | null;
 
-  // @Column()
-  // state: string;
+  @Column({ type: 'varchar', nullable: true })
+  sub1ImgUrl: string | null;
 
-  @Column()
-  mainImgUrl: string;
-
-  @Column()
-  sub1ImgUrl: string;
-
-  @Column()
-  sub2ImgUrl: string;
+  @Column({ type: 'varchar', nullable: true })
+  sub2ImgUrl: string | null;
 
   @Column()
   streetAddress: string;
 
   @Column()
   unit: string;
+
+  @Column()
+  state: string;
 
   @Column()
   city: string;
@@ -80,23 +77,15 @@ export class RestaurantEntityV2 {
   @JoinColumn({ name: 'ownerId' })
   owner: OwnerEntity;
 
-  @OneToMany(() => DishEntityV2, (dish) => dish.restaurant, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => DishEntityV2, (dish) => dish.restaurant)
   dishes: DishEntityV2[];
 
-  @OneToMany(() => OrderEntity, (order) => order.restaurant, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => OrderEntity, (order) => order.restaurant)
   orders: OrderEntity[];
 
   @OneToMany(
     () => OperatingHoursEntity,
     (operatingHours) => operatingHours.restaurant,
-    {
-      // cascade: true,
-      onDelete: 'CASCADE',
-    },
   )
   operatingHours: OperatingHoursEntity[];
 }

@@ -77,4 +77,15 @@ export class UserRepository {
   deleteUser(userId: string) {
     return this.userRepository.delete({ userId });
   }
+
+  async existsByEmail(email: string): Promise<boolean> {
+    const row = await this.userRepository
+      .createQueryBuilder('user')
+      .select('1')
+      .where('user.email = :email', { email })
+      .limit(1)
+      .getRawOne();
+
+    return !!row;
+  }
 }

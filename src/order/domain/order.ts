@@ -65,7 +65,7 @@ export class Order {
   }
 
   markPickedup() {
-    this._status = OrderStatus.PickedUp;
+    this._status = OrderStatus.Delivering;
   }
 
   markDelivered() {

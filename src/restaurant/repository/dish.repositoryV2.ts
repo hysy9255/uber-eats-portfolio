@@ -49,4 +49,11 @@ export class DishRepositoryV2 {
   async deleteOneById(id: string) {
     await this.dishRepositoryV2.delete({ dishId: id });
   }
+
+  async getDishesByIds(dishIds: string[]) {
+    return await this.dishRepositoryV2
+      .createQueryBuilder('dish')
+      .where('dish.dishId IN (:...dishIds)', { dishIds })
+      .getMany();
+  }
 }

@@ -46,7 +46,7 @@ export class UploadsController {
       );
 
       const url = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
-      console.log('url', url);
+
       return { ok: true, key, url }; // return whatever your frontend expects
     } catch (err) {
       console.error('S3 upload failed:', err);

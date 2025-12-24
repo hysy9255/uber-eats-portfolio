@@ -18,17 +18,14 @@ import { UserDomainService } from './service/user.domain.service';
 import { ClientIdReader } from './repository/reader/client.id.reader';
 import { DriverIdReader } from './repository/reader/driver.id.reader';
 import { RestaurantIdReader } from './repository/reader/restaurant.id.reader';
-import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurant.orm.entity';
-import { CustomerRepository } from './repository/\bcustomer.repository';
-import { CustomerEntity } from './orm-entities/customer.orm.entity';
+
+// import { CustomerRepository } from './repository/\bcustomer.repository';
+// import { CustomerEntity } from './orm-entities/customer.orm.entity';
 import { RestaurantService } from 'src/restaurant/service/restaurant.service';
 import { RestaurantRepository } from 'src/restaurant/repository/restaurant.repository';
 import { DishService } from 'src/restaurant/service/dish.service';
-import { DishRepository } from 'src/restaurant/repository/dish.repository';
-import {
-  DishEntity,
-  DishEntityV2,
-} from 'src/restaurant/orm-entities/dish.orm.entity';
+
+import { DishEntityV2 } from 'src/restaurant/orm-entities/dish.orm.entity';
 import { RestaurantEntityV2 } from 'src/restaurant/orm-entities/restaurantV2.orm.entity';
 import { DishRepositoryV2 } from 'src/restaurant/repository/dish.repositoryV2';
 import { OperatingHoursEntity } from 'src/restaurant/orm-entities/operatingHours.entity';
@@ -49,10 +46,10 @@ const repositories = [
   ClientRepository,
   DriverRepository,
   OwnerRepository,
-  CustomerRepository,
+  // CustomerRepository,
   RestaurantRepository,
   OwnerRepository,
-  DishRepository,
+
   DishRepositoryV2,
   VehicleRepository,
   DriverDocsRepository,
@@ -63,9 +60,8 @@ const entities = [
   OwnerEntity,
   ClientEntity,
   DriverEntity,
-  RestaurantEntity,
-  CustomerEntity,
-  DishEntity,
+  // CustomerEntity,
+  // DishEntity,
   RestaurantEntityV2,
   DishEntityV2,
   OperatingHoursEntity,

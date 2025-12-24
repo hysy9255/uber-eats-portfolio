@@ -31,6 +31,11 @@ export class CreateRestaurantInput {
 
 export class UpdateRestaurantInput extends PartialType(CreateRestaurantInput) {}
 
+export class UpdateRestaurantInputV2 {
+  updateBusinessInput: UpdateBusinessInput;
+  updateLocationAndHoursInput: UpdateLocationAndHoursInput;
+}
+
 // export type Day = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun';
 
 // export interface DayHours {
@@ -153,6 +158,10 @@ export class CreateLocationAndHoursInput {
   orderType: string;
 }
 
+export class UpdateLocationAndHoursInput extends PartialType(
+  CreateLocationAndHoursInput,
+) {}
+
 export class CreateBusinessInput {
   @ApiProperty({
     example: 'Tuxedo Dining LLC',
@@ -223,3 +232,5 @@ export class CreateBusinessInput {
   })
   sub2ImgUrl: string;
 }
+
+export class UpdateBusinessInput extends PartialType(CreateBusinessInput) {}

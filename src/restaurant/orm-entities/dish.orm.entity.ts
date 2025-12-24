@@ -7,7 +7,6 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { OrderItemEntity } from 'src/order/orm-entities/order-item.orm.entity';
-import { RestaurantEntity } from './restaurant.orm.entity';
 import { RestaurantEntityV2 } from './restaurantV2.orm.entity';
 
 export type CreateMenuInput = {
@@ -29,39 +28,30 @@ export type UpdateMenuInput = {
   dishImgUrl?: string;
 };
 
-export
-@Entity('dishes')
-class DishEntity {
-  @PrimaryColumn()
-  dishId: string;
+// export
+// @Entity('dishes')
+// class DishEntity {
+//   @PrimaryColumn()
+//   dishId: string;
 
-  @Column()
-  restaurantId: string;
+//   @Column()
+//   restaurantId: string;
 
-  @Column()
-  name: string;
+//   @Column()
+//   name: string;
 
-  @Column()
-  price: number;
+//   @Column()
+//   price: number;
 
-  @Column()
-  description: string;
+//   @Column()
+//   description: string;
 
-  @Column()
-  category: string;
+//   @Column()
+//   category: string;
 
-  @Column()
-  dishImgUrl: string;
-
-  @ManyToOne(() => RestaurantEntity, (restaurant) => restaurant.dishes)
-  @JoinColumn({ name: 'restaurantId' })
-  restaurant: RestaurantEntity;
-
-  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.dish, {
-    onDelete: 'CASCADE',
-  })
-  orderItems: OrderItemEntity[];
-}
+//   @Column()
+//   dishImgUrl: string;
+// }
 
 @Entity('dishesV2')
 export class DishEntityV2 {
@@ -86,12 +76,12 @@ export class DishEntityV2 {
   @Column({ nullable: true })
   dishImgUrl?: string;
 
-  @ManyToOne(() => RestaurantEntityV2, (restaurant) => restaurant.dishes)
+  @ManyToOne(() => RestaurantEntityV2, (restaurant) => restaurant.dishes, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'restaurantId' })
   restaurant: RestaurantEntityV2;
 
-  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.dish, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.dish)
   orderItems: OrderItemEntity[];
 }

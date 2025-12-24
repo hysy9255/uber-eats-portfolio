@@ -44,7 +44,7 @@ export class Driver {
 
   complete(order: Order) {
     // Is the order status picked up?
-    order.ensureStatus([OrderStatus.PickedUp]);
+    order.ensureStatus([OrderStatus.Delivering]);
     // Is this order assigned to this driver?
     order.ensureTakenBy(this);
     // mark order as delivered

@@ -4,7 +4,7 @@ export enum OrderStatus {
   Pending = 'Pending',
   Cooking = 'Cooking',
   Ready = 'Ready',
-  PickedUp = 'PickedUp',
+  Delivering = 'Delivering',
   Delivered = 'Delivered',
 }
 
@@ -23,3 +23,31 @@ export class OrderOutput {
 }
 
 export class OrderSummaryOutput extends PartialType(OrderOutput) {}
+
+export class OrderForRestaurantDashboardDTO {
+  orderId: string;
+  date: string;
+  time: string;
+  status: OrderStatus;
+  requestToRestaurant: string | null;
+  totalPrice: string;
+  clientName: string;
+  driverName: string | null;
+}
+
+export class OrderItemDetail {
+  dishImg: string;
+  name: string;
+  quantity: number;
+  price: number;
+  subTotal: number;
+}
+
+export class OrderDetailForRestaurantDashboardDTO {
+  orderId: string;
+  orderItems: OrderItemDetail[];
+  clientName: string;
+  totalPrice: number;
+  status: OrderStatus;
+  requestToRestaurant: string;
+}

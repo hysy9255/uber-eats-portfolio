@@ -16,14 +16,18 @@ export class RejectedDeliveryOrderEntity {
   @Column()
   orderId: string;
 
-  @Column()
+  @Column({ nullable: true })
   driverId: string;
 
-  @ManyToOne(() => DriverEntity, (driver) => driver.rejectedDeliveryOrders)
+  @ManyToOne(() => DriverEntity, (driver) => driver.rejectedDeliveryOrders, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'driverId' })
   driver: DriverEntity;
 
-  @ManyToOne(() => OrderEntity, (order) => order.rejectedDeliveryOrders)
+  @ManyToOne(() => OrderEntity, (order) => order.rejectedDeliveryOrders, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'orderId' })
   order: OrderEntity;
 }

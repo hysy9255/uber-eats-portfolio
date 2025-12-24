@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { DishEntity } from '../../restaurant/orm-entities/dish.orm.entity';
+import { DishEntityV2 } from '../../restaurant/orm-entities/dish.orm.entity';
 import { OrderEntity } from './order.orm.entity';
 
 @Entity('orderItems')
@@ -16,11 +16,15 @@ export class OrderItemEntity {
   @Column()
   quantity: number;
 
-  @ManyToOne(() => DishEntity, (dish) => dish.orderItems)
+  @ManyToOne(() => DishEntityV2, (dish) => dish.orderItems, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'dishId' })
-  dish: DishEntity;
+  dish: DishEntityV2;
 
-  @ManyToOne(() => OrderEntity, (order) => order.orderItems)
+  @ManyToOne(() => OrderEntity, (order) => order.orderItems, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'orderId' })
   order: OrderEntity;
 }

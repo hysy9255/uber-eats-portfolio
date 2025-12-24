@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -23,7 +24,7 @@ import { UserOutput, UserRole } from '../dto/user-output';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { LoginInput } from '../dto/login-input';
 import { Roles } from 'src/auth/roles.decorator';
-import { ApiOperation, ApiParam, ApiSecurity } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiSecurity } from '@nestjs/swagger';
 import { RestaurantService } from 'src/restaurant/service/restaurant.service';
 import { DishService } from 'src/restaurant/service/dish.service';
 import { DriverRegistration } from '../service/driver.registration';
@@ -45,6 +46,15 @@ export class UserController {
     return await this.userService.login(loginInput);
   }
 
+  @ApiOperation({ summary: 'Check availability for account email' })
+  @ApiQuery({ name: 'email', required: true, example: 'test@example.com' })
+  @Get('/exists')
+  async checkEmailAvailability(
+    @Query('email') email: string,
+  ): Promise<{ available: boolean }> {
+    return await this.userService.checkEmailAvailability(email);
+  }
+
   @ApiOperation({ summary: 'Create Customer' })
   @Post('/customers')
   async createCustomer(@Body() createCustomerInput: CreateCustomerInput) {
@@ -59,10 +69,9 @@ export class UserController {
 
     const userId = await this.userService.createUser(createUserInput);
 
-    await this.userService.createCustomer(
+    await this.userService.createClient(
       userId,
       createCustomerInput.deliveryAddress,
-      createCustomerInput.deliveryNotes,
     );
   }
 
@@ -109,21 +118,21 @@ export class UserController {
     );
   }
 
-  @ApiOperation({ summary: 'Create user' })
-  @Post()
-  async createUser(@Body() createUserInput: CreateUserInput) {
-    const userId = await this.userService.createUser(createUserInput);
+  // @ApiOperation({ summary: 'Create user' })
+  // @Post()
+  // async createUser(@Body() createUserInput: CreateUserInput) {
+  //   const userId = await this.userService.createUser(createUserInput);
 
-    if (createUserInput.role === UserRole.Owner) {
-      await this.userService.createOwner(userId);
-    }
-    if (createUserInput.role === UserRole.Client) {
-      await this.userService.createClient(userId);
-    }
-    if (createUserInput.role === UserRole.Driver) {
-      await this.userService.createDriver(userId);
-    }
-  }
+  //   if (createUserInput.role === UserRole.Owner) {
+  //     await this.userService.createOwner(userId);
+  //   }
+  //   if (createUserInput.role === UserRole.Client) {
+  //     await this.userService.createClient(userId);
+  //   }
+  //   if (createUserInput.role === UserRole.Driver) {
+  //     await this.userService.createDriver(userId);
+  //   }
+  // }
 
   @ApiOperation({ summary: 'Get my profile' })
   @UseGuards(AuthGuard)

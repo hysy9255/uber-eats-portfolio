@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OrderItem, OrderStatus } from '../dto/order-output';
-import { DishRepository } from 'src/restaurant/repository/dish.repository';
+// import { DishRepository } from 'src/restaurant/repository/dish.repository';
 import { RestaurantRepository } from 'src/restaurant/repository/restaurant.repository';
 import { ClientRepository } from 'src/user/repository/client.repository';
 import { DriverRepository } from 'src/user/repository/driver.repository';
@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from '../orm-entities/order.orm.entity';
 import { Repository } from 'typeorm';
 import { OrderMapper } from '../order.mapper';
+import { DishRepositoryV2 } from 'src/restaurant/repository/dish.repositoryV2';
 
 export type RawOrder = {
   orderId: string;
@@ -24,7 +25,8 @@ export class OrderDomainService {
   constructor(
     @InjectRepository(OrderEntity)
     private readonly orders: Repository<OrderEntity>,
-    private readonly dishRepository: DishRepository,
+    // private readonly dishRepository: DishRepository,
+    private readonly dishRepositoryV2: DishRepositoryV2,
     private readonly restaurantRepository: RestaurantRepository,
     private readonly clientRepository: ClientRepository,
     private readonly ownerRepopsitory: OwnerRepository,
@@ -57,7 +59,7 @@ export class OrderDomainService {
 
   async calculateTotalPrice(orderItems: OrderItem[]) {
     const dishIds = orderItems.map((item) => item.dishId);
-    const dishes = await this.dishRepository.getDishesByIds(dishIds);
+    const dishes = await this.dishRepositoryV2.getDishesByIds(dishIds);
     const totalPrice = orderItems.reduce((total, item) => {
       const dish = dishes.find((d) => d.dishId === item.dishId);
       if (dish) {
@@ -70,7 +72,7 @@ export class OrderDomainService {
 
   async validateRestaurantExists(restaurantId: string) {
     const restaurant =
-      await this.restaurantRepository.getRestaurantById(restaurantId);
+      await this.restaurantRepository.getRestaurantByIdV2(restaurantId);
     if (!restaurant) {
       throw new Error('Restaurant not found');
     }
@@ -82,15 +84,15 @@ export class OrderDomainService {
     return clientId;
   }
 
-  async validateOwnersRestaurantExists(userId: string) {
-    const owner = await this.ownerRepopsitory.getOwnerByUserId(userId);
-    if (!owner) throw new Error('Owner not found');
-    const restaurant = await this.restaurantRepository.getRestaurantById(
-      owner.restaurantId,
-    );
-    if (!restaurant) throw new Error('Restaurant not found for this owner');
-    return restaurant.restaurantId;
-  }
+  // async validateOwnersRestaurantExists(userId: string) {
+  //   const owner = await this.ownerRepopsitory.getOwnerByUserId(userId);
+  //   if (!owner) throw new Error('Owner not found');
+  //   const restaurant = await this.restaurantRepository.getRestaurantById(
+  //     owner.restaurantId,
+  //   );
+  //   if (!restaurant) throw new Error('Restaurant not found for this owner');
+  //   return restaurant.restaurantId;
+  // }
 
   async validateDriverExists(userId: string) {
     const driver = await this.driverRepository.getDriverByUserId(userId);

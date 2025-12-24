@@ -21,4 +21,25 @@ export class OrderItemRepository {
     const entities = this.orderItemRepository.create(orderItems);
     await this.orderItemRepository.save(entities);
   }
+
+  async getOrderItemsByOrderId(orderId: string) {
+    const result = await this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .leftJoin('orderItem.dish', 'dish')
+      .select([
+        'orderItem.quantity AS "quantity"',
+        'dish.name AS "name"',
+        'dish.price AS price',
+        'dish.dishImgUrl AS "dishImg"',
+      ])
+      .where('orderItem.orderId = :orderId', { orderId })
+      .getRawMany<{
+        dishImg: string;
+        name: string;
+        quantity: number;
+        price: number;
+      }>();
+
+    return result;
+  }
 }

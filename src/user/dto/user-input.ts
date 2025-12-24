@@ -100,11 +100,6 @@ export class CreateCustomerInput extends BasicUserInfo {
     description: 'delivery address',
   })
   deliveryAddress: string;
-  @ApiProperty({
-    example: 'Leave at the front door',
-    description: 'delivery notes',
-  })
-  deliveryNotes: string;
 }
 
 export class UpdateUserInput extends PartialType(

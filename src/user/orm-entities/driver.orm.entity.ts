@@ -20,28 +20,21 @@ export class DriverEntity {
   @Column()
   userId: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.drivers)
+  @ManyToOne(() => UserEntity, (user) => user.drivers, { onDelete: 'CASCADE' })
   user: UserEntity;
 
   @OneToMany(
     () => RejectedDeliveryOrderEntity,
     (rejectedDeliveryOrder) => rejectedDeliveryOrder.driver,
-    { onDelete: 'CASCADE' },
   )
   rejectedDeliveryOrders: RejectedDeliveryOrderEntity[];
 
-  @OneToMany(() => OrderEntity, (order) => order.driver, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => OrderEntity, (order) => order.driver)
   orders: OrderEntity[];
 
-  @OneToOne(() => VehicleEntity, (vehicle) => vehicle.driver, {
-    onDelete: 'CASCADE',
-  })
+  @OneToOne(() => VehicleEntity, (vehicle) => vehicle.driver)
   vehicle: VehicleEntity;
 
-  @OneToOne(() => DriverDocsEntity, (vehicle) => vehicle.driver, {
-    onDelete: 'CASCADE',
-  })
+  @OneToOne(() => DriverDocsEntity, (vehicle) => vehicle.driver)
   driverDocs: DriverDocsEntity;
 }

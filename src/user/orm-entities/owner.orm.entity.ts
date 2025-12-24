@@ -7,7 +7,8 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { UserEntity } from '../user.orm.entity';
-import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurant.orm.entity';
+// import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurant.orm.entity';
+import { RestaurantEntityV2 } from 'src/restaurant/orm-entities/restaurantV2.orm.entity';
 
 @Entity('owners')
 export class OwnerEntity {
@@ -21,8 +22,8 @@ export class OwnerEntity {
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @OneToOne(() => RestaurantEntity, (restaurant) => restaurant.owner, {
+  @OneToOne(() => RestaurantEntityV2, (restaurant) => restaurant.owner, {
     onDelete: 'CASCADE',
   })
-  restaurant: RestaurantEntity;
+  restaurant: RestaurantEntityV2;
 }
