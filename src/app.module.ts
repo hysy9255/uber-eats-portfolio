@@ -54,6 +54,9 @@ import { DeliveryAddressSnapshotEntity } from './order/orm-entities/delivery-add
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
+      ssl: {
+        rejectUnauthorized: false,
+      },
       entities: [
         VehicleEntity,
         DriverDocsEntity,
