@@ -44,7 +44,8 @@ import { DeliveryAddressSnapshotEntity } from './order/orm-entities/delivery-add
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.development.local',
+      // envFilePath: '.env.development.local',
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
