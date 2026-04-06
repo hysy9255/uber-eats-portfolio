@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
-import { DriverEntity } from './orm-entities/driver.orm.entity';
-import { OwnerEntity } from './orm-entities/owner.orm.entity';
-import { ClientEntity } from './orm-entities/client.orm.entity';
-import { UserRole } from './dto/user-output';
+import { OwnerEntity } from '../owner/owner.orm.entity';
+import { ClientEntity } from '../client/orm-entity/client.orm.entity';
+import { DriverEntity } from 'src/driver/orm-entities/driver.orm.entity';
+import { UserRole } from 'src/constants/userRole';
 
 @Entity('users')
 export class UserEntity {
@@ -18,14 +18,14 @@ export class UserEntity {
   @Column()
   role: UserRole;
 
-  @Column({ nullable: true })
+  @Column()
   name: string;
 
-  @Column({ nullable: true })
+  @Column()
   phoneNumber: string;
 
-  @Column({ nullable: true })
-  profileImgUrl: string;
+  @Column({ type: 'varchar', nullable: true })
+  profileImgUrl: string | null;
 
   @OneToMany(() => OwnerEntity, (owner) => owner.user, { onDelete: 'CASCADE' })
   owners: OwnerEntity[];

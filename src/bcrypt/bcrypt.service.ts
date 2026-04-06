@@ -6,6 +6,8 @@ export class BcryptService {
   async hashPassword(password: string) {
     return await bcrypt.hash(password, 10);
   }
+
+  // done
   async comparePassword(plainPassword: string, hashedPassword: string) {
     const match = await bcrypt.compare(plainPassword, hashedPassword);
     if (!match) {

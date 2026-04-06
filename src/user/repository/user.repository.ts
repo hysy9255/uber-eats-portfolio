@@ -1,88 +1,92 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../user.orm.entity';
 import { Repository } from 'typeorm';
-import { UserRole } from '../dto/user-output';
-import { OwnerEntity } from '../orm-entities/owner.orm.entity';
-import { ClientEntity } from '../orm-entities/client.orm.entity';
-import { DriverEntity } from '../orm-entities/driver.orm.entity';
+import { ReadUserData } from '../types/read-user-data';
+import { AddUserData } from '../types/add-user-data';
+import { UpdateUserData } from '../types/update-user-data';
 
 @Injectable()
 export class UserRepository {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
-    @InjectRepository(OwnerEntity)
-    private readonly ownerRepository: Repository<OwnerEntity>,
-    @InjectRepository(ClientEntity)
-    private readonly clientRepository: Repository<ClientEntity>,
-    @InjectRepository(DriverEntity)
-    private readonly driverRepository: Repository<DriverEntity>,
   ) {}
 
-  async updateUserInfo(
-    userId: string,
-    phoneNumber?: string,
-    profileImgUrl?: string,
-  ) {
-    return await this.userRepository.save(
-      this.userRepository.create({
-        userId,
-        phoneNumber,
-        profileImgUrl,
-      }),
+  // done
+  async addUser(data: AddUserData): Promise<{ userId: string }> {
+    const user = await this.userRepository.save(
+      this.userRepository.create(data),
     );
+    return { userId: user.userId };
   }
 
-  async saveUser(
-    userId: string,
-    email: string,
-    password: string,
-    role: UserRole,
-    name?: string,
-    phoneNumber?: string,
-    profileImgUrl?: string,
-  ) {
-    return await this.userRepository.save(
-      this.userRepository.create({
-        userId,
-        email,
-        password,
-        role,
-        name,
-        phoneNumber,
-        profileImgUrl,
-      }),
-    );
+  // done
+  async getUserById(userId: string): Promise<ReadUserData> {
+    const row = await this.userRepository
+      .createQueryBuilder('u')
+      .select([
+        'u.userId as "userId"',
+        'u.email as email',
+        'u.password as password',
+        'u.role as role',
+        'u.name as name',
+        'u.phoneNumber as "phoneNumber"',
+        'u.profileImgUrl as "profileImgUrl"',
+      ])
+      .where('u.userId = :userId', { userId })
+      .getRawOne<ReadUserData>();
+
+    if (!row) throw new NotFoundException(`User does not exist`);
+    return row;
   }
 
-  async getUserById(userId: string): Promise<UserEntity | undefined> {
-    const result: UserEntity[] = await this.userRepository.query(
-      'SELECT * FROM users WHERE "userId" = $1',
-      [userId],
-    );
+  async getUserByEmail(email: string): Promise<ReadUserData> {
+    const row = await this.userRepository
+      .createQueryBuilder('u')
+      .select([
+        'u.userId as "userId"',
+        'u.email as email',
+        'u.password as password',
+        'u.role as role',
+        'u.name as name',
+        'u.phoneNumber as "phoneNumber"',
+        'u.profileImgUrl as "profileImgUrl"',
+      ])
+      .where('u.email = :email', { email })
+      .getRawOne<ReadUserData>();
 
-    return result[0];
+    if (!row) throw new NotFoundException(`User does not exist`);
+
+    return row;
   }
 
-  async getUserByEmail(email: string): Promise<UserEntity | undefined> {
-    const result: UserEntity[] = await this.userRepository.query(
-      'SELECT * FROM users WHERE email = $1',
-      [email],
-    );
+  async checkEmailAvailability(email: string): Promise<{ available: boolean }> {
+    const row = await this.userRepository
+      .createQueryBuilder('u')
+      .select(['u.userId as "userId"'])
+      .where('u.email = :email', { email })
+      .getRawOne();
 
-    return result[0];
+    return { available: !row };
   }
 
+  // done
+  async updateUser(data: UpdateUserData) {
+    await this.userRepository.save(this.userRepository.create(data));
+  }
+
+  // done
   deleteUser(userId: string) {
     return this.userRepository.delete({ userId });
   }
 
+  // done
   async existsByEmail(email: string): Promise<boolean> {
     const row = await this.userRepository
-      .createQueryBuilder('user')
+      .createQueryBuilder('u')
       .select('1')
-      .where('user.email = :email', { email })
+      .where('u.email = :email', { email })
       .limit(1)
       .getRawOne();
 

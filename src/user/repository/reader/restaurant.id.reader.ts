@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 // import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurant.orm.entity';
-import { OwnerEntity } from '../../orm-entities/owner.orm.entity';
-import { RestaurantEntityV2 } from 'src/restaurant/orm-entities/restaurantV2.orm.entity';
+import { OwnerEntity } from '../../../owner/owner.orm.entity';
+import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurants.orm.entity';
 
 @Injectable()
 export class RestaurantIdReader {
   constructor(
-    @InjectRepository(RestaurantEntityV2)
-    private readonly restaurantRepository: Repository<RestaurantEntityV2>,
+    @InjectRepository(RestaurantEntity)
+    private readonly restaurantRepository: Repository<RestaurantEntity>,
     @InjectRepository(OwnerEntity)
     private readonly ownerRepository: Repository<OwnerEntity>,
   ) {}

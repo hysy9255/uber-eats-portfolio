@@ -1,15 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { RestaurantEntityV2 } from './restaurantV2.orm.entity';
-
-export type OperatingHoursInputType = {
-  id: string;
-  restaurantId: string;
-  dayOfWeek: string;
-  openTime: string;
-  closeTime: string;
-  open24Hours: boolean;
-  closed: boolean;
-};
+import { RestaurantEntity } from './restaurants.orm.entity';
 
 @Entity('operating_hours')
 export class OperatingHoursEntity {
@@ -35,10 +25,10 @@ export class OperatingHoursEntity {
   closed: boolean;
 
   @ManyToOne(
-    () => RestaurantEntityV2,
+    () => RestaurantEntity,
     (restaurant) => restaurant.operatingHours,
     { onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'restaurantId' })
-  restaurant: RestaurantEntityV2;
+  restaurant: RestaurantEntity;
 }

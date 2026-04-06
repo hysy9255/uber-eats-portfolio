@@ -1,8 +1,4 @@
-export enum UserRole {
-  Owner = 'owner',
-  Client = 'client',
-  Driver = 'driver',
-}
+import { UserRole } from 'src/constants/userRole';
 
 export class UserOutput {
   constructor(

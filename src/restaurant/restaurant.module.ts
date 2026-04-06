@@ -1,39 +1,38 @@
 import { Module } from '@nestjs/common';
 import { RestaurantController } from './controller/restaurant.controller';
-import { RestaurantService } from './service/restaurant.service';
 import { RestaurantRepository } from './repository/restaurant.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-// import { RestaurantEntity } from './orm-entities/restaurant.orm.entity';
-import { DishEntityV2 } from './orm-entities/dish.orm.entity';
-
-import { AuthModule } from 'src/auth/auth.module';
-import { DishController } from './controller/dish.controller';
-import { DishService } from './service/dish.service';
-import { UserModule } from 'src/user/user.module';
-import { RestaurantEntityV2 } from './orm-entities/restaurantV2.orm.entity';
-import { DishRepositoryV2 } from './repository/dish.repositoryV2';
 import { OperatingHoursEntity } from './orm-entities/operatingHours.entity';
+import { RestaurantEntity } from './orm-entities/restaurants.orm.entity';
+import { RestaurantExternalService } from './service/restaurant.external.service';
+import { OwnerModule } from 'src/owner/owner.module';
+import { RestaurantMapper } from './mapper/restaurant.mapper';
+import { RestaurantAddressEntity } from './orm-entities/restaurantAddress.entity';
+import { RestaurantAddressRepository } from './repository/restaurant-address.repository';
+import { OperatingHoursRepository } from './repository/operating-hours.repository';
+import { RestaurantAddressMapper } from './mapper/restaurant-address.mapper';
+import { OperatingHoursMapper } from './mapper/operating-hours.mapper';
+import { DishInternalModule } from 'src/dish/dish-internal.module';
 
 @Module({
   imports: [
-    AuthModule,
-    UserModule,
     TypeOrmModule.forFeature([
-      // RestaurantEntity,
-      // DishEntity,
-      DishEntityV2,
-      RestaurantEntityV2,
+      RestaurantEntity,
+      RestaurantAddressEntity,
       OperatingHoursEntity,
     ]),
+    OwnerModule,
+    DishInternalModule,
   ],
-  controllers: [RestaurantController, DishController],
+  controllers: [RestaurantController],
   providers: [
-    RestaurantService,
+    RestaurantExternalService,
     RestaurantRepository,
-    DishService,
-
-    DishRepositoryV2,
+    RestaurantAddressRepository,
+    OperatingHoursRepository,
+    RestaurantMapper,
+    RestaurantAddressMapper,
+    OperatingHoursMapper,
   ],
-  exports: [RestaurantRepository],
 })
 export class RestaurantModule {}

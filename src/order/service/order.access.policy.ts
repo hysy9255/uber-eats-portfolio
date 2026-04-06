@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserRole } from 'src/user/dto/user-output';
 import { ClientIdReader } from 'src/user/repository/reader/client.id.reader';
 import { DriverIdReader } from 'src/user/repository/reader/driver.id.reader';
 import { RestaurantIdReader } from 'src/user/repository/reader/restaurant.id.reader';
 import { OrderEntity } from '../orm-entities/order.orm.entity';
 import { Repository } from 'typeorm';
 import { AccessTokenPayload } from 'src/jwt/jwt.service';
+import { UserRole } from 'src/constants/userRole';
 
 @Injectable()
 export class OrderAccessPolicy {

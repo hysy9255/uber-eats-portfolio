@@ -3,192 +3,76 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   Patch,
-  Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import {
-  CreateCustomerInput,
-  CreateDriverInput,
-  CreateOwnerInput,
-  CreateUserInput,
-  DeleteUserInput,
-  UpdatePasswordInput,
-  UpdateUserInput,
-} from '../dto/user-input';
-import { UserService } from '../service/user.service';
-import { UserOutput, UserRole } from '../dto/user-output';
+import { UserExternalService } from '../service/user.external.service';
+import { UserOutput } from '../dto/user-output';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { LoginInput } from '../dto/login-input';
 import { Roles } from 'src/auth/roles.decorator';
-import { ApiOperation, ApiParam, ApiQuery, ApiSecurity } from '@nestjs/swagger';
-import { RestaurantService } from 'src/restaurant/service/restaurant.service';
-import { DishService } from 'src/restaurant/service/dish.service';
-import { DriverRegistration } from '../service/driver.registration';
-// import { MenuInput } from 'src/restaurant/dto/dish-input';
+import { ApiOperation, ApiQuery, ApiSecurity } from '@nestjs/swagger';
+import { UserDTO } from '../dto/user.dto';
+import { CheckEmailAvailabilityQueryDTO } from '../dto/availability/check-email-availability.query.dto';
+import { CheckEmailAvailabilityResponseDTO } from '../dto/availability/check-email-availability.response.dto';
+import { UpdateUserDTO } from '../dto/update-user.dto';
+import { UpdatePasswordDTO } from '../dto/update-password.dto';
+import { DeleteUserDTO } from '../dto/delete-user.dto';
+import { UserRole } from 'src/constants/userRole';
+console.log('### USER CONTROLLER LOADED ###');
 
 @ApiSecurity('jwt-token')
-@Controller('users')
+@Controller()
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    private readonly restaurantService: RestaurantService,
-    private readonly dishService: DishService,
-    private readonly driverRegistration: DriverRegistration,
-  ) {}
+  constructor(private readonly userService: UserExternalService) {}
 
-  @ApiOperation({ summary: 'Login' })
-  @Post('login')
-  async login(@Body() loginInput: LoginInput) {
-    return await this.userService.login(loginInput);
-  }
-
+  // done
   @ApiOperation({ summary: 'Check availability for account email' })
   @ApiQuery({ name: 'email', required: true, example: 'test@example.com' })
   @Get('/exists')
   async checkEmailAvailability(
-    @Query('email') email: string,
-  ): Promise<{ available: boolean }> {
-    return await this.userService.checkEmailAvailability(email);
+    @Query() dto: CheckEmailAvailabilityQueryDTO,
+  ): Promise<CheckEmailAvailabilityResponseDTO> {
+    return await this.userService.checkEmailAvailability(dto);
   }
 
-  @ApiOperation({ summary: 'Create Customer' })
-  @Post('/customers')
-  async createCustomer(@Body() createCustomerInput: CreateCustomerInput) {
-    const createUserInput: CreateUserInput = {
-      email: createCustomerInput.email,
-      password: createCustomerInput.password,
-      role: createCustomerInput.role,
-      name: `${createCustomerInput.firstName} ${createCustomerInput.lastName}`,
-      phoneNumber: createCustomerInput.phoneNumber,
-      profileImgUrl: createCustomerInput.profileImgUrl,
-    };
-
-    const userId = await this.userService.createUser(createUserInput);
-
-    await this.userService.createClient(
-      userId,
-      createCustomerInput.deliveryAddress,
-    );
-  }
-
-  @ApiOperation({ summary: 'Create Owner' })
-  @Post('/owners')
-  async createOwner(@Body() createOwnerInput: CreateOwnerInput) {
-    // create user
-    const createUserInput: CreateUserInput = createOwnerInput.userInfo;
-    const userId = await this.userService.createUser(createUserInput);
-
-    // create owner
-    const ownerId = await this.userService.createOwner(userId);
-
-    // create restaurant
-    await this.restaurantService.createRestaurantV2(
-      ownerId,
-      createOwnerInput.business,
-      createOwnerInput.locationAndHours,
-    );
-
-    // create menu
-    const menuItems = createOwnerInput.menus.items;
-    if (menuItems) {
-      await this.dishService.createMenus(userId, menuItems);
-    }
-  }
-
-  @ApiOperation({ summary: 'Create Driver' })
-  @Post('/drivers')
-  async createDriver(@Body() createDriverInput: CreateDriverInput) {
-    // create user
-    const createUserInput: CreateUserInput = createDriverInput.userInfo;
-    const userId = await this.userService.createUser(createUserInput);
-    // create owner
-    const driverId = await this.userService.createDriver(userId);
-    // create vehicle and documents
-    await this.driverRegistration.registerVehicle(
-      driverId,
-      createDriverInput.vehicleInfo,
-    );
-    await this.driverRegistration.registerDocument(
-      driverId,
-      createDriverInput.documents,
-    );
-  }
-
-  // @ApiOperation({ summary: 'Create user' })
-  // @Post()
-  // async createUser(@Body() createUserInput: CreateUserInput) {
-  //   const userId = await this.userService.createUser(createUserInput);
-
-  //   if (createUserInput.role === UserRole.Owner) {
-  //     await this.userService.createOwner(userId);
-  //   }
-  //   if (createUserInput.role === UserRole.Client) {
-  //     await this.userService.createClient(userId);
-  //   }
-  //   if (createUserInput.role === UserRole.Driver) {
-  //     await this.userService.createDriver(userId);
-  //   }
-  // }
-
-  @ApiOperation({ summary: 'Get my profile' })
+  // done
+  @ApiOperation({ summary: 'Get me' })
   @UseGuards(AuthGuard)
   @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
-  @Get('me')
-  getMe(@Req() req: Request) {
+  @Get('/users/me')
+  getMe(@Req() req: Request): Promise<UserDTO> {
     const { userId } = req['authUser'] as UserOutput;
     return this.userService.getUser(userId);
   }
 
-  @ApiOperation({ summary: 'Change my info' })
+  // done
+  @ApiOperation({ summary: 'Update me' })
   @UseGuards(AuthGuard)
   @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
-  @Patch('me')
-  async updateMe(
-    @Req() req: Request,
-    @Body() updateUserInput: UpdateUserInput,
-  ) {
+  @Patch('/me')
+  async updateMe(@Req() req: Request, @Body() dto: UpdateUserDTO) {
     const { userId } = req['authUser'] as UserOutput;
-    await this.userService.updateUserInfo(userId, updateUserInput);
+    await this.userService.updateUser(userId, dto);
   }
 
-  @ApiOperation({ summary: 'Change my password' })
+  // done
+  @ApiOperation({ summary: 'Update my password' })
   @UseGuards(AuthGuard)
   @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
-  @Patch('password')
-  async updateMyPassword(
-    @Req() req: Request,
-    @Body() updatePasswordInput: UpdatePasswordInput,
-  ) {
+  @Patch('/password')
+  async updatePassword(@Req() req: Request, @Body() dto: UpdatePasswordDTO) {
     const { userId } = req['authUser'] as UserOutput;
-    await this.userService.updatePassword(userId, updatePasswordInput);
+    await this.userService.updatePassword(userId, dto);
   }
 
-  @ApiOperation({ summary: 'Delete my account' })
+  // done
+  @ApiOperation({ summary: 'Delete me' })
   @UseGuards(AuthGuard)
-  @Delete('me')
-  async deleteMe(
-    @Req() req: Request,
-    @Body() deleteUserInput: DeleteUserInput,
-  ) {
+  @Delete('/me')
+  async deleteMyAccount(@Req() req: Request, @Body() dto: DeleteUserDTO) {
     const { userId } = req['authUser'] as UserOutput;
-    await this.userService.deleteMe(userId, deleteUserInput);
-  }
-
-  @ApiOperation({ summary: 'Get user profile' })
-  @ApiParam({
-    name: 'id',
-    description: 'User ID',
-    required: true,
-    type: String,
-    example: '64f1a2b7c9d1234567890abc',
-  })
-  @UseGuards(AuthGuard)
-  @Get('/:id')
-  getUser(@Param('id') userId: string) {
-    return this.userService.getUser(userId);
+    await this.userService.deleteMe(userId, dto);
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { UserRole } from 'src/user/dto/user-output';
+import { UserRole } from 'src/constants/userRole';
 
 export interface AccessTokenPayload extends jwt.JwtPayload {
   userId: string;

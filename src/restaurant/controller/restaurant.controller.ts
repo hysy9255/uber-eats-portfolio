@@ -1,126 +1,83 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   Patch,
   Req,
   UseGuards,
 } from '@nestjs/common';
-
-import {
-  RestaurantService,
-  RestaurantView,
-  UpdateRestaurantInputV3,
-} from '../service/restaurant.service';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { UserOutput, UserRole } from 'src/user/dto/user-output';
+import { UserOutput } from 'src/user/dto/user-output';
 import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles.decorator';
-import { UserService } from 'src/user/service/user.service';
-import { DishService } from '../service/dish.service';
+import { GetRestaurantPageViewDTO } from '../dto/get-restaurant-page-view.dto';
+import { RestaurantExternalService } from '../service/restaurant.external.service';
+import { UpdateRestaurantDTO } from '../dto/update-restaurant.dto';
+import { UserRole } from 'src/constants/userRole';
+import { GetRestaurantNameAndLogoDTO } from '../dto/get-restaurant-name.dto';
+import { GetRestaurantsPageViewDTO } from '../dto/get-restaurants-page-view.dto';
+import { GetMyRestaurantForOwnerDashboardDTO } from '../dto/get-my-restaurant-for-owner-dashboard.dto';
 
 @ApiSecurity('jwt-token')
-@Controller('restaurants')
+@Controller()
 export class RestaurantController {
   constructor(
-    private readonly restaurantService: RestaurantService,
-    private readonly userService: UserService,
-    private readonly dishService: DishService,
+    private readonly restaurantExternalService: RestaurantExternalService,
   ) {}
 
-  // @ApiOperation({ summary: 'Get my restaurant' })
-  // @UseGuards(AuthGuard)
-  // @Roles(UserRole.Owner)
-  // @Get('/my-restaurant')
-  // getMyRestaurant(@Req() req: Request) {
-  //   const { userId } = req['authUser'] as UserOutput;
-  //   return this.restaurantService.getMyRestaurant(userId);
-  // }
-
-  @ApiOperation({ summary: 'Get restaurant info for owner dashboard' })
-  @UseGuards(AuthGuard)
-  @Roles(UserRole.Owner)
-  @Get('/my-restaurantV2')
-  async getMyRestaurantView(@Req() req: Request) {
-    const { userId } = req['authUser'] as UserOutput;
-    const ownerId = await this.userService.getOwnerId(userId);
-    return this.restaurantService.getMyRestaurantView(ownerId);
+  //done
+  @ApiOperation({ summary: 'Get Restaurants Page View' })
+  @Get('/restaurants')
+  getRestaurantsPageView(): Promise<GetRestaurantsPageViewDTO> {
+    return this.restaurantExternalService.getRestaurantsPageView();
   }
-
-  // @ApiOperation({ summary: 'Create a restaurant' })
-  // @UseGuards(AuthGuard)
-  // @Roles(UserRole.Owner)
-  // @Post()
-  // async createRestaurant(
-  //   @Req() req: Request,
-  //   @Body() createRestaurantInput: CreateRestaurantInput,
-  // ) {
-  //   const { userId } = req['authUser'] as UserOutput;
-  //   await this.restaurantService.createRestaurant(
-  //     userId,
-  //     createRestaurantInput,
-  //   );
-  // }
-
-  // @ApiOperation({ summary: 'Get a list of restaurants' })
-  // @Get()
-  // getRestaurants() {
-  //   return this.restaurantService.getRestaurants();
-  // }
-
-  @ApiOperation({ summary: 'Get a list of restaurants V2' })
-  @Get()
-  getRestaurantsV2() {
-    return this.restaurantService.getRestaurantsV2();
-  }
-
-  // @ApiOperation({ summary: 'Get a restaurant' })
-  // @Get('/:restaurantId')
-  // getRestaurant(@Param('restaurantId') restaurantId: string) {
-  //   return this.restaurantService.getRestaurant(restaurantId);
-  // }
-
-  @ApiOperation({ summary: 'Get a restaurant' })
-  @Get('/:id')
-  getRestaurant(@Param('id') id: string): Promise<RestaurantView> {
-    return this.restaurantService.getRestaurantView(id);
-  }
-
-  @Get('/v2/:id/view')
-  getRestaurantView(@Param('id') id: string) {
-    return this.restaurantService.getRestaurantViewV2(id);
-  }
-
-  @ApiOperation({ summary: 'Get restaurant name' })
-  @Get('/v2/restaurantName/:id')
-  async getRestaurantName(@Param('id') id: string): Promise<string> {
-    const { dba } = await this.restaurantService.getRestaurantV2(id);
-    return dba;
-  }
-
-  @ApiOperation({ summary: 'Update a restaurant' })
-  @UseGuards(AuthGuard)
-  @Roles(UserRole.Owner)
-  @Patch('/')
-  async updateRestaurant(
-    @Req() req: Request,
-    @Body() updateRestaurantInput: UpdateRestaurantInputV3,
-  ) {
-    const { userId } = req['authUser'] as UserOutput;
-    await this.restaurantService.updateRestaurantV2(
-      userId,
-      updateRestaurantInput,
+  // done
+  @ApiOperation({ summary: 'Get Restaurant Page View' })
+  @Get('/restaurants/:id/view')
+  getRestaurantPageView(
+    @Param('id') restaurantId: string,
+  ): Promise<GetRestaurantPageViewDTO> {
+    return this.restaurantExternalService.getRestaurantPageViewByRestaurantId(
+      restaurantId,
     );
   }
 
-  @ApiOperation({ summary: 'Delete a restaurant' })
+  // done
+  @ApiOperation({
+    summary: 'Get My Restaurant Information For Owner Dashboard',
+  })
   @UseGuards(AuthGuard)
-  @Delete('/')
-  async deleteRestaurant(@Req() req: Request) {
+  @Roles(UserRole.Owner)
+  @Get('/restaurants/my-restaurant')
+  async getMyRestaurantForOwnerDashboard(
+    @Req() req: Request,
+  ): Promise<GetMyRestaurantForOwnerDashboardDTO> {
     const { userId } = req['authUser'] as UserOutput;
-    const ownerId = await this.userService.getOwnerId(userId);
-    await this.restaurantService.deleteRestaurantV2(ownerId);
+    return await this.restaurantExternalService.getOwnerRestaurantByUserId(
+      userId,
+    );
+  }
+
+  // done
+  @ApiOperation({ summary: 'Get Restaurant Name' })
+  @Get('/restaurants/restaurantName/:id')
+  async getRestaurantNameAndLogo(
+    @Param('id') id: string,
+  ): Promise<GetRestaurantNameAndLogoDTO> {
+    return await this.restaurantExternalService.getRestaurantNameAndLogo(id);
+  }
+
+  // done
+  @ApiOperation({ summary: 'Update Restaurant' })
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.Owner)
+  @Patch('/restaurants')
+  async updateRestaurant(
+    @Req() req: Request,
+    @Body() body: UpdateRestaurantDTO,
+  ) {
+    const { userId } = req['authUser'] as UserOutput;
+    await this.restaurantExternalService.updateRestaurant(userId, body);
   }
 }

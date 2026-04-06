@@ -1,5 +1,5 @@
+import { OrderStatus } from 'src/constants/orderStatus';
 import { Order } from 'src/order/domain/order';
-import { OrderStatus } from 'src/order/dto/order-output';
 
 export class Driver {
   constructor(

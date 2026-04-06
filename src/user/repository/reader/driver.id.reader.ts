@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DriverEntity } from '../../orm-entities/driver.orm.entity';
+import { DriverEntity } from 'src/driver/orm-entities/driver.orm.entity';
+
 import { Repository } from 'typeorm';
 
 @Injectable()

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Owner } from '../domain/owner';
-import { OwnerRepository } from '../repository/owner.repository';
-import { DriverRepository } from '../repository/driver.repository';
-import { ClientRepository } from '../repository/client.repository';
+import { OwnerRepository } from '../../owner/owner.repository';
+import { DriverRepository } from '../../driver/repositories/driver.repository';
+import { ClientRepository } from '../../client/repository/client.repository';
 import { Driver } from '../domain/driver';
 
 @Injectable()

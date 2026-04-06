@@ -4,15 +4,17 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 import { OrderItemEntity } from './order-item.orm.entity';
-import { ClientEntity } from 'src/user/orm-entities/client.orm.entity';
-import { DriverEntity } from 'src/user/orm-entities/driver.orm.entity';
-import { OrderStatus } from '../dto/order-output';
+import { ClientEntity } from 'src/client/orm-entity/client.orm.entity';
 import { RejectedDeliveryOrderEntity } from './rejected-delivery-order.orm.entity';
-import { DeliveryType } from '../dto/order-input';
-import { RestaurantEntityV2 } from 'src/restaurant/orm-entities/restaurantV2.orm.entity';
+import { RestaurantEntity } from 'src/restaurant/orm-entities/restaurants.orm.entity';
+import { DriverEntity } from 'src/driver/orm-entities/driver.orm.entity';
+import { DeliveryType } from 'src/constants/deliveryType';
+import { OrderStatus } from 'src/constants/orderStatus';
+import { DeliveryAddressSnapshotEntity } from './delivery-address-snapshot.orm.entity';
 
 @Entity('orders')
 export class OrderEntity {
@@ -25,8 +27,12 @@ export class OrderEntity {
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.Pending })
   status: OrderStatus;
 
-  @Column()
-  totalPrice: string;
+  @Column({
+    type: 'numeric',
+    precision: 10,
+    scale: 2,
+  })
+  totalPrice: number;
 
   @Column({ type: 'varchar', nullable: true })
   requestToRestaurant: string | null;
@@ -36,9 +42,6 @@ export class OrderEntity {
 
   @Column()
   deliveryType: DeliveryType;
-
-  @Column({ nullable: true })
-  deliveryAddress: string;
 
   @Column()
   restaurantId: string;
@@ -55,11 +58,17 @@ export class OrderEntity {
   @JoinColumn({ name: 'clientId' })
   client: ClientEntity;
 
-  @ManyToOne(() => RestaurantEntityV2, (restaurant) => restaurant.orders, {
+  @OneToOne(
+    () => DeliveryAddressSnapshotEntity,
+    (deliveryAddressSnapshot) => deliveryAddressSnapshot.order,
+  )
+  deliveryAddressSnapshot: DeliveryAddressSnapshotEntity;
+
+  @ManyToOne(() => RestaurantEntity, (restaurant) => restaurant.orders, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'restaurantId' })
-  restaurant: RestaurantEntityV2;
+  restaurant: RestaurantEntity;
 
   @ManyToOne(() => DriverEntity, (driver) => driver.orders, {
     onDelete: 'SET NULL',

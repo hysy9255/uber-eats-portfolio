@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { DishEntityV2 } from '../../restaurant/orm-entities/dish.orm.entity';
 import { OrderEntity } from './order.orm.entity';
+import { DishEntity } from 'src/dish/orm-entities/dish.orm.entity';
 
 @Entity('orderItems')
 export class OrderItemEntity {
@@ -16,11 +16,11 @@ export class OrderItemEntity {
   @Column()
   quantity: number;
 
-  @ManyToOne(() => DishEntityV2, (dish) => dish.orderItems, {
+  @ManyToOne(() => DishEntity, (dish) => dish.orderItems, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'dishId' })
-  dish: DishEntityV2;
+  dish: DishEntity;
 
   @ManyToOne(() => OrderEntity, (order) => order.orderItems, {
     onDelete: 'CASCADE',

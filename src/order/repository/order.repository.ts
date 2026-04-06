@@ -2,8 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from '../orm-entities/order.orm.entity';
 import { Repository } from 'typeorm';
-import { DeliveryType } from '../dto/order-input';
-import { OrderStatus } from '../dto/order-output';
+import { CreateOrderData } from '../types/create-order-data';
+import { ReadOrderData } from '../types/read-order-data';
+import { UpdateOrderData } from '../types/update-order-data';
+import { OrderStatus } from 'src/constants/orderStatus';
+import { QuantityAndDishName } from 'src/dish/types/menu-ranking-data';
 
 @Injectable()
 export class OrderRepository {
@@ -12,99 +15,123 @@ export class OrderRepository {
     private readonly orderRepository: Repository<OrderEntity>,
   ) {}
 
-  async updateOrder(orderId: string, fields: Partial<OrderEntity>) {
-    await this.orderRepository.update({ orderId }, fields);
+  async updateOrder(data: UpdateOrderData) {
+    await this.orderRepository.save(this.orderRepository.create(data));
   }
 
-  async saveOrder(
-    orderId: string,
-    restaurantId: string,
-    totalPrice: string,
-    clientId: string,
-    driverId: string | null,
-    deliveryType: DeliveryType,
-    requestToRestaurant: string | null,
-    requestToDriver: string | null,
-    deliveryAddress?: string,
-  ) {
-    await this.orderRepository.save(
-      this.orderRepository.create({
-        orderId,
-        totalPrice,
-        deliveryAddress,
-        restaurantId,
-        clientId,
-        driverId,
-        deliveryType,
-        requestToRestaurant,
-        requestToDriver,
-      }),
-    );
+  async saveOrder(data: CreateOrderData) {
+    await this.orderRepository.save(this.orderRepository.create(data));
   }
 
-  async getOrderById(orderId: string) {
-    const result = await this.orderRepository
+  async findOrderById(orderId: string): Promise<ReadOrderData> {
+    const row = await this.orderRepository
       .createQueryBuilder('order')
-      .leftJoinAndSelect('order.orderItems', 'orderItem')
-      .where('order.orderId = :orderId', { orderId })
-      .getOne();
-
-    return result;
-  }
-
-  async getOrderDetailViewById(orderId: string) {
-    const result = await this.orderRepository
-      .createQueryBuilder('order')
-      .leftJoin('order.client', 'client')
-      .leftJoin('client.user', 'clientUser')
-      .leftJoin('order.orderItems', 'orderItems')
-      .select([
-        'order.orderId AS "orderId"',
-        'order.totalPrice AS "totalPrice"',
-        'order.status AS status',
-        'order.requestToRestaurant AS "requestToRestaurant"',
-        'clientUser.name AS "clientName"',
-      ])
-      .where('order.orderId = :orderId', { orderId })
-      .getRawOne<{
-        orderId: string;
-        totalPrice: number;
-        status: OrderStatus;
-        requestToRestaurant: string;
-        clientName: string;
-      }>();
-
-    return result;
-  }
-
-  async getOrdersViewByRestaurantId(restaurantId: string) {
-    const result = await this.orderRepository
-      .createQueryBuilder('order')
-      // .leftJoinAndSelect('order.orderItems', 'orderItem')
-      .leftJoin('order.client', 'client')
-      .leftJoin('client.user', 'clientUser')
-      .leftJoin('order.driver', 'driver')
-      .leftJoin('driver.user', 'driverUser')
       .select([
         'order.orderId AS "orderId"',
         'order.createdAt AS "createdAt"',
         'order.totalPrice AS "totalPrice"',
         'order.status AS "status"',
         'order.requestToRestaurant AS "requestToRestaurant"',
-        'clientUser.name AS "clientName"',
-        'driverUser.name AS "driverName"',
+        'order.clientId AS "clientId"',
+      ])
+      .where('order.orderId = :orderId', { orderId })
+      .getRawOne<ReadOrderData>();
+
+    if (!row) throw new Error('Order Not Found');
+    return row;
+  }
+
+  async findOrdersByRestaurantId(
+    restaurantId: string,
+    status?: OrderStatus,
+  ): Promise<ReadOrderData[]> {
+    const result = this.orderRepository
+      .createQueryBuilder('order')
+      .select([
+        'order.orderId AS "orderId"',
+        'order.createdAt AS "createdAt"',
+        'order.totalPrice AS "totalPrice"',
+        'order.status AS "status"',
+        'order.requestToRestaurant AS "requestToRestaurant"',
+        'order.clientId AS "clientId"',
+      ])
+      .where('order.restaurantId = :restaurantId', { restaurantId });
+
+    if (status) {
+      result.andWhere('order.status = :status', { status });
+    }
+
+    return result.getRawMany<ReadOrderData>();
+  }
+
+  async findDeliveredInDateRange(
+    restaurantId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<ReadOrderData[]> {
+    const result = this.orderRepository
+      .createQueryBuilder('order')
+      .select([
+        'order.orderId AS "orderId"',
+        'order.createdAt AS "createdAt"',
+        'order.totalPrice AS "totalPrice"',
+        'order.status AS "status"',
+        'order.requestToRestaurant AS "requestToRestaurant"',
+        'order.clientId AS "clientId"',
       ])
       .where('order.restaurantId = :restaurantId', { restaurantId })
-      .getRawMany<{
-        orderId: string;
-        createdAt: Date;
-        totalPrice: string;
-        status: OrderStatus;
-        requestToRestaurant: string | null;
-        clientName: string;
-        driverName: string | null;
-      }>();
+      .andWhere('order.status = :status', { status: OrderStatus.Delivered })
+      .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      });
 
-    return result;
+    return result.getRawMany<ReadOrderData>();
+  }
+
+  async findTopDishesByQuantity(
+    restaurantId: string,
+    limit: number,
+    orderBy: 'ASC' | 'DESC',
+  ): Promise<QuantityAndDishName[]> {
+    const result = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoin('order.orderItems', 'oi')
+      .leftJoin('oi.dish', 'dish')
+      .select([
+        'oi.dishId AS "dishId"',
+        'SUM(oi.quantity) AS "quantity"',
+        'dish.name AS "dishName"',
+      ])
+      .where('order.restaurantId = :restaurantId', { restaurantId })
+      .groupBy('oi.dishId')
+      .addGroupBy('dish.name')
+      .orderBy('SUM(oi.quantity)', orderBy)
+      .limit(limit)
+      .getRawMany<QuantityAndDishName>();
+
+    return result.map((item) => ({
+      ...item,
+      quantity: Number(item.quantity),
+    }));
+  }
+
+  async findOrdersByClientIdAndStatuses(
+    clientId: string,
+    statuses: OrderStatus[],
+  ): Promise<ReadOrderData[]> {
+    return this.orderRepository
+      .createQueryBuilder('order')
+      .select([
+        'order.orderId AS "orderId"',
+        'order.createdAt AS "createdAt"',
+        'order.totalPrice AS "totalPrice"',
+        'order.status AS "status"',
+        'order.requestToRestaurant AS "requestToRestaurant"',
+        'order.clientId AS "clientId"',
+      ])
+      .where('order.clientId = :clientId', { clientId })
+      .andWhere('order.status IN (:...statuses)', { statuses })
+      .getRawMany<ReadOrderData>();
   }
 }

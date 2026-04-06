@@ -1,6 +1,6 @@
 import { Driver } from 'src/user/domain/driver';
-import { OrderStatus } from '../dto/order-output';
 import { OrderEntity } from '../orm-entities/order.orm.entity';
+import { OrderStatus } from 'src/constants/orderStatus';
 
 export class Order {
   constructor(

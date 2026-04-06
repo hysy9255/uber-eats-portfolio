@@ -1,12 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-
-export enum OrderStatus {
-  Pending = 'Pending',
-  Cooking = 'Cooking',
-  Ready = 'Ready',
-  Delivering = 'Delivering',
-  Delivered = 'Delivered',
-}
+import { OrderStatus } from 'src/constants/orderStatus';
 
 export class OrderItem {
   dishId: string;
@@ -23,17 +16,6 @@ export class OrderOutput {
 }
 
 export class OrderSummaryOutput extends PartialType(OrderOutput) {}
-
-export class OrderForRestaurantDashboardDTO {
-  orderId: string;
-  date: string;
-  time: string;
-  status: OrderStatus;
-  requestToRestaurant: string | null;
-  totalPrice: string;
-  clientName: string;
-  driverName: string | null;
-}
 
 export class OrderItemDetail {
   dishImg: string;

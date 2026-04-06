@@ -1,54 +1,46 @@
 import { Module } from '@nestjs/common';
 import { OrderController } from './controller/order.controller';
-import { OrderService } from './service/order.service';
-import { OrderRepository } from './repository/order.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderEntity } from './orm-entities/order.orm.entity';
-import { RestaurantModule } from 'src/restaurant/restaurant.module';
+import { OrderExternalService } from './service/order.external.service';
+import { OrderRepository } from './repository/order.repository';
+import { OrderMapper } from './mapper/order.mapper';
+import { OrderDomainService } from './service/order.domain.service';
+import { OrderItemMapper } from './mapper/order-item.mapper';
 import { OrderItemEntity } from './orm-entities/order-item.orm.entity';
 import { OrderItemRepository } from './repository/orderItem.repository';
-import { AuthModule } from 'src/auth/auth.module';
-import { OwnerEntity } from 'src/user/orm-entities/owner.orm.entity';
-import {
-  // DishEntity,
-  DishEntityV2,
-} from 'src/restaurant/orm-entities/dish.orm.entity';
-import { OrderDomainService } from './service/order.domain.service';
-import { UserModule } from 'src/user/user.module';
-import { OrderAccessPolicy } from './service/order.access.policy';
-import { RejectedDeliveryOrderEntity } from './orm-entities/rejected-delivery-order.orm.entity';
-import { RejectedDeliveryOrderRepository } from './repository/rejectedDeliveryOrder.repository';
-
-const entities = [
-  OrderEntity,
-  OrderItemEntity,
-  // DishEntity,
-  DishEntityV2,
-  OwnerEntity,
-  RejectedDeliveryOrderEntity,
-  // RestaurantEntity,
-];
-
-const repositories = [
-  OrderRepository,
-  OrderItemRepository,
-
-  RejectedDeliveryOrderRepository,
-];
+import { OwnerModule } from 'src/owner/owner.module';
+import { RestaurantInternalModule } from 'src/restaurant/restaurant-internal.module';
+import { DishInternalModule } from 'src/dish/dish-internal.module';
+import { ClientInternalModule } from 'src/client/module/client.internal.module';
+import { DeliveryAddressSnapshotEntity } from './orm-entities/delivery-address-snapshot.orm.entity';
+import { DeliveryAddressSnapshotRepository } from './repository/delivery-address-snapshot.repository';
+import { DeliveryAddressSnapshotMapper } from './mapper/delivery-address-snapshot.mapper';
+import { OrderGateway } from './order.gateway';
 
 @Module({
   imports: [
-    AuthModule,
-    UserModule,
-    RestaurantModule,
-    TypeOrmModule.forFeature(entities),
+    TypeOrmModule.forFeature([
+      OrderEntity,
+      OrderItemEntity,
+      DeliveryAddressSnapshotEntity,
+    ]),
+    ClientInternalModule,
+    OwnerModule,
+    RestaurantInternalModule,
+    DishInternalModule,
   ],
   controllers: [OrderController],
   providers: [
-    OrderService,
+    OrderExternalService,
+    OrderRepository,
+    OrderItemRepository,
+    DeliveryAddressSnapshotRepository,
+    OrderMapper,
+    OrderItemMapper,
+    DeliveryAddressSnapshotMapper,
     OrderDomainService,
-    OrderAccessPolicy,
-    ...repositories,
+    OrderGateway,
   ],
 })
 export class OrderModule {}
