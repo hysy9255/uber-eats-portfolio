@@ -23,7 +23,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'jwt-token'],
     credentials: true, // only if you plan to send cookies
   });
-  await app.listen(process.env.SERVER_PORT ?? 3000);
+  await app.listen(process.env.SERVER_PORT ?? 3000, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();
