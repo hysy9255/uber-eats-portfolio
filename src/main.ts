@@ -18,7 +18,10 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   app.enableCors({
-    origin: 'http://localhost:5173', // your Vite dev URL
+    origin: [
+      'http://yhj-bucket-test.s3-website.ap-northeast-2.amazonaws.com',
+      'http://localhost:5173',
+    ], // your Vite dev URL
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'jwt-token'],
     credentials: true, // only if you plan to send cookies
