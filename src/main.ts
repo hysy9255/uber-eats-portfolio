@@ -21,6 +21,7 @@ async function bootstrap() {
     origin: [
       'http://yhj-bucket-test.s3-website.ap-northeast-2.amazonaws.com',
       'http://localhost:5173',
+      'https://hyungjoon-yoon.click',
     ], // your Vite dev URL
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'jwt-token'],
