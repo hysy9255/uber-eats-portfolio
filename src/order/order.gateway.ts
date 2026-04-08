@@ -13,7 +13,11 @@ import { Server, Socket } from 'socket.io';
 @WebSocketGateway({
   transports: ['websocket'],
   cors: {
-    origin: ['http://localhost:5173', 'https://hyungjoon-yoon.click'],
+    origin: [
+      'http://yhj-bucket-test.s3-website.ap-northeast-2.amazonaws.com',
+      'http://localhost:5173',
+      'https://hyungjoon-yoon.click',
+    ],
     credentials: true,
   },
 })
