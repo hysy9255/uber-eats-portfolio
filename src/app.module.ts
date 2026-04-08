@@ -39,6 +39,7 @@ import { ClientEntity } from './client/orm-entity/client.orm.entity';
 import { DeliveryAddressEntity } from './client/orm-entity/delivery-address.orm.entity';
 import { ClientModule } from './client/module/client.module';
 import { DeliveryAddressSnapshotEntity } from './order/orm-entities/delivery-address-snapshot.orm.entity';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { DeliveryAddressSnapshotEntity } from './order/orm-entities/delivery-add
     DriverModule,
     RestaurantModule,
     OrderModule,
+    HealthModule,
   ],
   controllers: [UploadsController],
   providers: [],
