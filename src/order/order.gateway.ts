@@ -12,7 +12,7 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173', 'https://hyungjoon-yoon.click'],
     credentials: true,
   },
 })
