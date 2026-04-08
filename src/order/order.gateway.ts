@@ -11,6 +11,7 @@ import {
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
+  transports: ['websocket'],
   cors: {
     origin: ['http://localhost:5173', 'https://hyungjoon-yoon.click'],
     credentials: true,
