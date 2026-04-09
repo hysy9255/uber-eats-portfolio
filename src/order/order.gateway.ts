@@ -11,7 +11,6 @@ import {
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
-  transports: ['websocket'],
   cors: {
     origin: [
       'http://yhj-bucket-test.s3-website.ap-northeast-2.amazonaws.com',
