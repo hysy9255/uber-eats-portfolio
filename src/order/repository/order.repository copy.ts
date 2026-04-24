@@ -1,13 +1,14 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderEntity } from '../orm-entities/order.orm.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
+import { z } from 'zod';
+
+import { OrderEntity } from '../orm-entities/order.orm.entity';
 import { CreateOrderData } from '../types/create-order-data';
 import { ReadOrderData } from '../types/read-order-data';
 import { UpdateOrderData } from '../types/update-order-data';
 import { OrderStatus } from 'src/constants/orderStatus';
 import { QuantityAndDishName } from 'src/dish/types/menu-ranking-data';
-import { z } from 'zod';
 
 const ORDER_STATUS_VALUES = Object.values(OrderStatus) as [string, ...string[]];
 
@@ -30,10 +31,6 @@ export class OrderRepository {
     private readonly orderRepository: Repository<OrderEntity>,
   ) {}
 
-  async updateOrder(data: UpdateOrderData) {
-    await this.orderRepository.save(this.orderRepository.create(data));
-  }
-
   async saveOrder(data: CreateOrderData): Promise<{ orderId: string }> {
     const { orderId } = await this.orderRepository.save(
       this.orderRepository.create(data),
@@ -41,72 +38,68 @@ export class OrderRepository {
     return { orderId };
   }
 
+  async updateOrder(data: UpdateOrderData): Promise<void> {
+    await this.orderRepository.save(this.orderRepository.create(data));
+  }
+
   async findById(orderId: string): Promise<ReadOrderData> {
     const row = await this.baseReadQb()
       .where('order.orderId = :orderId', { orderId })
-      .getRawOne<ReadOrderData>();
+      .getRawOne();
 
     if (!row) {
       throw new Error('Order Not Found');
     }
 
-    return row;
+    return this.parseOne(row);
+  }
+
+  async findByRestaurant(
+    restaurantId: string,
+    status?: OrderStatus,
+  ): Promise<ReadOrderData[]> {
+    const qb = this.baseReadQb().where('order.restaurantId = :restaurantId', {
+      restaurantId,
+    });
+
+    if (status) {
+      qb.andWhere('order.status = :status', { status });
+    }
+
+    const rows = await qb.getRawMany();
+    return this.parseMany(rows);
   }
 
   async findByOwner(
     ownerId: string,
     status?: OrderStatus,
   ): Promise<ReadOrderData[]> {
-    const qb = this.orderRepository
-      .createQueryBuilder('order')
+    const qb = this.baseReadQb()
       .leftJoin('order.restaurant', 'restaurant')
-      .select([
-        'order.orderId AS "orderId"',
-        'order.createdAt AS "createdAt"',
-        'order.totalPrice AS "totalPrice"',
-        'order.status AS "status"',
-        'order.requestToRestaurant AS "requestToRestaurant"',
-        'order.clientId AS "clientId"',
-        'order.restaurantId AS "restaurantId"',
-      ])
       .where('restaurant.ownerId = :ownerId', { ownerId });
 
     if (status) {
       qb.andWhere('order.status = :status', { status });
     }
+
     const rows = await qb.getRawMany();
-    const parsed = ReadOrderDataSchema.array().safeParse(rows);
-
-    if (!parsed.success) {
-      console.error(parsed.error.issues);
-      throw new InternalServerErrorException('Invalid order read model');
-    }
-
-    return parsed.data;
+    return this.parseMany(rows);
   }
 
   async findByClient(
     clientId: string,
     statuses?: OrderStatus[],
   ): Promise<ReadOrderData[]> {
-    const qb = this.orderRepository
-      .createQueryBuilder('order')
-      .select([
-        'order.orderId AS "orderId"',
-        'order.createdAt AS "createdAt"',
-        'order.totalPrice AS "totalPrice"',
-        'order.status AS "status"',
-        'order.requestToRestaurant AS "requestToRestaurant"',
-        'order.clientId AS "clientId"',
-        'order.restaurantId AS "restaurantId"',
-      ])
-      .where('order.clientId = :clientId', { clientId });
+    const qb = this.baseReadQb().where('order.clientId = :clientId', {
+      clientId,
+    });
 
     if (statuses && statuses.length > 0) {
       qb.andWhere('order.status IN (:...statuses)', { statuses });
     }
 
-    return qb.getRawMany<ReadOrderData>();
+    const rows = await qb.getRawMany();
+    return this.parseMany(rows);
   }
 
   async findDeliveredInDateRange(
@@ -114,17 +107,7 @@ export class OrderRepository {
     startDate: Date,
     endDate: Date,
   ): Promise<ReadOrderData[]> {
-    const result = this.orderRepository
-      .createQueryBuilder('order')
-      .select([
-        'order.orderId AS "orderId"',
-        'order.createdAt AS "createdAt"',
-        'order.totalPrice AS "totalPrice"',
-        'order.status AS "status"',
-        'order.requestToRestaurant AS "requestToRestaurant"',
-        'order.clientId AS "clientId"',
-        'order.restaurantId AS "restaurantId"',
-      ])
+    const qb = this.baseReadQb()
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .andWhere('order.status = :status', { status: OrderStatus.Delivered })
       .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
@@ -132,7 +115,8 @@ export class OrderRepository {
         endDate,
       });
 
-    return result.getRawMany<ReadOrderData>();
+    const rows = await qb.getRawMany();
+    return this.parseMany(rows);
   }
 
   async findTopDishesByQuantity(
@@ -140,7 +124,7 @@ export class OrderRepository {
     limit: number,
     orderBy: 'ASC' | 'DESC',
   ): Promise<QuantityAndDishName[]> {
-    const result = await this.orderRepository
+    const rows = await this.orderRepository
       .createQueryBuilder('order')
       .leftJoin('order.orderItems', 'oi')
       .leftJoin('oi.dish', 'dish')
@@ -156,7 +140,7 @@ export class OrderRepository {
       .limit(limit)
       .getRawMany<QuantityAndDishName>();
 
-    return result.map((item) => ({
+    return rows.map((item) => ({
       ...item,
       quantity: Number(item.quantity),
     }));
@@ -174,5 +158,27 @@ export class OrderRepository {
         'order.clientId AS "clientId"',
         'order.restaurantId AS "restaurantId"',
       ]);
+  }
+
+  private parseOne(row: unknown): ReadOrderData {
+    const parsed = ReadOrderDataSchema.safeParse(row);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new InternalServerErrorException('Invalid order read model');
+    }
+
+    return parsed.data;
+  }
+
+  private parseMany(rows: unknown[]): ReadOrderData[] {
+    const parsed = ReadOrderDataSchema.array().safeParse(rows);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new InternalServerErrorException('Invalid order read model');
+    }
+
+    return parsed.data;
   }
 }

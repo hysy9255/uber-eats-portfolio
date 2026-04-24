@@ -71,7 +71,7 @@ export class OrderValidationService {
       await this.ownerService.getRestaurantIdByOwnerId(ownerId);
 
     // validate order existence
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepo.findById(orderId);
 
     // validate restaurant ownership of order
     if (order.restaurantId !== restaurantId) {

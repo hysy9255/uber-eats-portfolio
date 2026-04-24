@@ -76,7 +76,7 @@ export class OrderCommandService {
   async update(orderId: string, userId: string, newStatus: OrderStatus) {
     await this.validation.updateOrder(orderId, userId, newStatus);
 
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepo.findById(orderId);
     order.status = newStatus;
 
     await this.orderRepo.updateOrder(this.orderMapper.readToUpdateData(order));

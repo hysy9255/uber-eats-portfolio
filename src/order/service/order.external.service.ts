@@ -98,13 +98,7 @@ export class OrderExternalService {
   ): Promise<GetOrderForOwnerDTO[]> {
     const { ownerId } =
       await this.ownerInternalService.getOwnerIdByUserId(userId);
-    const { restaurantId } =
-      await this.restaurantInternalService.getByOwnerId(ownerId);
-
-    const orders = await this.orderRepo.findOrdersByRestaurantId(
-      restaurantId,
-      status,
-    );
+    const orders = await this.orderRepo.findByOwner(ownerId, status);
     if (orders.length === 0) return [];
 
     const orderIds = orders.map((order) => order.orderId);
@@ -145,7 +139,7 @@ export class OrderExternalService {
     const { clientId } =
       await this.clientInternalService.getClientByUserId(userId);
 
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepo.findById(orderId);
     if (order?.clientId !== clientId) throw new Error('Unauthorized');
     const orderItems = await this.orderItemRepo.findByOrderId(orderId);
     const { dba, prepTime: eta } =
@@ -171,7 +165,7 @@ export class OrderExternalService {
     // const restaurant =
     //   await this.restaurantInternalService.getByOwnerId(ownerId);
 
-    const order = await this.orderRepo.findOrderById(orderId);
+    const order = await this.orderRepo.findById(orderId);
     order.status = status;
     const updateData = this.orderMapper.readToUpdateData(order);
     await this.orderRepo.updateOrder(updateData);
@@ -187,15 +181,12 @@ export class OrderExternalService {
     const { clientId } =
       await this.clientInternalService.getClientByUserId(userId);
 
-    const orders = await this.orderRepo.findOrdersByClientIdAndStatuses(
-      clientId,
-      [
-        OrderStatus.Pending,
-        OrderStatus.Cooking,
-        OrderStatus.Ready,
-        OrderStatus.Delivering,
-      ],
-    );
+    const orders = await this.orderRepo.findByClient(clientId, [
+      OrderStatus.Pending,
+      OrderStatus.Cooking,
+      OrderStatus.Ready,
+      OrderStatus.Delivering,
+    ]);
     return this.composeOrderDTOs(orders);
   }
 
@@ -204,10 +195,9 @@ export class OrderExternalService {
   ): Promise<GetOrderForClientDTO[]> {
     const { clientId } =
       await this.clientInternalService.getClientByUserId(userId);
-    const orders = await this.orderRepo.findOrdersByClientIdAndStatuses(
-      clientId,
-      [OrderStatus.Delivered],
-    );
+    const orders = await this.orderRepo.findByClient(clientId, [
+      OrderStatus.Delivered,
+    ]);
     return this.composeOrderDTOs(orders);
   }
 
