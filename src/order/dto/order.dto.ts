@@ -5,14 +5,14 @@ export class OrderDTO {
   createdAt: string;
   totalPrice: number;
   status: OrderStatus;
-  requestToRestaurant?: string;
+  requestToRestaurant: string | null;
 
   constructor(init: {
     orderId: string;
     createdAt: string;
     totalPrice: number;
     status: OrderStatus;
-    requestToRestaurant?: string;
+    requestToRestaurant: string | null;
   }) {
     this.orderId = init.orderId;
     this.createdAt = init.createdAt;

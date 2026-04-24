@@ -34,9 +34,25 @@ export class RestaurantInternalService {
     return await this.restaurantRepo.findAllByOrderIds(orderIds);
   }
 
+  async getByOrders(
+    orderIds: string[],
+  ): Promise<(ReadRestaurantData & { orderId: string })[]> {
+    return await this.restaurantRepo.findAllByOrderIds(orderIds);
+  }
+
   // done
   async getByOwnerId(ownerId: string): Promise<ReadRestaurantData> {
     return await this.restaurantRepo.findOneByOwnerId(ownerId);
+  }
+
+  async getByOwner(ownerId: string): Promise<ReadRestaurantData> {
+    return await this.restaurantRepo.findOneByOwnerId(ownerId);
+  }
+
+  async getIdByOwner(ownerId: string): Promise<{ restaurantId: string }> {
+    const { restaurantId } =
+      await this.restaurantRepo.findOneByOwnerId(ownerId);
+    return { restaurantId };
   }
 
   // done
@@ -63,5 +79,13 @@ export class RestaurantInternalService {
     await this.operatingHoursRepo.save(cohData);
     await this.restaurantAddressRepo.save(createAddressData);
     return { restaurantId };
+  }
+
+  // async getOperatingHoursByRestaurantId(restaurantId: string) {
+  //   return await this.operatingHoursRepo.findByRestaurantId(restaurantId);
+  // }
+
+  isRestaurantOpen(restaurantId: string): boolean {
+    return true;
   }
 }

@@ -45,8 +45,8 @@ import { HealthModule } from './health/health.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: '.env.development.local',
-      envFilePath: '.env',
+      envFilePath: '.env.development.local',
+      // envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -55,9 +55,9 @@ import { HealthModule } from './health/health.module';
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      ssl: {
-        rejectUnauthorized: false,
-      },
+      // ssl: {
+      //   rejectUnauthorized: false,
+      // },
       entities: [
         VehicleEntity,
         DriverDocsEntity,

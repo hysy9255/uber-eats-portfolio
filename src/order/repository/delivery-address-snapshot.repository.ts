@@ -18,7 +18,27 @@ export class DeliveryAddressSnapshotRepository {
     );
   }
 
-  async findAllByOrderIds(
+  async findByOrderIds(
+    orderIds: string[],
+  ): Promise<ReadDeliveryAddressSnapshotData[]> {
+    return await this.deliveryAddressSnapshotRepo
+      .createQueryBuilder('snap')
+      .select([
+        'snap.deliveryAddressSnapshotId AS "deliveryAddressSnapshotId"',
+        'snap.streetAddress AS "streetAddress"',
+        'snap.apt AS apt',
+        'snap.city AS city',
+        'snap.state AS state',
+        'snap.zip AS zip',
+        'snap.orderId AS "orderId"',
+      ])
+      .where('snap.orderId IN (:...orderIds)', {
+        orderIds,
+      })
+      .getRawMany<ReadDeliveryAddressSnapshotData>();
+  }
+
+  async findByOrders(
     orderIds: string[],
   ): Promise<ReadDeliveryAddressSnapshotData[]> {
     return await this.deliveryAddressSnapshotRepo

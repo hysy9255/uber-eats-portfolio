@@ -21,4 +21,14 @@ export class OwnerInternalService {
     const owner = await this.ownerRepository.getOwnerByUserId(userId);
     return { ownerId: owner.ownerId };
   }
+
+  async getIdByUser(userId: string): Promise<{ ownerId: string }> {
+    return await this.ownerRepository.getOwnerByUserId(userId);
+  }
+
+  async getRestaurantIdByOwnerId(
+    ownerId: string,
+  ): Promise<{ restaurantId: string }> {
+    return await this.ownerRepository.getRestaurantIdByOwnerId(ownerId);
+  }
 }

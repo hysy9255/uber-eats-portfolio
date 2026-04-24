@@ -3,6 +3,7 @@ import { DishRepository } from './dish.repository';
 import { DishMapper } from './dish.mapper';
 import { CreateDishDTO } from './dto/create-dish.dto';
 import { DishDTO } from './dto/dish.dto';
+import { ReadDishData } from './types/read-dish-data';
 
 @Injectable()
 export class DishInternalService {
@@ -27,7 +28,12 @@ export class DishInternalService {
   }
 
   // done
-  async getManyByIds(dishIds: string[]) {
+  async getManyByIds(dishIds: string[]): Promise<ReadDishData[]> {
+    return await this.dishRepo.findAllByIds(dishIds);
+  }
+
+  // done
+  async getByIds(dishIds: string[]): Promise<ReadDishData[]> {
     return await this.dishRepo.findAllByIds(dishIds);
   }
 }

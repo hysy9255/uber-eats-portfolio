@@ -6,5 +6,6 @@ export type ReadOrderData = {
   totalPrice: number;
   status: OrderStatus;
   clientId: string;
-  requestToRestaurant?: string;
+  requestToRestaurant: string | null;
+  restaurantId: string;
 };

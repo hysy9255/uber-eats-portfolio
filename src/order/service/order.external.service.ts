@@ -17,11 +17,9 @@ import { RestaurantInfoDTO } from 'src/restaurant/dto/restaurant-Info.dto';
 import { OrderStatus } from 'src/constants/orderStatus';
 import { ReadOrderData } from '../types/read-order-data';
 import { OrderGateway } from '../order.gateway';
-
 import { buildDailyRevenue } from 'src/utils/buildDailyRevenue';
-import { GetOwnerDashBoardPageDTO } from '../dto/\bget-owner-dashboard-page.dto';
 import { MenuRankingDTO } from 'src/dish/types/menu-ranking-data';
-// import { MenuRankingFilter } from 'src/constants/menuRankingFilter';
+import { GetOwnerDashBoardPageDTO } from '../dto/get-owner-dashboard-page.dto';
 
 @Injectable()
 export class OrderExternalService {
@@ -114,7 +112,7 @@ export class OrderExternalService {
     const orderItems = await this.orderItemRepo.findByOrderIds(orderIds);
 
     const daSnapshots =
-      await this.deliveryAddressSnapshotRepo.findAllByOrderIds(orderIds);
+      await this.deliveryAddressSnapshotRepo.findByOrderIds(orderIds);
 
     const clientIds = orders.map((order) => order.clientId);
 
@@ -220,7 +218,7 @@ export class OrderExternalService {
     const orderIds = orders.map((order) => order.orderId);
     const orderItems = await this.orderItemRepo.findByOrderIds(orderIds);
     const daSnapshots =
-      await this.deliveryAddressSnapshotRepo.findAllByOrderIds(orderIds);
+      await this.deliveryAddressSnapshotRepo.findByOrderIds(orderIds);
 
     const restaurantInfos =
       await this.restaurantInternalService.getByOrderIds(orderIds);

@@ -3,15 +3,18 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 import { UserRole } from 'src/constants/userRole';
+import { AUTH_USER } from 'src/constants/variables';
+import { AuthInternalService } from './auth.internal.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
+    private readonly authService: AuthInternalService,
     private reflector: Reflector,
   ) {}
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     const required = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -28,16 +31,16 @@ export class AuthGuard implements CanActivate {
 
     const { userId, role } = this.jwtService.verifyToken(token);
 
-    req['authUser'] = { userId, role };
+    if (role === UserRole.Client) {
+      const { clientId } = await this.authService.getClientByUserId(userId);
+      req[AUTH_USER] = { userId, role, clientId };
+    } else if (role === UserRole.Owner) {
+      const { ownerId } = await this.authService.getOwnerByUserId(userId);
+      req[AUTH_USER] = { userId, role, ownerId };
+    }
+
+    // req[AUTH_USER] = { userId, role };
 
     return true;
-
-    // const user = await this.authUserRepository.getUserById(userId);
-    // if (!user) {
-    //   return false;
-    // }
-    // req['authUser'] = user;
-
-    // return true;
   }
 }

@@ -6,7 +6,7 @@ export class UpdateOrderData {
   totalPrice: number;
   status: OrderStatus;
   clientId: string;
-  requestToRestaurant?: string;
+  requestToRestaurant: string | null;
 
   constructor(init: {
     orderId: string;
@@ -14,7 +14,7 @@ export class UpdateOrderData {
     totalPrice: number;
     status: OrderStatus;
     clientId: string;
-    requestToRestaurant?: string;
+    requestToRestaurant: string | null;
   }) {
     this.orderId = init.orderId;
     this.createdAt = init.createdAt;

@@ -17,16 +17,73 @@ import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { UserRole } from 'src/constants/userRole';
 import { OrderExternalService } from '../service/order.external.service';
 import { GetOrderForOwnerDTO } from '../dto/get-order-for-owner.dto';
-import { GetOrderForClientDTO } from '../dto/get-order-for-client.dto';
 import { UpdateOrderStatusDTO } from '../dto/update-order-status.dto';
 import { OrderStatus } from 'src/constants/orderStatus';
-import { GetOwnerDashBoardPageDTO } from '../dto/get-owner-dashboard-page.dto';
 import { MenuRankingDTO } from 'src/dish/types/menu-ranking-data';
+import { GetOrderForClientDTO } from '../dto/get-order-for-client.dto';
+import { GetOwnerDashBoardPageDTO } from '../dto/get-owner-dashboard-page.dto';
+import { OrderCommandService } from '../service/order.command.service';
+import { OrderQueryService } from '../service/order.query.service';
+import {
+  FINISHED_ORDER_STATUSES,
+  ONGOING_ORDER_STATUSES,
+} from 'src/constants/orderStatuses';
 
 @ApiSecurity('jwt-token')
 @Controller('orders')
 export class OrderController {
-  constructor(private readonly orderExternalService: OrderExternalService) {}
+  constructor(
+    private readonly orderExternalService: OrderExternalService,
+    private readonly command: OrderCommandService,
+    private readonly query: OrderQueryService,
+  ) {}
+
+  // @ApiOperation({ summary: 'Make an order' })
+  // @UseGuards(AuthGuard)
+  // @Roles(UserRole.Client)
+  // @Post()
+  // async createOrder(
+  //   @Req() req: Request,
+  //   @Body() dto: CreateOrderDTO,
+  // ): Promise<{ orderId: string }> {
+  //   const { userId } = req['authUser'] as UserOutput;
+  //   return await this.orderExternalService.createOrder(userId, dto);
+  // }
+
+  // @ApiOperation({ summary: 'Owner updates order status' })
+  // @UseGuards(AuthGuard)
+  // @Roles(UserRole.Owner)
+  // @Patch('/:orderId/status')
+  // async updateOrderStatus(
+  //   @Req() req: Request,
+  //   @Param('orderId') orderId: string,
+  //   @Body() { status }: UpdateOrderStatusDTO,
+  // ) {
+  //   const { userId } = req['authUser'] as UserOutput;
+  //   await this.orderExternalService.updateOrderStatus(orderId, userId, status);
+  // }
+
+  // @ApiOperation({ summary: 'Get on going orders for client' })
+  // @UseGuards(AuthGuard)
+  // @Roles(UserRole.Client)
+  // @Get('/ongoing')
+  // async getOnGoingOrdersForClient(
+  //   @Req() req: Request,
+  // ): Promise<GetOrderForClientDTO[]> {
+  //   const { userId } = req['authUser'] as UserOutput;
+  //   return await this.orderExternalService.getOnGoingOrdersForClient(userId);
+  // }
+
+  // @ApiOperation({ summary: 'Get completed orders for client' })
+  // @UseGuards(AuthGuard)
+  // @Roles(UserRole.Client)
+  // @Get('/history')
+  // async getOrderHistoryForClient(
+  //   @Req() req: Request,
+  // ): Promise<GetOrderForClientDTO[]> {
+  //   const { userId } = req['authUser'] as UserOutput;
+  //   return await this.orderExternalService.getOrderHistoryForClient(userId);
+  // }
 
   @ApiOperation({ summary: 'Make an order' })
   @UseGuards(AuthGuard)
@@ -37,7 +94,20 @@ export class OrderController {
     @Body() dto: CreateOrderDTO,
   ): Promise<{ orderId: string }> {
     const { userId } = req['authUser'] as UserOutput;
-    return await this.orderExternalService.createOrder(userId, dto);
+    return await this.command.create(userId, dto);
+  }
+
+  @ApiOperation({ summary: 'Get order for client' })
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.Client)
+  @Get('/:orderId')
+  async getOrderForClient(
+    @Req() req: Request,
+    @Param('orderId') orderId: string,
+  ): Promise<GetOrderForClientDTO> {
+    console.log('Get order for client');
+    const { userId } = req['authUser'] as UserOutput;
+    return await this.orderExternalService.getOrderForClient(userId, orderId);
   }
 
   @ApiOperation({ summary: 'Get on going orders for client' })
@@ -48,10 +118,46 @@ export class OrderController {
     @Req() req: Request,
   ): Promise<GetOrderForClientDTO[]> {
     const { userId } = req['authUser'] as UserOutput;
-    return await this.orderExternalService.getOnGoingOrdersForClient(userId);
+    return await this.query.clientOrders(userId, ONGOING_ORDER_STATUSES);
   }
 
-  @ApiOperation({ summary: 'Make an order' })
+  @ApiOperation({ summary: 'Get completed orders for client' })
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.Client)
+  @Get('/history')
+  async getOrderHistoryForClient(
+    @Req() req: Request,
+  ): Promise<GetOrderForClientDTO[]> {
+    const { userId } = req['authUser'] as UserOutput;
+    return await this.query.clientOrders(userId, FINISHED_ORDER_STATUSES);
+  }
+
+  @ApiOperation({ summary: 'Owner updates order status' })
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.Owner)
+  @Patch('/:orderId/status')
+  async updateOrderStatus(
+    @Req() req: Request,
+    @Param('orderId') orderId: string,
+    @Body() { status }: UpdateOrderStatusDTO,
+  ) {
+    const { userId } = req['authUser'] as UserOutput;
+    await this.command.update(orderId, userId, status);
+  }
+
+  @ApiOperation({ summary: 'Get orders' })
+  @UseGuards(AuthGuard)
+  @Roles(UserRole.Owner)
+  @Get()
+  getOrdersForOwner(
+    @Req() req: Request,
+    @Query('status') status?: OrderStatus,
+  ): Promise<GetOrderForOwnerDTO[]> {
+    const { userId } = req['authUser'] as UserOutput;
+    return this.orderExternalService.getOrdersForOwner(userId, status);
+  }
+
+  @ApiOperation({ summary: 'Get menu rankings' })
   @UseGuards(AuthGuard)
   @Roles(UserRole.Client)
   @Get('/ranking')
@@ -73,54 +179,6 @@ export class OrderController {
   ): Promise<GetOwnerDashBoardPageDTO> {
     const { userId } = req['authUser'] as UserOutput;
     return await this.orderExternalService.getOwnerDashBoardPage(userId, range);
-  }
-
-  @ApiOperation({ summary: 'Get on going orders for client' })
-  @UseGuards(AuthGuard)
-  @Roles(UserRole.Client)
-  @Get('/history')
-  async getOrderHistoryForClient(
-    @Req() req: Request,
-  ): Promise<GetOrderForClientDTO[]> {
-    const { userId } = req['authUser'] as UserOutput;
-    return await this.orderExternalService.getOrderHistoryForClient(userId);
-  }
-
-  @ApiOperation({ summary: 'Get order for client' })
-  @UseGuards(AuthGuard)
-  @Roles(UserRole.Client)
-  @Get('/:orderId')
-  async getOrderForClient(
-    @Req() req: Request,
-    @Param('orderId') orderId: string,
-  ): Promise<GetOrderForClientDTO> {
-    const { userId } = req['authUser'] as UserOutput;
-    return await this.orderExternalService.getOrderForClient(userId, orderId);
-  }
-
-  @ApiOperation({ summary: 'Get orders' })
-  @UseGuards(AuthGuard)
-  @Roles(UserRole.Owner)
-  @Get()
-  getOrdersForOwner(
-    @Req() req: Request,
-    @Query('status') status?: OrderStatus,
-  ): Promise<GetOrderForOwnerDTO[]> {
-    const { userId } = req['authUser'] as UserOutput;
-    return this.orderExternalService.getOrdersForOwner(userId, status);
-  }
-
-  @ApiOperation({ summary: 'Owner updates order status' })
-  @UseGuards(AuthGuard)
-  @Roles(UserRole.Owner)
-  @Patch('/:orderId/status')
-  async updateOrderStatus(
-    @Req() req: Request,
-    @Param('orderId') orderId: string,
-    @Body() { status }: UpdateOrderStatusDTO,
-  ) {
-    const { userId } = req['authUser'] as UserOutput;
-    await this.orderExternalService.updateOrderStatus(orderId, userId, status);
   }
 
   // @ApiOperation({ summary: 'Get order detail' })

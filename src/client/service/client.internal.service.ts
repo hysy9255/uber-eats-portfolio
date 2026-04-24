@@ -34,6 +34,16 @@ export class ClientInternalService {
     return await this.clientRepo.findByUserId(userId);
   }
 
+  async getClientIdByUserId(userId: string): Promise<string> {
+    const { clientId } = await this.clientRepo.findByUserId(userId);
+    return clientId;
+  }
+
+  async getClientIdByUser(userId: string): Promise<string> {
+    const { clientId } = await this.clientRepo.findByUserId(userId);
+    return clientId;
+  }
+
   async getDeliveryAddressById(
     deliveryAddressId: string,
   ): Promise<ReadDeliveryAddressData> {
@@ -41,6 +51,11 @@ export class ClientInternalService {
   }
 
   async getClientInfoByIds(clientIds: string[]): Promise<ClientInfoDTO[]> {
+    const readData = await this.clientRepo.findClientInfoByIds(clientIds);
+    return readData.map((d) => new ClientInfoDTO({ ...d }));
+  }
+
+  async getByIds(clientIds: string[]): Promise<ClientInfoDTO[]> {
     const readData = await this.clientRepo.findClientInfoByIds(clientIds);
     return readData.map((d) => new ClientInfoDTO({ ...d }));
   }

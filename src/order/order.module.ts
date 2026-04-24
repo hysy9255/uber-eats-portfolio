@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
-import { OrderController } from './controller/order.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderEntity } from './orm-entities/order.orm.entity';
-import { OrderExternalService } from './service/order.external.service';
 import { OrderRepository } from './repository/order.repository';
 import { OrderMapper } from './mapper/order.mapper';
 import { OrderDomainService } from './service/order.domain.service';
@@ -17,6 +15,19 @@ import { DeliveryAddressSnapshotEntity } from './orm-entities/delivery-address-s
 import { DeliveryAddressSnapshotRepository } from './repository/delivery-address-snapshot.repository';
 import { DeliveryAddressSnapshotMapper } from './mapper/delivery-address-snapshot.mapper';
 import { OrderGateway } from './order.gateway';
+// import { OrderCommandService } from './service/order.command.service';
+// import { OrderQueryService } from './service/order.query.service';
+import { OrderValidationService } from './service/order.validation.service';
+import { OrderClientDTOAssembler } from './assembler/order-client-dto.assembler';
+import { OrderOwnerDTOAssembler } from './assembler/order-owner-dto.assembler';
+import { OwnerOrderController } from './controller/owner.order.controller';
+import { ClientOrderController } from './controller/client.order.controller';
+import { ClientOrderCommandService } from './service/client.order.command.service';
+import { OwnerOrderCommandService } from './service/owner.order.command.service';
+import { ClientOrderQueryService } from './service/client.order.query.service';
+import { OwnerOrderQueryService } from './service/owner.order.query.service';
+import { OrderKpiService } from './service/order.kpi.service';
+import { OrderKpiController } from './controller/\bkpi.controller';
 
 @Module({
   imports: [
@@ -30,9 +41,12 @@ import { OrderGateway } from './order.gateway';
     RestaurantInternalModule,
     DishInternalModule,
   ],
-  controllers: [OrderController],
+  controllers: [
+    OwnerOrderController,
+    ClientOrderController,
+    OrderKpiController,
+  ],
   providers: [
-    OrderExternalService,
     OrderRepository,
     OrderItemRepository,
     DeliveryAddressSnapshotRepository,
@@ -41,6 +55,14 @@ import { OrderGateway } from './order.gateway';
     DeliveryAddressSnapshotMapper,
     OrderDomainService,
     OrderGateway,
+    OrderValidationService,
+    OrderClientDTOAssembler,
+    OrderOwnerDTOAssembler,
+    ClientOrderCommandService,
+    ClientOrderQueryService,
+    OwnerOrderCommandService,
+    OwnerOrderQueryService,
+    OrderKpiService,
   ],
 })
 export class OrderModule {}

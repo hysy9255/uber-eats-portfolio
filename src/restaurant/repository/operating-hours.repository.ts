@@ -11,26 +11,22 @@ import { DayOfWeek } from 'src/constants/dayOfWeek';
 export class OperatingHoursRepository {
   constructor(
     @InjectRepository(OperatingHoursEntity)
-    private readonly operatingHoursRepository: Repository<OperatingHoursEntity>,
+    private readonly repo: Repository<OperatingHoursEntity>,
   ) {}
 
   save(data: CreateOperatingHoursData[]) {
-    return this.operatingHoursRepository.save(
-      this.operatingHoursRepository.create(data),
-    );
+    return this.repo.save(this.repo.create(data));
   }
 
   // done
   update(data: UpdateOperatingHoursData[]) {
-    return this.operatingHoursRepository.save(
-      this.operatingHoursRepository.create(data),
-    );
+    return this.repo.save(this.repo.create(data));
   }
 
   findIdsAndDaysByRestaurantId(
     restaurantId: string,
   ): Promise<{ id: string; dayOfWeek: DayOfWeek }[]> {
-    return this.operatingHoursRepository
+    return this.repo
       .createQueryBuilder('op')
       .select(['op.id as id', 'op.dayOfWeek as "dayOfWeek"'])
       .where('op.restaurantId = :restaurantId', { restaurantId })
@@ -40,7 +36,7 @@ export class OperatingHoursRepository {
   findByRestaurantIds(
     restaurantIds: string[],
   ): Promise<ReadOperatingHoursData[]> {
-    return this.operatingHoursRepository
+    return this.repo
       .createQueryBuilder('op')
       .select([
         'op.id as id',
@@ -56,7 +52,7 @@ export class OperatingHoursRepository {
   }
 
   findByRestaurantId(restaurantId: string): Promise<ReadOperatingHoursData[]> {
-    return this.operatingHoursRepository
+    return this.repo
       .createQueryBuilder('op')
       .select([
         'op.id as id',
