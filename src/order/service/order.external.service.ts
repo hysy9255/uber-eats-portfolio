@@ -20,6 +20,7 @@ import { OrderGateway } from '../order.gateway';
 import { buildDailyRevenue } from 'src/utils/buildDailyRevenue';
 import { MenuRankingDTO } from 'src/dish/types/menu-ranking-data';
 import { GetOwnerDashBoardPageDTO } from '../dto/get-owner-dashboard-page.dto';
+import { OrderStatsRepository } from '../repository/order.stats.repository';
 
 @Injectable()
 export class OrderExternalService {
@@ -36,6 +37,7 @@ export class OrderExternalService {
     private readonly orderItemMapper: OrderItemMapper,
     private readonly deliveryAddressSnapshotMapper: DeliveryAddressSnapshotMapper,
     private readonly orderGateway: OrderGateway,
+    private readonly orderStatsRepository: OrderStatsRepository,
   ) {}
 
   async createOrder(
@@ -336,12 +338,12 @@ export class OrderExternalService {
     const { restaurantId } =
       await this.restaurantInternalService.getByOwnerId(ownerId);
 
-    const topOrders = await this.orderRepo.findTopDishesByQuantity(
+    const topOrders = await this.orderStatsRepository.findTopDishesByQuantity(
       restaurantId,
       Number(limit),
       'DESC',
     );
-    const leastOrders = await this.orderRepo.findTopDishesByQuantity(
+    const leastOrders = await this.orderStatsRepository.findTopDishesByQuantity(
       restaurantId,
       Number(limit),
       'ASC',

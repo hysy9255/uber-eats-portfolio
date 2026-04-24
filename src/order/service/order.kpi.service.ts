@@ -11,11 +11,13 @@ import {
 } from 'src/utils/generateDateRange';
 import { calculateAvgOrder } from 'src/utils/calculateAvgOrder';
 import { calculateRevenue } from 'src/utils/calculateRevenue';
+import { OrderStatsRepository } from '../repository/order.stats.repository';
 
 @Injectable()
 export class OrderKpiService {
   constructor(
     private readonly orderRepo: OrderRepository,
+    private readonly orderStatsRepo: OrderStatsRepository,
     private readonly ownerService: OwnerInternalService,
     private readonly restaurantService: RestaurantInternalService,
   ) {}
@@ -91,12 +93,12 @@ export class OrderKpiService {
     const { ownerId } = await this.ownerService.getIdByUser(userId);
     const { restaurantId } = await this.restaurantService.getByOwner(ownerId);
 
-    const topOrders = await this.orderRepo.findTopDishesByQuantity(
+    const topOrders = await this.orderStatsRepo.findTopDishesByQuantity(
       restaurantId,
       Number(limit),
       'DESC',
     );
-    const leastOrders = await this.orderRepo.findTopDishesByQuantity(
+    const leastOrders = await this.orderStatsRepo.findTopDishesByQuantity(
       restaurantId,
       Number(limit),
       'ASC',

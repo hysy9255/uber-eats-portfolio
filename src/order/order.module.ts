@@ -28,6 +28,7 @@ import { ClientOrderQueryService } from './service/client.order.query.service';
 import { OwnerOrderQueryService } from './service/owner.order.query.service';
 import { OrderKpiService } from './service/order.kpi.service';
 import { OrderKpiController } from './controller/\bkpi.controller';
+import { OrderStatsRepository } from './repository/order.stats.repository';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { OrderKpiController } from './controller/\bkpi.controller';
   ],
   providers: [
     OrderRepository,
+    OrderStatsRepository,
     OrderItemRepository,
     DeliveryAddressSnapshotRepository,
     OrderMapper,
