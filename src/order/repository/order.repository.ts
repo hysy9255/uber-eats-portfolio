@@ -53,22 +53,28 @@ export class OrderRepository {
     return row;
   }
 
+  async findByClient(
+    clientId: string,
+    statuses?: OrderStatus[],
+  ): Promise<ReadOrderData[]> {
+    const qb = this.baseReadQb().where('order.clientId = :clientId', {
+      clientId,
+    });
+
+    if (statuses && statuses.length > 0) {
+      qb.andWhere('order.status IN (:...statuses)', { statuses });
+    }
+
+    const rows = await qb.getRawMany<ReadOrderData>();
+    return rows;
+  }
+
   async findByOwner(
     ownerId: string,
     status?: OrderStatus,
   ): Promise<ReadOrderData[]> {
-    const qb = this.orderRepository
-      .createQueryBuilder('order')
+    const qb = this.baseReadQb()
       .leftJoin('order.restaurant', 'restaurant')
-      .select([
-        'order.orderId AS "orderId"',
-        'order.createdAt AS "createdAt"',
-        'order.totalPrice AS "totalPrice"',
-        'order.status AS "status"',
-        'order.requestToRestaurant AS "requestToRestaurant"',
-        'order.clientId AS "clientId"',
-        'order.restaurantId AS "restaurantId"',
-      ])
       .where('restaurant.ownerId = :ownerId', { ownerId });
 
     if (status) {
@@ -85,46 +91,12 @@ export class OrderRepository {
     return parsed.data;
   }
 
-  async findByClient(
-    clientId: string,
-    statuses?: OrderStatus[],
-  ): Promise<ReadOrderData[]> {
-    const qb = this.orderRepository
-      .createQueryBuilder('order')
-      .select([
-        'order.orderId AS "orderId"',
-        'order.createdAt AS "createdAt"',
-        'order.totalPrice AS "totalPrice"',
-        'order.status AS "status"',
-        'order.requestToRestaurant AS "requestToRestaurant"',
-        'order.clientId AS "clientId"',
-        'order.restaurantId AS "restaurantId"',
-      ])
-      .where('order.clientId = :clientId', { clientId });
-
-    if (statuses && statuses.length > 0) {
-      qb.andWhere('order.status IN (:...statuses)', { statuses });
-    }
-
-    return qb.getRawMany<ReadOrderData>();
-  }
-
   async findDeliveredInDateRange(
     restaurantId: string,
     startDate: Date,
     endDate: Date,
   ): Promise<ReadOrderData[]> {
-    const result = this.orderRepository
-      .createQueryBuilder('order')
-      .select([
-        'order.orderId AS "orderId"',
-        'order.createdAt AS "createdAt"',
-        'order.totalPrice AS "totalPrice"',
-        'order.status AS "status"',
-        'order.requestToRestaurant AS "requestToRestaurant"',
-        'order.clientId AS "clientId"',
-        'order.restaurantId AS "restaurantId"',
-      ])
+    const result = this.baseReadQb()
       .where('order.restaurantId = :restaurantId', { restaurantId })
       .andWhere('order.status = :status', { status: OrderStatus.Delivered })
       .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
