@@ -56,10 +56,9 @@ export class OrderKpiService {
   }
 
   async getOwnerDashBoardPage(
-    userId: string,
+    ownerId: string,
     range: string,
   ): Promise<GetOwnerDashBoardPageDTO> {
-    const { ownerId } = await this.ownerService.getIdByUser(userId);
     const { restaurantId } = await this.restaurantService.getByOwner(ownerId);
 
     const { startDate, endDate } = generateDateRange(range);
@@ -91,10 +90,9 @@ export class OrderKpiService {
   }
 
   async getMenuRankings(
-    userId: string,
+    ownerId: string,
     limit: string,
   ): Promise<MenuRankingDTO> {
-    const { ownerId } = await this.ownerService.getIdByUser(userId);
     const { restaurantId } = await this.restaurantService.getByOwner(ownerId);
 
     const topOrders = await this.orderStatsRepo.findTopDishesByQuantity(

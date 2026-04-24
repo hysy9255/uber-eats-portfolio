@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserExternalService } from '../service/user.external.service';
-import { UserOutput } from '../dto/user-output';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { ApiOperation, ApiQuery, ApiSecurity } from '@nestjs/swagger';
@@ -20,6 +19,7 @@ import { UpdateUserDTO } from '../dto/update-user.dto';
 import { UpdatePasswordDTO } from '../dto/update-password.dto';
 import { DeleteUserDTO } from '../dto/delete-user.dto';
 import { UserRole } from 'src/constants/userRole';
+import { AuthUser } from '../types/auth-user';
 console.log('### USER CONTROLLER LOADED ###');
 
 @ApiSecurity('jwt-token')
@@ -43,7 +43,7 @@ export class UserController {
   @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
   @Get('/users/me')
   getMe(@Req() req: Request): Promise<UserDTO> {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     return this.userService.getUser(userId);
   }
 
@@ -53,7 +53,7 @@ export class UserController {
   @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
   @Patch('/me')
   async updateMe(@Req() req: Request, @Body() dto: UpdateUserDTO) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.userService.updateUser(userId, dto);
   }
 
@@ -63,7 +63,7 @@ export class UserController {
   @Roles(UserRole.Client, UserRole.Driver, UserRole.Owner)
   @Patch('/password')
   async updatePassword(@Req() req: Request, @Body() dto: UpdatePasswordDTO) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.userService.updatePassword(userId, dto);
   }
 
@@ -72,7 +72,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Delete('/me')
   async deleteMyAccount(@Req() req: Request, @Body() dto: DeleteUserDTO) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.userService.deleteMe(userId, dto);
   }
 }

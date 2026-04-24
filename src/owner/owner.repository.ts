@@ -16,6 +16,18 @@ export class OwnerRepository {
     );
   }
 
+  async getById(ownerId: string): Promise<{ ownerId: string }> {
+    const row = await this.ownerRepository
+      .createQueryBuilder('owner')
+      .innerJoin('owner.restaurant', 'restaurant')
+      .where('owner.ownerId = :ownerId', { ownerId })
+      .select(['owner.ownerId AS "ownerId"'])
+      .getRawOne<{ ownerId: string }>();
+
+    if (!row) throw new Error('Owner Not Found');
+    return row;
+  }
+
   async getOwnerByUserId(userId: string) {
     const row = await this.ownerRepository
       .createQueryBuilder('owner')

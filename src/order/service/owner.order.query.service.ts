@@ -22,10 +22,9 @@ export class OwnerOrderQueryService {
   ) {}
 
   async orders(
-    userId: string,
+    ownerId: string,
     status?: OrderStatus,
   ): Promise<GetOrderForOwnerDTO[]> {
-    const { ownerId } = await this.ownerService.getIdByUser(userId);
     const orders = await this.orderRepo.findByOwner(ownerId, status);
 
     if (orders.length === 0) return [];

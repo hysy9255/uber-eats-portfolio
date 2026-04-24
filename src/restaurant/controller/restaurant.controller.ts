@@ -8,7 +8,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { UserOutput } from 'src/user/dto/user-output';
 import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles.decorator';
 import { GetRestaurantPageViewDTO } from '../dto/get-restaurant-page-view.dto';
@@ -18,6 +17,7 @@ import { UserRole } from 'src/constants/userRole';
 import { GetRestaurantNameAndLogoDTO } from '../dto/get-restaurant-name.dto';
 import { GetRestaurantsPageViewDTO } from '../dto/get-restaurants-page-view.dto';
 import { GetMyRestaurantForOwnerDashboardDTO } from '../dto/get-my-restaurant-for-owner-dashboard.dto';
+import { AuthUser } from 'src/user/types/auth-user';
 
 @ApiSecurity('jwt-token')
 @Controller()
@@ -53,7 +53,7 @@ export class RestaurantController {
   async getMyRestaurantForOwnerDashboard(
     @Req() req: Request,
   ): Promise<GetMyRestaurantForOwnerDashboardDTO> {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     return await this.restaurantExternalService.getOwnerRestaurantByUserId(
       userId,
     );
@@ -77,7 +77,7 @@ export class RestaurantController {
     @Req() req: Request,
     @Body() body: UpdateRestaurantDTO,
   ) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.restaurantExternalService.updateRestaurant(userId, body);
   }
 }

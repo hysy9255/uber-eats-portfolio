@@ -12,12 +12,14 @@ import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { UserRole } from 'src/constants/userRole';
 import { Roles } from 'src/auth/roles.decorator';
 import { UpdateOrderStatusDTO } from '../dto/update-order-status.dto';
-import { UserOutput } from 'src/user/dto/user-output';
+// import { UserOutput } from 'src/user/dto/user-output';
 import { OrderStatus } from 'src/constants/orderStatus';
 import { GetOrderForOwnerDTO } from '../dto/get-order-for-owner.dto';
 import { OwnerOrderCommandService } from '../service/owner.order.command.service';
 import { OwnerOrderQueryService } from '../service/owner.order.query.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { AUTH_USER } from 'src/constants/variables';
+import { OwnerUser } from 'src/user/types/auth-user';
 
 @ApiSecurity('jwt-token')
 @Controller('owner/orders')
@@ -36,8 +38,8 @@ export class OwnerOrderController {
     @Param('orderId') orderId: string,
     @Body() { status }: UpdateOrderStatusDTO,
   ) {
-    const { userId } = req['authUser'] as UserOutput;
-    await this.command.update(orderId, userId, status);
+    const { ownerId } = req[AUTH_USER] as OwnerUser;
+    await this.command.update(orderId, ownerId, status);
   }
 
   @ApiOperation({ summary: 'Owner get orders' })
@@ -48,7 +50,7 @@ export class OwnerOrderController {
     @Req() req: Request,
     @Query('status') status?: OrderStatus,
   ): Promise<GetOrderForOwnerDTO[]> {
-    const { userId } = req['authUser'] as UserOutput;
-    return this.query.orders(userId, status);
+    const { ownerId } = req[AUTH_USER] as OwnerUser;
+    return this.query.orders(ownerId, status);
   }
 }

@@ -2,11 +2,12 @@ import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles.decorator';
 import { UserRole } from 'src/constants/userRole';
-import { UserOutput } from 'src/user/dto/user-output';
+import { OwnerUser } from 'src/user/types/auth-user';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { MenuRankingDTO } from 'src/dish/types/menu-ranking-data';
 import { GetOwnerDashBoardPageDTO } from '../dto/get-owner-dashboard-page.dto';
 import { OrderKpiService } from '../service/order.kpi.service';
+import { AUTH_USER } from 'src/constants/variables';
 
 @ApiSecurity('jwt-token')
 @Controller('kpi/orders')
@@ -21,8 +22,8 @@ export class OrderKpiController {
     @Req() req: Request,
     @Query('limit') limit: string,
   ): Promise<MenuRankingDTO> {
-    const { userId } = req['authUser'] as UserOutput;
-    return await this.service.getMenuRankings(userId, limit);
+    const { ownerId } = req[AUTH_USER] as OwnerUser;
+    return await this.service.getMenuRankings(ownerId, limit);
   }
 
   @ApiOperation({ summary: 'Get owner dashboard page' })
@@ -33,7 +34,7 @@ export class OrderKpiController {
     @Req() req: Request,
     @Query('range') range: string,
   ): Promise<GetOwnerDashBoardPageDTO> {
-    const { userId } = req['authUser'] as UserOutput;
-    return await this.service.getOwnerDashBoardPage(userId, range);
+    const { ownerId } = req[AUTH_USER] as OwnerUser;
+    return await this.service.getOwnerDashBoardPage(ownerId, range);
   }
 }

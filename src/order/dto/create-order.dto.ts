@@ -1,5 +1,9 @@
 import { DeliveryType } from 'src/constants/deliveryType';
-import { OrderItem } from './order-output';
+
+export class OrderItem {
+  dishId: string;
+  quantity: number;
+}
 
 export class CreateOrderDTO {
   restaurantId: string;

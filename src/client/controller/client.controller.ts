@@ -13,12 +13,12 @@ import { ApiOperation } from '@nestjs/swagger';
 import { UserRole } from 'src/constants/userRole';
 import { Roles } from 'src/auth/roles.decorator';
 import { GetDeliveryAddressDTO } from '../dto/get-delivery-address.dto';
-import { UserOutput } from 'src/user/dto/user-output';
 import { CreateDeliveryAddressDTO } from '../dto/create-delivery-address.dto';
 import { UpdateDeliveryAddressDTO } from '../dto/update-delivery-address.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SetDefaultDeliveryAddressDTO } from '../dto/set-default-delivery-address.dto';
 import { DeleteDeliveryAddressDTO } from '../dto/delete-delivery-address.dto';
+import { AuthUser } from 'src/user/types/auth-user';
 
 @Controller('client')
 export class ClientController {
@@ -31,7 +31,7 @@ export class ClientController {
   async viewMyDeliveryAddresses(
     @Req() req: Request,
   ): Promise<GetDeliveryAddressDTO[]> {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     return await this.clientExternalService.getDeliveryAddresses(userId);
   }
 
@@ -43,7 +43,7 @@ export class ClientController {
     @Req() req: Request,
     @Body() dto: SetDefaultDeliveryAddressDTO,
   ) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.clientExternalService.setDefaultAddress(
       userId,
       dto.deliveryAddressId,
@@ -58,7 +58,7 @@ export class ClientController {
     @Req() req: Request,
     @Body() dto: CreateDeliveryAddressDTO,
   ) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.clientExternalService.addNewDeliveryAddress(userId, dto);
   }
 
@@ -70,7 +70,7 @@ export class ClientController {
     @Req() req: Request,
     @Body() dto: UpdateDeliveryAddressDTO,
   ) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.clientExternalService.updateDeliveryAddress(userId, dto);
   }
 
@@ -82,7 +82,7 @@ export class ClientController {
     @Req() req: Request,
     @Body() dto: DeleteDeliveryAddressDTO,
   ) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.clientExternalService.deleteDeliveryAddress(userId, dto);
   }
 }

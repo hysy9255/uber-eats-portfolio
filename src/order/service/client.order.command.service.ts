@@ -34,16 +34,16 @@ export class ClientOrderCommandService {
   ) {}
 
   async create(
-    userId: string,
+    clientId: string,
     dto: CreateOrderDTO,
   ): Promise<{ orderId: string }> {
-    await this.validation.createOrder(userId, dto);
+    await this.validation.createOrder(clientId, dto);
 
     const { orderItems, deliveryAddressId, restaurantId } = dto;
 
     const { orderId } = await this.orderRepo.saveOrder(
       this.orderMapper.dtoToCreateData(
-        await this.clientService.getClientIdByUser(userId),
+        clientId,
         this.orderDomainService.calculateTotalPrice(
           orderItems,
           await this.dishService.getByIds(

@@ -14,7 +14,7 @@ export class AuthInternalService {
     const row = await this.userRepo
       .createQueryBuilder('user')
       .leftJoin('user.clients', 'clients')
-      .select(['clients.clientId as clientId'])
+      .select(['clients.clientId as "clientId"'])
       .where('user.userId = :userId', { userId })
       .getRawOne<{ clientId: string }>();
 
@@ -26,7 +26,7 @@ export class AuthInternalService {
     const row = await this.userRepo
       .createQueryBuilder('user')
       .leftJoin('user.owners', 'owners')
-      .select(['owners.ownerId as ownerId'])
+      .select(['owners.ownerId as "ownerId"'])
       .where('user.userId = :userId', { userId })
       .getRawOne<{ ownerId: string }>();
 

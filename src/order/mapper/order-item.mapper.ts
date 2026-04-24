@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { SharedService } from 'src/shared/shared.service';
 import { CreateOrderItemData } from '../types/create-order-item-data';
-import { OrderItem } from '../dto/order-output';
 import { OrderItemDTO } from '../dto/order-item.dto';
 import { ReadOrderItemData } from '../types/read-order-item-data';
+import { OrderItem } from '../dto/create-order.dto';
 
 @Injectable()
 export class OrderItemMapper {

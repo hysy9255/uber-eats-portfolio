@@ -19,11 +19,11 @@ export class OrderValidationService {
     private readonly orderRepo: OrderRepository,
   ) {}
 
-  async createOrder(userId: string, dto: CreateOrderDTO) {
+  async createOrder(clientId: string, dto: CreateOrderDTO) {
     const { restaurantId, orderItems, deliveryAddressId } = dto;
 
     // validate client existence
-    const clientId = await this.clientService.getClientIdByUserId(userId);
+    await this.clientService.getClientById(clientId);
 
     // validate client ownership of delivery address
     const deliveryAddress =
@@ -64,9 +64,11 @@ export class OrderValidationService {
     }
   }
 
-  async updateOrder(orderId: string, userId: string, newStatus: OrderStatus) {
-    // validate owner & restaurant existence
-    const { ownerId } = await this.ownerService.getOwnerIdByUserId(userId);
+  async updateOrder(orderId: string, ownerId: string, newStatus: OrderStatus) {
+    // validate owner
+    await this.ownerService.getById(ownerId);
+
+    // validate restaurant existence and ownership
     const { restaurantId } =
       await this.ownerService.getRestaurantIdByOwnerId(ownerId);
 
@@ -91,8 +93,7 @@ export class OrderValidationService {
     }
   }
 
-  async getOrder(userId: string, order: ReadOrderData) {
-    const { clientId } = await this.clientService.getClientByUserId(userId);
+  getOrder(clientId: string, order: ReadOrderData) {
     if (order.clientId !== clientId) throw new Error('Unauthorized');
   }
 }

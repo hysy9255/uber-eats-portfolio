@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-
 import { SharedService } from 'src/shared/shared.service';
 import { CreateDeliveryAddressSnapshotData } from '../types/create-delivery-address-snapshot-data';
 import { ReadDeliveryAddressData } from 'src/client/types/read-delivery-address.data';
@@ -28,8 +27,4 @@ export class DeliveryAddressSnapshotMapper {
       ...data,
     });
   }
-
-  //   readDataToDto(data: ReadOrderData): OrderDTO {
-  //     return new OrderDTO({ ...data, createdAt: data.createdAt.toISOString() });
-  //   }
 }

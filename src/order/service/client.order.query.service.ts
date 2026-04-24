@@ -25,11 +25,9 @@ export class ClientOrderQueryService {
   ) {}
 
   async orders(
-    userId: string,
+    clientId: string,
     statuses?: OrderStatus[],
   ): Promise<GetOrderForClientDTO[]> {
-    const { clientId } = await this.clientService.getClientByUserId(userId);
-
     const orders = await this.orderRepo.findByClient(clientId, statuses);
 
     if (orders.length === 0) return [];
@@ -48,12 +46,15 @@ export class ClientOrderQueryService {
     );
   }
 
-  async order(userId: string, orderId: string): Promise<GetOrderForClientDTO> {
+  async order(
+    clientId: string,
+    orderId: string,
+  ): Promise<GetOrderForClientDTO> {
     const order = await this.orderRepo.findById(orderId);
     const orderItems = await this.orderItemRepo.findByOrderId(orderId);
     const restaurant = await this.restaurantService.getByOrderId(orderId);
 
-    await this.validation.getOrder(userId, order);
+    this.validation.getOrder(clientId, order);
     return this.clientAssembler.build(order, orderItems, restaurant);
   }
 }

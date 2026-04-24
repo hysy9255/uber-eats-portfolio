@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 
 import { AuthGuard } from 'src/auth/auth.guard';
-import { UserOutput } from 'src/user/dto/user-output';
+import { AuthUser } from 'src/user/types/auth-user';
 import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles.decorator';
 import { DishExternalService } from './dish.external.service';
@@ -48,7 +48,7 @@ export class DishController {
   @Roles(UserRole.Owner)
   @Post('dishes')
   async createDish(@Req() req: Request, @Body() dto: CreateDishDTO) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.dishExternalService.createDish(userId, dto);
   }
 
@@ -62,7 +62,7 @@ export class DishController {
     @Param('dishId') dishId: string,
     @Body() dto: UpdateDishDTO,
   ) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.dishExternalService.updateDish(userId, dishId, dto);
   }
 
@@ -72,7 +72,7 @@ export class DishController {
   @Roles(UserRole.Owner)
   @Delete('/dishes/:dishId')
   async deleteDish(@Req() req: Request, @Param('dishId') dishId: string) {
-    const { userId } = req['authUser'] as UserOutput;
+    const { userId } = req['authUser'] as AuthUser;
     await this.dishExternalService.deleteDish(userId, dishId);
   }
 }

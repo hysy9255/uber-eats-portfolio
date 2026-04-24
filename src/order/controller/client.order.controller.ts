@@ -11,7 +11,7 @@ import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles.decorator';
 import { UserRole } from 'src/constants/userRole';
 import { CreateOrderDTO } from '../dto/create-order.dto';
-import { UserOutput } from 'src/user/dto/user-output';
+import { ClientUser } from 'src/user/types/auth-user';
 import { GetOrderForClientDTO } from '../dto/get-order-for-client.dto';
 import {
   FINISHED_ORDER_STATUSES,
@@ -20,6 +20,7 @@ import {
 import { ClientOrderCommandService } from '../service/client.order.command.service';
 import { ClientOrderQueryService } from '../service/client.order.query.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { AUTH_USER } from 'src/constants/variables';
 
 @ApiSecurity('jwt-token')
 @Controller('client/orders')
@@ -37,8 +38,8 @@ export class ClientOrderController {
     @Req() req: Request,
     @Body() dto: CreateOrderDTO,
   ): Promise<{ orderId: string }> {
-    const { userId } = req['authUser'] as UserOutput;
-    return await this.command.create(userId, dto);
+    const { clientId } = req[AUTH_USER] as ClientUser;
+    return await this.command.create(clientId, dto);
   }
 
   @ApiOperation({ summary: 'Client gets an order' })
@@ -49,8 +50,8 @@ export class ClientOrderController {
     @Req() req: Request,
     @Param('orderId') orderId: string,
   ): Promise<GetOrderForClientDTO> {
-    const { userId } = req['authUser'] as UserOutput;
-    return await this.query.order(userId, orderId);
+    const { clientId } = req[AUTH_USER] as ClientUser;
+    return await this.query.order(clientId, orderId);
   }
 
   @ApiOperation({ summary: 'Client gets on-going orders' })
@@ -60,8 +61,8 @@ export class ClientOrderController {
   async getOnGoingOrdersForClient(
     @Req() req: Request,
   ): Promise<GetOrderForClientDTO[]> {
-    const { userId } = req['authUser'] as UserOutput;
-    return await this.query.orders(userId, ONGOING_ORDER_STATUSES);
+    const { clientId } = req[AUTH_USER] as ClientUser;
+    return await this.query.orders(clientId, ONGOING_ORDER_STATUSES);
   }
 
   @ApiOperation({ summary: 'Client gets completed orders' })
@@ -71,7 +72,7 @@ export class ClientOrderController {
   async getOrderHistoryForClient(
     @Req() req: Request,
   ): Promise<GetOrderForClientDTO[]> {
-    const { userId } = req['authUser'] as UserOutput;
-    return await this.query.orders(userId, FINISHED_ORDER_STATUSES);
+    const { clientId } = req[AUTH_USER] as ClientUser;
+    return await this.query.orders(clientId, FINISHED_ORDER_STATUSES);
   }
 }

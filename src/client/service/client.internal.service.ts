@@ -34,6 +34,10 @@ export class ClientInternalService {
     return await this.clientRepo.findByUserId(userId);
   }
 
+  async getClientById(userId: string): Promise<{ clientId: string }> {
+    return await this.clientRepo.findById(userId);
+  }
+
   async getClientIdByUserId(userId: string): Promise<string> {
     const { clientId } = await this.clientRepo.findByUserId(userId);
     return clientId;

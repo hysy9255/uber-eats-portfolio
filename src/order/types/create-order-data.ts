@@ -1,5 +1,5 @@
 import { DeliveryType } from 'src/constants/deliveryType';
-import { OrderItem } from '../dto/order-output';
+import { OrderItem } from '../dto/create-order.dto';
 
 export class CreateOrderData {
   orderId: string;
