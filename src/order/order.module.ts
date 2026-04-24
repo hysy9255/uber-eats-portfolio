@@ -15,8 +15,6 @@ import { DeliveryAddressSnapshotEntity } from './orm-entities/delivery-address-s
 import { DeliveryAddressSnapshotRepository } from './repository/delivery-address-snapshot.repository';
 import { DeliveryAddressSnapshotMapper } from './mapper/delivery-address-snapshot.mapper';
 import { OrderGateway } from './order.gateway';
-// import { OrderCommandService } from './service/order.command.service';
-// import { OrderQueryService } from './service/order.query.service';
 import { OrderValidationService } from './service/order.validation.service';
 import { OrderClientDTOAssembler } from './assembler/order-client-dto.assembler';
 import { OrderOwnerDTOAssembler } from './assembler/order-owner-dto.assembler';
