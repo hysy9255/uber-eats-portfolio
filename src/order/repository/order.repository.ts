@@ -83,18 +83,23 @@ export class OrderRepository {
     return this.parseMany(rows);
   }
 
-  async findDeliveredInDateRange(
+  async findInDateRange(
     restaurantId: string,
     startDate: Date,
     endDate: Date,
+    status?: OrderStatus,
   ): Promise<ReadOrderData[]> {
     const qb = this.baseReadQb()
       .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere('order.status = :status', { status: OrderStatus.Delivered })
+      // .andWhere('order.status = :status', { status: OrderStatus.Delivered })
       .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       });
+
+    if (status) {
+      qb.andWhere('order.status = :status', { status });
+    }
 
     const rows = await qb.getRawMany();
     return this.parseMany(rows);

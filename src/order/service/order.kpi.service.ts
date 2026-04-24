@@ -12,6 +12,7 @@ import {
 import { calculateAvgOrder } from 'src/utils/calculateAvgOrder';
 import { calculateRevenue } from 'src/utils/calculateRevenue';
 import { OrderStatsRepository } from '../repository/order.stats.repository';
+import { OrderStatus } from 'src/constants/orderStatus';
 
 @Injectable()
 export class OrderKpiService {
@@ -30,16 +31,18 @@ export class OrderKpiService {
       secondHalfEndDate,
     } = generateTwoDateRanges(range);
 
-    const firstHalfOrders = await this.orderRepo.findDeliveredInDateRange(
+    const firstHalfOrders = await this.orderRepo.findInDateRange(
       restaurantId,
       firstHalfStartDate,
       firstHalfEndDate,
+      OrderStatus.Delivered,
     );
 
-    const secondHalfOrders = await this.orderRepo.findDeliveredInDateRange(
+    const secondHalfOrders = await this.orderRepo.findInDateRange(
       restaurantId,
       secondHalfStartDate,
       secondHalfEndDate,
+      OrderStatus.Delivered,
     );
 
     const firstHalfRevenue = calculateRevenue(firstHalfOrders);
@@ -61,10 +64,11 @@ export class OrderKpiService {
 
     const { startDate, endDate } = generateDateRange(range);
 
-    const orders = await this.orderRepo.findDeliveredInDateRange(
+    const orders = await this.orderRepo.findInDateRange(
       restaurantId,
       startDate,
       endDate,
+      OrderStatus.Delivered,
     );
 
     const dailyRevenue = buildDailyRevenue(orders, startDate, endDate);

@@ -253,16 +253,18 @@ export class OrderExternalService {
     secondHalfStartDate.setDate(secondHalfStartDate.getDate() - days);
     secondHalfStartDate.setHours(0, 0, 0, 0);
 
-    const firstHalfOrders = await this.orderRepo.findDeliveredInDateRange(
+    const firstHalfOrders = await this.orderRepo.findInDateRange(
       restaurantId,
       firstHalfStartDate,
       firstHalfEndDate,
+      OrderStatus.Delivered,
     );
 
-    const secondHalfOrders = await this.orderRepo.findDeliveredInDateRange(
+    const secondHalfOrders = await this.orderRepo.findInDateRange(
       restaurantId,
       secondHalfStartDate,
       secondHalfEndDate,
+      OrderStatus.Delivered,
     );
 
     const firstHalfRevenue = firstHalfOrders.reduce(
@@ -299,10 +301,11 @@ export class OrderExternalService {
     startDate.setDate(startDate.getDate() - days);
     startDate.setHours(0, 0, 0, 0);
 
-    const orders = await this.orderRepo.findDeliveredInDateRange(
+    const orders = await this.orderRepo.findInDateRange(
       restaurantId,
       startDate,
       endDate,
+      OrderStatus.Delivered,
     );
 
     const dailyRevenue = buildDailyRevenue(orders, startDate, endDate);
