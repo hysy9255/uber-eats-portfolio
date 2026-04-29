@@ -18,6 +18,12 @@ export class DriverRepository {
     private readonly driverDocsRepository: Repository<DriverDocsEntity>,
   ) {}
 
+  async save(userId: string, driverId: string) {
+    await this.driverRepository.save(
+      this.driverRepository.create({ userId, driverId }),
+    );
+  }
+
   // done
   async saveDriver(userId: string, driverId: string) {
     await this.driverRepository.save(

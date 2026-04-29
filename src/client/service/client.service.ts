@@ -12,7 +12,7 @@ import { UpdateDeliveryAddressDTO } from '../dto/update-delivery-address.dto';
 import { DeleteDeliveryAddressDTO } from '../dto/delete-delivery-address.dto';
 
 @Injectable()
-export class ClientExternalService {
+export class ClientService {
   constructor(
     private readonly clientRepo: ClientRepository,
     private readonly deliveryAddressRepo: DeliveryAddressRepository,
@@ -20,13 +20,13 @@ export class ClientExternalService {
   ) {}
 
   async getDeliveryAddresses(userId: string): Promise<GetDeliveryAddressDTO[]> {
-    const { clientId } = await this.clientRepo.findByUserId(userId);
+    const { clientId } = await this.clientRepo.findOneByUser(userId);
     const readData = await this.deliveryAddressRepo.findAllByClientId(clientId);
     return readData.map((d) => this.deliveryAddressMapper.readDataToDto(d));
   }
 
   async addNewDeliveryAddress(userId: string, dto: CreateDeliveryAddressDTO) {
-    const { clientId } = await this.clientRepo.findByUserId(userId);
+    const { clientId } = await this.clientRepo.findOneByUser(userId);
     const createData = this.deliveryAddressMapper.dtoToCreateData(
       clientId,
       dto,
@@ -35,7 +35,7 @@ export class ClientExternalService {
   }
 
   async setDefaultAddress(userId: string, deliveryAddressId: string) {
-    const { clientId } = await this.clientRepo.findByUserId(userId);
+    const { clientId } = await this.clientRepo.findOneByUser(userId);
     const address = await this.deliveryAddressRepo.findDefaultAddress(clientId);
     address.isDefault = false;
     await this.deliveryAddressRepo.updateDefault(
@@ -55,7 +55,7 @@ export class ClientExternalService {
   }
 
   async updateDeliveryAddress(userId: string, dto: UpdateDeliveryAddressDTO) {
-    const { clientId } = await this.clientRepo.findByUserId(userId);
+    const { clientId } = await this.clientRepo.findOneByUser(userId);
 
     const deliveryAddress = await this.deliveryAddressRepo.findById(
       dto.deliveryAddressId,
@@ -73,7 +73,7 @@ export class ClientExternalService {
     userId: string,
     { deliveryAddressId }: DeleteDeliveryAddressDTO,
   ) {
-    const { clientId } = await this.clientRepo.findByUserId(userId);
+    const { clientId } = await this.clientRepo.findOneByUser(userId);
     const deliveryAddress =
       await this.deliveryAddressRepo.findById(deliveryAddressId);
     if (deliveryAddress.isDefault)

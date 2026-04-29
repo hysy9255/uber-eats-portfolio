@@ -10,13 +10,13 @@ export class OwnerRepository {
     private readonly ownerRepository: Repository<OwnerEntity>,
   ) {}
 
-  async saveOwner(userId: string, ownerId: string) {
+  async save(userId: string, ownerId: string) {
     await this.ownerRepository.save(
       this.ownerRepository.create({ userId, ownerId }),
     );
   }
 
-  async getById(ownerId: string): Promise<{ ownerId: string }> {
+  async findOneById(ownerId: string): Promise<{ ownerId: string }> {
     const row = await this.ownerRepository
       .createQueryBuilder('owner')
       .innerJoin('owner.restaurant', 'restaurant')
@@ -28,7 +28,7 @@ export class OwnerRepository {
     return row;
   }
 
-  async getOwnerByUserId(userId: string) {
+  async findOneByUser(userId: string) {
     const row = await this.ownerRepository
       .createQueryBuilder('owner')
       .innerJoin('owner.restaurant', 'restaurant')
@@ -41,32 +41,6 @@ export class OwnerRepository {
       .getRawOne<{ restaurantId: string; userId: string; ownerId: string }>();
 
     if (!row) throw new Error('Owner Not Found');
-    return row;
-  }
-
-  // done
-  async getOwnerIdByUserId(userId: string): Promise<{ ownerId: string }> {
-    const row = await this.ownerRepository
-      .createQueryBuilder('o')
-      .where('o.userId = :userId', { userId })
-      .select(['o.ownerId AS "ownerId"'])
-      .getRawOne<{ ownerId: string }>();
-
-    if (!row) throw new Error('OwnerId Not Found');
-    return row;
-  }
-
-  async getRestaurantIdByOwnerId(
-    ownerId: string,
-  ): Promise<{ restaurantId: string }> {
-    const row = await this.ownerRepository
-      .createQueryBuilder('o')
-      .innerJoin('o.restaurant', 'r')
-      .where('o.ownerId = :ownerId', { ownerId })
-      .select(['r.restaurantId AS "restaurantId"'])
-      .getRawOne<{ restaurantId: string }>();
-
-    if (!row) throw new Error('RestaurantId Not Found');
     return row;
   }
 }

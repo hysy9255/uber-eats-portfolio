@@ -1,38 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { OwnerRepository } from './owner.repository';
-import { SharedService } from 'src/shared/shared.service';
 
 @Injectable()
 export class OwnerInternalService {
-  constructor(
-    private readonly ownerRepository: OwnerRepository,
-    private readonly sharedService: SharedService,
-  ) {}
+  constructor(private readonly ownerRep: OwnerRepository) {}
 
-  // done
-  async create(userId: string): Promise<{ ownerId: string }> {
-    const ownerId = this.sharedService.generateId();
-    await this.ownerRepository.saveOwner(userId, ownerId);
-    return { ownerId };
-  }
-
-  // done
-  async getOwnerIdByUserId(userId: string): Promise<{ ownerId: string }> {
-    const owner = await this.ownerRepository.getOwnerByUserId(userId);
+  async getOwnerByUser(userId: string): Promise<{ ownerId: string }> {
+    const owner = await this.ownerRep.findOneByUser(userId);
     return { ownerId: owner.ownerId };
   }
 
   async getById(ownerId: string): Promise<{ ownerId: string }> {
-    return await this.ownerRepository.getById(ownerId);
+    const result = await this.ownerRep.findOneById(ownerId);
+    if (!result) throw new Error('Owner Not Found');
+    return result;
   }
 
   async getIdByUser(userId: string): Promise<{ ownerId: string }> {
-    return await this.ownerRepository.getOwnerByUserId(userId);
-  }
-
-  async getRestaurantIdByOwnerId(
-    ownerId: string,
-  ): Promise<{ restaurantId: string }> {
-    return await this.ownerRepository.getRestaurantIdByOwnerId(ownerId);
+    return await this.ownerRep.findOneByUser(userId);
   }
 }

@@ -52,6 +52,30 @@ export class DeliveryAddressRepository {
     return row;
   }
 
+  async findOneById(
+    deliveryAddressId: string,
+  ): Promise<ReadDeliveryAddressData> {
+    const row = await this.deliveryAddressRepo
+      .createQueryBuilder('d')
+      .select([
+        'd.deliveryAddressId AS "deliveryAddressId"',
+        'd.streetAddress AS "streetAddress"',
+        'd.apt AS apt',
+        'd.city AS city',
+        'd.state AS state',
+        'd.zip AS zip',
+        'd.isDefault AS "isDefault"',
+        'd.alias AS alias',
+        'd.customAlias AS "customAlias"',
+        'd.clientId AS "clientId"',
+      ])
+      .where('d.deliveryAddressId = :deliveryAddressId', { deliveryAddressId })
+      .getRawOne<ReadDeliveryAddressData>();
+
+    if (!row) throw new Error('Address Not Found');
+    return row;
+  }
+
   async findDefaultAddress(clientId: string): Promise<ReadDeliveryAddressData> {
     const row = await this.deliveryAddressRepo
       .createQueryBuilder('d')

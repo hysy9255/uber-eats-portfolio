@@ -1,24 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { OrderStatus } from 'src/constants/orderStatus';
-import { OwnerInternalService } from 'src/owner/owner.internal.service';
 import { OrderRepository } from '../repository/order.repository';
 import { OrderItemRepository } from '../repository/orderItem.repository';
 import { DeliveryAddressSnapshotRepository } from '../repository/delivery-address-snapshot.repository';
 import { GetOrderForOwnerDTO } from '../dto/get-order-for-owner.dto';
-import { ClientInternalService } from 'src/client/service/client.internal.service';
 import { OrderOwnerDTOAssembler } from '../assembler/order-owner-dto.assembler';
+import { ClientRepository } from 'src/client/repository/client.repository';
 
 @Injectable()
 export class OwnerOrderQueryService {
   constructor(
-    private readonly ownerService: OwnerInternalService,
-    private readonly clientService: ClientInternalService,
-
     private readonly orderRepo: OrderRepository,
     private readonly orderItemRepo: OrderItemRepository,
     private readonly snapshotRepo: DeliveryAddressSnapshotRepository,
+    private readonly clientRepo: ClientRepository,
 
-    private readonly ownerAssembler: OrderOwnerDTOAssembler,
+    private readonly assembler: OrderOwnerDTOAssembler,
   ) {}
 
   async orders(
@@ -34,13 +31,8 @@ export class OwnerOrderQueryService {
 
     const orderItems = await this.orderItemRepo.findByOrders(orderIds);
     const snapshots = await this.snapshotRepo.findByOrders(orderIds);
-    const clientInfos = await this.clientService.getByIds(clientIds);
+    const clientInfos = await this.clientRepo.findClientInfoByIds(clientIds);
 
-    return this.ownerAssembler.build(
-      orders,
-      orderItems,
-      snapshots,
-      clientInfos,
-    );
+    return this.assembler.build(orders, orderItems, snapshots, clientInfos);
   }
 }

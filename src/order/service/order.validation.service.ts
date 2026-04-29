@@ -1,79 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrderDTO } from '../dto/create-order.dto';
-import { RestaurantInternalService } from 'src/restaurant/service/restaurant.internal.service';
-import { DishInternalService } from 'src/dish/dish.internal.service';
-import { ClientInternalService } from 'src/client/service/client.internal.service';
 import { OrderStatus } from 'src/constants/orderStatus';
 import { OrderRepository } from '../repository/order.repository';
-import { OwnerInternalService } from 'src/owner/owner.internal.service';
 import { ReadOrderData } from '../types/read-order-data';
+import { OwnerRepository } from 'src/owner/owner.repository';
+import { DishInternalService } from 'src/dish/dish.internal.service';
+import { RestaurantRepository } from 'src/restaurant/repository/restaurant.repository';
+import { ClientLoader } from 'src/client/service/client.loader';
 
 @Injectable()
 export class OrderValidationService {
   constructor(
-    private readonly restaurantService: RestaurantInternalService,
+    private readonly restaurantRepo: RestaurantRepository,
+    private readonly owner: OwnerRepository,
+    private readonly order: OrderRepository,
+    private readonly clientLoader: ClientLoader,
     private readonly dishService: DishInternalService,
-    private readonly clientService: ClientInternalService,
-    private readonly ownerService: OwnerInternalService,
-
-    private readonly orderRepo: OrderRepository,
   ) {}
 
   async createOrder(clientId: string, dto: CreateOrderDTO) {
     const { restaurantId, orderItems, deliveryAddressId } = dto;
+    const dishIds = orderItems.map((item) => item.dishId);
 
-    // validate client existence
-    await this.clientService.getClientById(clientId);
+    const client = await this.clientLoader.loadClient(clientId);
+    // const restaurant = await this.restaurant.loadRestaurant(restaurantId);
+    console.log(restaurantId);
 
     // validate client ownership of delivery address
-    const deliveryAddress =
-      await this.clientService.getDeliveryAddressById(deliveryAddressId);
-
-    if (deliveryAddress.clientId !== clientId) {
-      throw new Error('Invalid delivery address');
-    }
-
-    // validate restaurant existence
-    await this.restaurantService.getById(restaurantId);
+    client.ensureOwnsAddress(deliveryAddressId);
 
     // validate restaurant is open
-    this.restaurantService.isRestaurantOpen(restaurantId);
+    // restaurant.isOpen();
 
     // validate duplicate dishIds
-    const dishIdSet = new Set<string>();
-    for (const item of orderItems) {
-      if (dishIdSet.has(item.dishId)) {
-        throw new Error('Duplicate dishId in order items');
-      }
-      dishIdSet.add(item.dishId);
-    }
+    this.dishService.hasDuplicateIds(dishIds);
 
     // validate dish existence and restaurant ownership
-    const dishes = await this.dishService.getManyByIds(
-      orderItems.map((item) => item.dishId),
-    );
-
-    if (dishes.length !== orderItems.length) {
-      throw new Error('dish does not exist');
-    }
-
-    for (const dish of dishes) {
-      if (dish.restaurantId !== restaurantId) {
-        throw new Error('dish does not belong to the restaurant');
-      }
-    }
+    // restaurant.ensureDishExist(dishIds);
   }
 
   async updateOrder(orderId: string, ownerId: string, newStatus: OrderStatus) {
     // validate owner
-    await this.ownerService.getById(ownerId);
+    await this.owner.findOneById(ownerId);
 
     // validate restaurant existence and ownership
-    const { restaurantId } =
-      await this.ownerService.getRestaurantIdByOwnerId(ownerId);
+    const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
 
     // validate order existence
-    const order = await this.orderRepo.findById(orderId);
+    const order = await this.order.findOneById(orderId);
 
     // validate restaurant ownership of order
     if (order.restaurantId !== restaurantId) {

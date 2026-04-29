@@ -1,33 +1,29 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { RegisterClientDTO } from './dto/register-client.dto';
-import { RegistrationExternalService } from './registration.external.service';
 import { RegisterOwnerDTO } from './dto/register-owner.dto';
 import { RegisterDriverDTO } from './dto/register-driver.dto';
+import { RegistrationService } from './registration.external.service';
 
 @Controller('registration')
 export class RegistrationController {
-  constructor(
-    private readonly registrationExternalService: RegistrationExternalService,
-  ) {}
+  constructor(private readonly registrar: RegistrationService) {}
 
   @ApiOperation({ summary: 'Register Client' })
   @Post('/clients')
   async registerClient(@Body() dto: RegisterClientDTO) {
-    await this.registrationExternalService.registerClient(dto);
+    await this.registrar.registerClient(dto);
   }
 
-  // done
   @ApiOperation({ summary: 'Register Owner' })
   @Post('/owners')
   async registerOwner(@Body() dto: RegisterOwnerDTO) {
-    await this.registrationExternalService.registerOwner(dto);
+    await this.registrar.registerOwner(dto);
   }
 
-  // done
   @ApiOperation({ summary: 'Register Driver' })
   @Post('/drivers')
   async registerDriver(@Body() dto: RegisterDriverDTO) {
-    await this.registrationExternalService.registerDriver(dto);
+    await this.registrar.registerDriver(dto);
   }
 }

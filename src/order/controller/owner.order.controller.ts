@@ -12,7 +12,6 @@ import { ApiOperation, ApiSecurity } from '@nestjs/swagger';
 import { UserRole } from 'src/constants/userRole';
 import { Roles } from 'src/auth/roles.decorator';
 import { UpdateOrderStatusDTO } from '../dto/update-order-status.dto';
-// import { UserOutput } from 'src/user/dto/user-output';
 import { OrderStatus } from 'src/constants/orderStatus';
 import { GetOrderForOwnerDTO } from '../dto/get-order-for-owner.dto';
 import { OwnerOrderCommandService } from '../service/owner.order.command.service';

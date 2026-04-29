@@ -5,7 +5,7 @@ export class DishDTO {
   price: number;
   description: string;
   category: string;
-  dishImgUrl?: string;
+  dishImgUrl: string | null;
   availability: boolean;
   constructor(init: {
     dishId: string;
@@ -15,7 +15,7 @@ export class DishDTO {
     description: string;
     category: string;
     availability: boolean;
-    dishImgUrl?: string;
+    dishImgUrl: string | null;
   }) {
     this.dishId = init.dishId;
     this.restaurantId = init.restaurantId;

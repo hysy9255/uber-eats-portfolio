@@ -1,14 +1,14 @@
 export class ReadRestaurantData {
   restaurantId: string;
   ownerId: string;
-  logo?: string;
+  logo: string | null;
   lbn: string;
   dba: string;
   cuisineType: string;
   storePhone: string;
   businessEmail: string;
-  instagram?: string;
-  website?: string;
+  instagram: string | null;
+  website: string | null;
   mainImgUrl: string;
   sub1ImgUrl: string;
   sub2ImgUrl: string;

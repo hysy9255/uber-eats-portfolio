@@ -14,7 +14,7 @@ export class UserDomainService {
   ) {}
 
   async getOwnerDomainByUserId(userId: string) {
-    const owner = await this.ownerRepository.getOwnerByUserId(userId);
+    const owner = await this.ownerRepository.findOneByUser(userId);
     if (!owner) {
       throw new Error('Owner not found');
     }

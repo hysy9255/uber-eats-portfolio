@@ -30,7 +30,7 @@ export class DishEntity {
   category: string;
 
   @Column({ nullable: true })
-  dishImgUrl?: string;
+  dishImgUrl: string | null;
 
   @ManyToOne(() => RestaurantEntity, (restaurant) => restaurant.dishes, {
     onDelete: 'CASCADE',

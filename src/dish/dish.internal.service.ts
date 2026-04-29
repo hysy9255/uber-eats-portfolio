@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DishRepository } from './dish.repository';
 import { DishMapper } from './dish.mapper';
-import { CreateDishDTO } from './dto/create-dish.dto';
-import { DishDTO } from './dto/dish.dto';
-import { ReadDishData } from './types/read-dish-data';
 
 @Injectable()
 export class DishInternalService {
@@ -12,28 +9,31 @@ export class DishInternalService {
     private readonly dishMapper: DishMapper,
   ) {}
 
-  // done
-  async getAllByRestaurantId(restaurantId: string): Promise<DishDTO[]> {
-    const rows = await this.dishRepo.findAllByRestaurantId(restaurantId);
-    return rows.map((row) => this.dishMapper.readDataToDTO(row));
+  hasDuplicateIds(dishIds: string[]) {
+    const dishIdSet = new Set<string>();
+    for (const dishId of dishIds) {
+      if (dishIdSet.has(dishId)) {
+        throw new Error('Duplicate dishId in order items');
+      }
+      dishIdSet.add(dishId);
+    }
   }
 
-  // done
-  async createMany(restaurantId: string, dto: CreateDishDTO[]) {
-    const createDishesData = this.dishMapper.dtoToCreateDishesData(
-      restaurantId,
-      dto,
-    );
-    await this.dishRepo.saveMultiple(createDishesData);
+  async exist(dishIds: string[]) {
+    const dishes = await this.dishRepo.findByIds(dishIds);
+
+    if (dishes.length !== dishIds.length) {
+      throw new Error('Some dish does not exist');
+    }
   }
 
-  // done
-  async getManyByIds(dishIds: string[]): Promise<ReadDishData[]> {
-    return await this.dishRepo.findAllByIds(dishIds);
-  }
+  async existByRestaurant(restaurantId: string, dishIds: string[]) {
+    const dishes = await this.dishRepo.findByIds(dishIds);
 
-  // done
-  async getByIds(dishIds: string[]): Promise<ReadDishData[]> {
-    return await this.dishRepo.findAllByIds(dishIds);
+    for (const dish of dishes) {
+      if (dish.restaurantId !== restaurantId) {
+        throw new Error('dish does not belong to the restaurant');
+      }
+    }
   }
 }

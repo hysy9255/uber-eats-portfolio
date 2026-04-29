@@ -5,5 +5,5 @@ export type ReadDishData = {
   price: number;
   description: string;
   category: string;
-  dishImgUrl?: string;
+  dishImgUrl: string | null;
 };

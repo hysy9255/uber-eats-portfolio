@@ -22,7 +22,6 @@ import { JwtMiddleWare } from './jwt/jwt.middleware';
 import { UploadsController } from './uploads/uploads.controller';
 import { UserInternalModule } from './user/user-internal.module';
 import { DishInternalModule } from './dish/dish-internal.module';
-import { RestaurantInternalModule } from './restaurant/restaurant-internal.module';
 import { DishModule } from './dish/dish.module';
 import { DriverModule } from './driver/driver.module';
 import { OwnerModule } from './owner/owner.module';
@@ -84,7 +83,6 @@ import { HealthModule } from './health/health.module';
     OwnerDraftModule,
     RegistrationModule,
     DishModule,
-    RestaurantInternalModule,
     DishInternalModule,
     UserInternalModule,
     UserModule,

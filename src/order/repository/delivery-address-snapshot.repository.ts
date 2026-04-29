@@ -58,6 +58,28 @@ export class DeliveryAddressSnapshotRepository {
       .getRawMany<ReadDeliveryAddressSnapshotData>();
   }
 
+  async findOneByOrder(
+    orderId: string,
+  ): Promise<ReadDeliveryAddressSnapshotData> {
+    const row = await this.deliveryAddressSnapshotRepo
+      .createQueryBuilder('snap')
+      .select([
+        'snap.deliveryAddressSnapshotId AS "deliveryAddressSnapshotId"',
+        'snap.streetAddress AS "streetAddress"',
+        'snap.apt AS apt',
+        'snap.city AS city',
+        'snap.state AS state',
+        'snap.zip AS zip',
+        'snap.orderId AS "orderId"',
+      ])
+      .where('snap.orderId = :orderId', { orderId })
+      .getRawOne<ReadDeliveryAddressSnapshotData>();
+
+    if (!row) throw new Error('Delivery Address Snapshot Not Found');
+
+    return row;
+  }
+
   //   async getOrderById(orderId: string) {
   //     const result = await this.orderRepository
   //       .createQueryBuilder('order')

@@ -17,18 +17,7 @@ export class ClientRepository {
     );
   }
 
-  async findById(clientId: string): Promise<{ clientId: string }> {
-    const row = await this.clientRepository
-      .createQueryBuilder('c')
-      .select(['c.clientId AS "clientId"'])
-      .where('c.clientId = :clientId', { clientId })
-      .getRawOne<{ clientId: string }>();
-
-    if (!row) throw new Error('Client Not Found');
-    return row;
-  }
-
-  async findByUserId(userId: string): Promise<{ clientId: string }> {
+  async findOneByUser(userId: string): Promise<{ clientId: string }> {
     const row = await this.clientRepository
       .createQueryBuilder('c')
       .select(['c.clientId AS "clientId"'])

@@ -8,7 +8,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ClientExternalService } from '../service/client.external.service';
 import { ApiOperation } from '@nestjs/swagger';
 import { UserRole } from 'src/constants/userRole';
 import { Roles } from 'src/auth/roles.decorator';
@@ -19,10 +18,11 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { SetDefaultDeliveryAddressDTO } from '../dto/set-default-delivery-address.dto';
 import { DeleteDeliveryAddressDTO } from '../dto/delete-delivery-address.dto';
 import { AuthUser } from 'src/user/types/auth-user';
+import { ClientService } from '../service/client.service';
 
 @Controller('client')
 export class ClientController {
-  constructor(private readonly clientExternalService: ClientExternalService) {}
+  constructor(private readonly service: ClientService) {}
 
   @ApiOperation({ summary: 'View my delivery addresses' })
   @UseGuards(AuthGuard)
@@ -32,7 +32,7 @@ export class ClientController {
     @Req() req: Request,
   ): Promise<GetDeliveryAddressDTO[]> {
     const { userId } = req['authUser'] as AuthUser;
-    return await this.clientExternalService.getDeliveryAddresses(userId);
+    return await this.service.getDeliveryAddresses(userId);
   }
 
   @ApiOperation({ summary: 'Set default delivery address' })
@@ -44,10 +44,7 @@ export class ClientController {
     @Body() dto: SetDefaultDeliveryAddressDTO,
   ) {
     const { userId } = req['authUser'] as AuthUser;
-    await this.clientExternalService.setDefaultAddress(
-      userId,
-      dto.deliveryAddressId,
-    );
+    await this.service.setDefaultAddress(userId, dto.deliveryAddressId);
   }
 
   @ApiOperation({ summary: 'Add delivery address' })
@@ -59,7 +56,7 @@ export class ClientController {
     @Body() dto: CreateDeliveryAddressDTO,
   ) {
     const { userId } = req['authUser'] as AuthUser;
-    await this.clientExternalService.addNewDeliveryAddress(userId, dto);
+    await this.service.addNewDeliveryAddress(userId, dto);
   }
 
   @ApiOperation({ summary: 'Update delivery address' })
@@ -71,7 +68,7 @@ export class ClientController {
     @Body() dto: UpdateDeliveryAddressDTO,
   ) {
     const { userId } = req['authUser'] as AuthUser;
-    await this.clientExternalService.updateDeliveryAddress(userId, dto);
+    await this.service.updateDeliveryAddress(userId, dto);
   }
 
   @ApiOperation({ summary: 'Delete delivery address' })
@@ -83,6 +80,6 @@ export class ClientController {
     @Body() dto: DeleteDeliveryAddressDTO,
   ) {
     const { userId } = req['authUser'] as AuthUser;
-    await this.clientExternalService.deleteDeliveryAddress(userId, dto);
+    await this.service.deleteDeliveryAddress(userId, dto);
   }
 }

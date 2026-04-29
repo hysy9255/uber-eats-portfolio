@@ -49,9 +49,9 @@ export class ClientOrderController {
   async getOrderForClient(
     @Req() req: Request,
     @Param('orderId') orderId: string,
-  ): Promise<GetOrderForClientDTO> {
+  ): Promise<GetOrderForClientDTO[]> {
     const { clientId } = req[AUTH_USER] as ClientUser;
-    return await this.query.order(clientId, orderId);
+    return await this.query.getOrderByIdAndClientId(clientId, orderId);
   }
 
   @ApiOperation({ summary: 'Client gets on-going orders' })
@@ -62,7 +62,7 @@ export class ClientOrderController {
     @Req() req: Request,
   ): Promise<GetOrderForClientDTO[]> {
     const { clientId } = req[AUTH_USER] as ClientUser;
-    return await this.query.orders(clientId, ONGOING_ORDER_STATUSES);
+    return await this.query.getOrdersByClient(clientId, ONGOING_ORDER_STATUSES);
   }
 
   @ApiOperation({ summary: 'Client gets completed orders' })
@@ -73,6 +73,9 @@ export class ClientOrderController {
     @Req() req: Request,
   ): Promise<GetOrderForClientDTO[]> {
     const { clientId } = req[AUTH_USER] as ClientUser;
-    return await this.query.orders(clientId, FINISHED_ORDER_STATUSES);
+    return await this.query.getOrdersByClient(
+      clientId,
+      FINISHED_ORDER_STATUSES,
+    );
   }
 }

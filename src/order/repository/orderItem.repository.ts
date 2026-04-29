@@ -31,6 +31,21 @@ export class OrderItemRepository {
       .getRawMany<ReadOrderItemData>();
   }
 
+  async findByOrder(orderId: string): Promise<ReadOrderItemData[]> {
+    return await this.repo
+      .createQueryBuilder('oi')
+      .leftJoin('oi.dish', 'dish')
+      .select([
+        'oi.orderId AS "orderId"',
+        'oi.quantity AS "quantity"',
+        'dish.name AS "name"',
+        'dish.price AS "price"',
+        'dish.dishImgUrl AS "dishImg"',
+      ])
+      .where('oi.orderId = :orderId', { orderId })
+      .getRawMany<ReadOrderItemData>();
+  }
+
   async findByOrderIds(orderIds: string[]): Promise<ReadOrderItemData[]> {
     return await this.repo
       .createQueryBuilder('oi')

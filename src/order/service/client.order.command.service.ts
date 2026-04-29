@@ -6,31 +6,23 @@ import { OrderItemRepository } from '../repository/orderItem.repository';
 import { OrderRepository } from '../repository/order.repository';
 import { DeliveryAddressSnapshotMapper } from '../mapper/delivery-address-snapshot.mapper';
 import { OrderItemMapper } from '../mapper/order-item.mapper';
-import { OrderMapper } from '../mapper/order.mapper';
 import { OrderValidationService } from './order.validation.service';
-import { OrderDomainService } from './order.domain.service';
-import { DishInternalService } from 'src/dish/dish.internal.service';
-import { ClientInternalService } from 'src/client/service/client.internal.service';
+import { DeliveryAddressRepository } from 'src/client/repository/delivery-address.repository';
 
 @Injectable()
 export class ClientOrderCommandService {
   constructor(
-    private readonly clientService: ClientInternalService,
-    private readonly dishService: DishInternalService,
-
-    private readonly orderDomainService: OrderDomainService,
+    private readonly orderItemMapper: OrderItemMapper,
+    private readonly snapshotMapper: DeliveryAddressSnapshotMapper,
 
     private readonly validation: OrderValidationService,
-
-    private readonly orderMapper: OrderMapper,
-    private readonly orderItemMapper: OrderItemMapper,
-    private readonly deliveryAddressSnapshotMapper: DeliveryAddressSnapshotMapper,
+    private readonly orderGateway: OrderGateway,
+    private readonly assembler: OrderClientDTOAssembler,
 
     private readonly orderRepo: OrderRepository,
     private readonly orderItemRepo: OrderItemRepository,
-    private readonly deliveryAddressSnapshotRepo: DeliveryAddressSnapshotRepository,
-
-    private readonly orderGateway: OrderGateway,
+    private readonly snapshotRepo: DeliveryAddressSnapshotRepository,
+    private readonly addressRepo: DeliveryAddressRepository,
   ) {}
 
   async create(
@@ -41,27 +33,18 @@ export class ClientOrderCommandService {
 
     const { orderItems, deliveryAddressId, restaurantId } = dto;
 
-    const { orderId } = await this.orderRepo.saveOrder(
-      this.orderMapper.dtoToCreateData(
-        clientId,
-        this.orderDomainService.calculateTotalPrice(
-          orderItems,
-          await this.dishService.getByIds(
-            orderItems.map((item) => item.dishId),
-          ),
-        ),
-        dto,
-      ),
+    const { orderId } = await this.orderRepo.save(
+      await this.assembler.buildCreateData(clientId, dto),
     );
 
     await this.orderItemRepo.save(
       this.orderItemMapper.dtoToCreateData(orderId, orderItems),
     );
 
-    await this.deliveryAddressSnapshotRepo.save(
-      this.deliveryAddressSnapshotMapper.toCreateData(
+    await this.snapshotRepo.save(
+      this.snapshotMapper.toCreateData(
         orderId,
-        await this.clientService.getDeliveryAddressById(deliveryAddressId),
+        await this.addressRepo.findOneById(deliveryAddressId),
       ),
     );
 

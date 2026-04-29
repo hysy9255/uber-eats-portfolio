@@ -1,56 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RestaurantAddressEntity } from '../orm-entities/restaurantAddress.entity';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ReadRestaurantAddressData } from '../types/read-restaurant-address-data';
 import { CreateRestaurantAddressData } from '../types/create-restaurant-address-data';
 import { UpdateRestaurantAddressData } from '../types/update-restaurant-address-data';
+import { z } from 'zod';
+
+const ReadRestaurantAddressDataSchema = z.object({
+  restaurantAddressId: z.string(),
+  restaurantId: z.string(),
+  streetAddress: z.string(),
+  unit: z.string(),
+  state: z.string(),
+  city: z.string(),
+  zip: z.string(),
+});
 
 @Injectable()
 export class RestaurantAddressRepository {
   constructor(
     @InjectRepository(RestaurantAddressEntity)
-    private readonly restaurantAddressRepository: Repository<RestaurantAddressEntity>,
+    private readonly address: Repository<RestaurantAddressEntity>,
   ) {}
 
-  async findOneByRestaurantId(
+  save(data: CreateRestaurantAddressData) {
+    return this.address.save(this.address.create(data));
+  }
+
+  update(data: UpdateRestaurantAddressData) {
+    return this.address.save(this.address.create(data));
+  }
+
+  async findOneByRestaurant(
     restaurantId: string,
   ): Promise<ReadRestaurantAddressData> {
-    const row = await this.restaurantAddressRepository
-      .createQueryBuilder('ra')
-      .select([
-        'ra.restaurantAddressId as "restaurantAdressId"',
-        'ra.restaurantId as "restaurantId"',
-        'ra.streetAddress as "streetAddress"',
-        'ra.unit as unit',
-        'ra.state as state',
-        'ra.city as city',
-        'ra.zip as zip',
-      ])
+    const row = await this.baseReadQb()
       .where('ra.restaurantId = :restaurantId', { restaurantId })
       .getRawOne<ReadRestaurantAddressData>();
 
     if (!row) throw new Error('Restaurant Not Found');
-    return row;
+    return this.parseOne(row);
   }
 
-  async findIdByRestaurantId(
-    restaurantId: string,
-  ): Promise<{ restaurantAddressId: string }> {
-    const row = await this.restaurantAddressRepository
-      .createQueryBuilder('ra')
-      .select(['ra.restaurantAddressId as "restaurantAddressId"'])
-      .where('ra.restaurantId = :restaurantId', { restaurantId })
-      .getRawOne<{ restaurantAddressId: string }>();
-
-    if (!row) throw new Error('Restaurant Not Found');
-    return row;
-  }
-
-  async findAllByRestaurantIds(
+  async findByRestaurants(
     restaurantIds: string[],
   ): Promise<ReadRestaurantAddressData[]> {
-    return await this.restaurantAddressRepository
+    const qb = this.baseReadQb().where(
+      'ra.restaurantId IN (:...restaurantIds)',
+      { restaurantIds },
+    );
+
+    const rows = await qb.getRawMany();
+    return this.parseMany(rows);
+  }
+
+  private baseReadQb(): SelectQueryBuilder<RestaurantAddressEntity> {
+    return this.address
       .createQueryBuilder('ra')
       .select([
         'ra.restaurantAddressId as "restaurantAdressId"',
@@ -60,21 +66,32 @@ export class RestaurantAddressRepository {
         'ra.state as state',
         'ra.city as city',
         'ra.zip as zip',
-      ])
-      .where('ra.restaurantId IN (:...restaurantIds)', { restaurantIds })
-      .getRawMany<ReadRestaurantAddressData>();
+      ]);
   }
 
-  save(data: CreateRestaurantAddressData) {
-    return this.restaurantAddressRepository.save(
-      this.restaurantAddressRepository.create(data),
-    );
+  private parseOne(row: unknown): ReadRestaurantAddressData {
+    const parsed = ReadRestaurantAddressDataSchema.safeParse(row);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new InternalServerErrorException(
+        'Invalid restaurant address read model',
+      );
+    }
+
+    return parsed.data;
   }
 
-  // done
-  update(data: UpdateRestaurantAddressData) {
-    return this.restaurantAddressRepository.save(
-      this.restaurantAddressRepository.create(data),
-    );
+  private parseMany(rows: unknown[]): ReadRestaurantAddressData[] {
+    const parsed = ReadRestaurantAddressDataSchema.array().safeParse(rows);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new InternalServerErrorException(
+        'Invalid restaurant address read model',
+      );
+    }
+
+    return parsed.data;
   }
 }

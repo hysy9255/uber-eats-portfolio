@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { DishEntity } from './orm-entities/dish.orm.entity';
 import { CreateDishData } from './types/create-dish-data';
 import { UpdateDishData } from './types/update-dish-data';
 import { ReadDishData } from './types/read-dish-data';
+import { ReadDishDataSchema } from './schema/read-dish-data.schema';
 
 @Injectable()
 export class DishRepository {
@@ -13,61 +14,56 @@ export class DishRepository {
     private readonly dishRepository: Repository<DishEntity>,
   ) {}
 
-  async saveOne(data: CreateDishData) {
+  async save(data: CreateDishData | CreateDishData[]) {
+    if (Array.isArray(data)) {
+      const entities = this.dishRepository.create(data);
+      await this.dishRepository.save(entities);
+      return;
+    }
+
+    const entity = this.dishRepository.create(data);
+    await this.dishRepository.save(entity);
+  }
+
+  async update(data: UpdateDishData) {
     await this.dishRepository.save(this.dishRepository.create(data));
   }
 
-  async saveMultiple(data: CreateDishData[]) {
-    await this.dishRepository.save(this.dishRepository.create(data));
+  async findByRestaurant(restaurantId: string): Promise<ReadDishData[]> {
+    const qb = this.baseReadQb().where('d.restaurantId = :restaurantId', {
+      restaurantId,
+    });
+    const rows = await qb.getRawMany<ReadDishData>();
+    return this.parseMany(rows);
   }
 
-  async updateOne(data: UpdateDishData) {
-    await this.dishRepository.save(this.dishRepository.create(data));
-  }
-
-  // done
-  async findAllByRestaurantId(restaurantId: string): Promise<ReadDishData[]> {
-    return await this.dishRepository
-      .createQueryBuilder('d')
-      .select([
-        'd.dishId AS "dishId"',
-        'd.restaurantId AS "restaurantId"',
-        'd.name AS name',
-        'd.price AS price',
-        'd.description AS description',
-        'd.category AS category',
-        'd.dishImgUrl AS "dishImgUrl"',
-      ])
-      .where('d.restaurantId = :restaurantId', { restaurantId })
-      .getRawMany<ReadDishData>();
-  }
-
-  // done
   async findOneById(id: string): Promise<ReadDishData> {
-    const row = await this.dishRepository
-      .createQueryBuilder('d')
-      .select([
-        'd.dishId AS "dishId"',
-        'd.restaurantId AS "restaurantId"',
-        'd.name AS name',
-        'd.price AS price',
-        'd.description AS description',
-        'd.category AS category',
-        'd.dishImgUrl AS "dishImgUrl"',
-      ])
+    const row = await this.baseReadQb()
       .where('d.dishId = :dishId', { dishId: id })
       .getRawOne<ReadDishData>();
 
-    if (!row) throw new Error('Dish not found');
-    return row;
+    if (!row) {
+      throw new Error('Order Not Found');
+    }
+
+    return this.parseOne(row);
   }
 
-  async deleteOneById(id: string) {
+  async delete(id: string) {
     await this.dishRepository.delete({ dishId: id });
   }
 
-  async findAllByIds(dishIds: string[]): Promise<ReadDishData[]> {
-    return await this.dishRepository
+  async findByIds(dishIds: string[]): Promise<ReadDishData[]> {
+    const qb = this.baseReadQb().where('d.dishId IN (:...dishIds)', {
+      dishIds,
+    });
+
+    const rows = await qb.getRawMany<ReadDishData>();
+    return this.parseMany(rows);
+  }
+
+  private baseReadQb(): SelectQueryBuilder<DishEntity> {
+    return this.dishRepository
       .createQueryBuilder('d')
       .select([
         'd.dishId AS "dishId"',
@@ -77,8 +73,28 @@ export class DishRepository {
         'd.description AS description',
         'd.category AS category',
         'd.dishImgUrl AS "dishImgUrl"',
-      ])
-      .where('d.dishId IN (:...dishIds)', { dishIds })
-      .getRawMany<ReadDishData>();
+      ]);
+  }
+
+  private parseOne(row: unknown): ReadDishData {
+    const parsed = ReadDishDataSchema.safeParse(row);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new InternalServerErrorException('Invalid dish read model');
+    }
+
+    return parsed.data;
+  }
+
+  private parseMany(rows: unknown[]): ReadDishData[] {
+    const parsed = ReadDishDataSchema.array().safeParse(rows);
+
+    if (!parsed.success) {
+      console.error(parsed.error.issues);
+      throw new InternalServerErrorException('Invalid dish read model');
+    }
+
+    return parsed.data;
   }
 }

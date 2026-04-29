@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { ReadOrderData } from '../types/read-order-data';
 import { ReadOrderItemData } from '../types/read-order-item-data';
 import { ReadDeliveryAddressSnapshotData } from '../types/read-delivery-address-snapshot-data';
-import { ClientInfoDTO } from 'src/client/dto/client-info.dto';
 import { GetOrderForOwnerDTO } from '../dto/get-order-for-owner.dto';
 import { OrderMapper } from '../mapper/order.mapper';
 import { OrderItemMapper } from '../mapper/order-item.mapper';
 import { DeliveryAddressSnapshotMapper } from '../mapper/delivery-address-snapshot.mapper';
+import { ReadClientInfoData } from 'src/client/types/read-client-info.data';
+import { ClientInfoDTO } from 'src/client/dto/client-info.dto';
 
 @Injectable()
 export class OrderOwnerDTOAssembler {
@@ -20,7 +21,7 @@ export class OrderOwnerDTOAssembler {
     orders: ReadOrderData[],
     orderItems: ReadOrderItemData[],
     snapshots: ReadDeliveryAddressSnapshotData[],
-    clientInfos: ClientInfoDTO[],
+    clientInfos: ReadClientInfoData[],
   ): GetOrderForOwnerDTO[] {
     const orderItemsMap = new Map<string, typeof orderItems>();
     for (const item of orderItems) {
@@ -51,7 +52,7 @@ export class OrderOwnerDTOAssembler {
 
       const clientInfo = clientInfoMap.get(order.clientId);
       if (!clientInfo) throw new Error('ClientInfo Not Found');
-      response.clientInfo = clientInfo;
+      response.clientInfo = new ClientInfoDTO({ ...clientInfo });
 
       return response;
     });

@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../repository/order.repository';
 import { GetOwnerDashBoardPageDTO } from '../dto/get-owner-dashboard-page.dto';
 import { buildDailyRevenue } from 'src/utils/buildDailyRevenue';
-import { OwnerInternalService } from 'src/owner/owner.internal.service';
-import { RestaurantInternalService } from 'src/restaurant/service/restaurant.internal.service';
 import { MenuRankingDTO } from 'src/dish/types/menu-ranking-data';
 import {
   generateDateRange,
@@ -13,14 +11,14 @@ import { calculateAvgOrder } from 'src/utils/calculateAvgOrder';
 import { calculateRevenue } from 'src/utils/calculateRevenue';
 import { OrderStatsRepository } from '../repository/order.stats.repository';
 import { OrderStatus } from 'src/constants/orderStatus';
+import { RestaurantRepository } from 'src/restaurant/repository/restaurant.repository';
 
 @Injectable()
 export class OrderKpiService {
   constructor(
     private readonly orderRepo: OrderRepository,
     private readonly orderStatsRepo: OrderStatsRepository,
-    private readonly ownerService: OwnerInternalService,
-    private readonly restaurantService: RestaurantInternalService,
+    private readonly restaurantRepo: RestaurantRepository,
   ) {}
 
   async revenuePercentChange(restaurantId: string, range: string) {
@@ -59,7 +57,7 @@ export class OrderKpiService {
     ownerId: string,
     range: string,
   ): Promise<GetOwnerDashBoardPageDTO> {
-    const { restaurantId } = await this.restaurantService.getByOwner(ownerId);
+    const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
 
     const { startDate, endDate } = generateDateRange(range);
 
@@ -93,7 +91,7 @@ export class OrderKpiService {
     ownerId: string,
     limit: string,
   ): Promise<MenuRankingDTO> {
-    const { restaurantId } = await this.restaurantService.getByOwner(ownerId);
+    const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
 
     const topOrders = await this.orderStatsRepo.findTopDishesByQuantity(
       restaurantId,

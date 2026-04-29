@@ -1,13 +1,13 @@
 export class RestaurantDTO {
   restaurantId: string;
-  logo?: string;
+  logo: string | null;
   lbn: string;
   dba: string;
   cuisineType: string;
   storePhone: string;
   businessEmail: string;
-  website?: string;
-  instagram?: string;
+  website: string | null;
+  instagram: string | null;
   mainImgUrl: string;
   sub1ImgUrl: string;
   sub2ImgUrl: string;
@@ -18,14 +18,14 @@ export class RestaurantDTO {
 
   constructor(init: {
     restaurantId: string;
-    logo?: string;
+    logo: string | null;
     lbn: string;
     dba: string;
     cuisineType: string;
     storePhone: string;
     businessEmail: string;
-    website?: string;
-    instagram?: string;
+    website: string | null;
+    instagram: string | null;
     mainImgUrl: string;
     sub1ImgUrl: string;
     sub2ImgUrl: string;

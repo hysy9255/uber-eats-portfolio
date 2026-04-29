@@ -20,10 +20,10 @@ export class OwnerOrderCommandService {
   async update(orderId: string, ownerId: string, newStatus: OrderStatus) {
     await this.validation.updateOrder(orderId, ownerId, newStatus);
 
-    const order = await this.orderRepo.findById(orderId);
+    const order = await this.orderRepo.findOneById(orderId);
     order.status = newStatus;
 
-    await this.orderRepo.updateOrder(this.orderMapper.readToUpdateData(order));
+    await this.orderRepo.update(this.orderMapper.readToUpdateData(order));
 
     this.orderGateway.emitOrderStatusChanged(order.orderId, {
       orderId: order.orderId,

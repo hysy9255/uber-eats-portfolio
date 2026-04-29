@@ -33,7 +33,7 @@ export class OperatingHoursRepository {
       .getRawMany<{ id: string; dayOfWeek: DayOfWeek }>();
   }
 
-  findByRestaurantIds(
+  findByRestaurants(
     restaurantIds: string[],
   ): Promise<ReadOperatingHoursData[]> {
     return this.repo
@@ -52,6 +52,22 @@ export class OperatingHoursRepository {
   }
 
   findByRestaurantId(restaurantId: string): Promise<ReadOperatingHoursData[]> {
+    return this.repo
+      .createQueryBuilder('op')
+      .select([
+        'op.id as id',
+        'op.restaurantId as "restaurantId"',
+        'op.dayOfWeek as "dayOfWeek"',
+        'op.openTime as "openTime"',
+        'op.closeTime as "closeTime"',
+        'op.open24Hours as "open24Hours"',
+        'op.closed as closed',
+      ])
+      .where('op.restaurantId = :restaurantId', { restaurantId })
+      .getRawMany<ReadOperatingHoursData>();
+  }
+
+  findByRestaurant(restaurantId: string): Promise<ReadOperatingHoursData[]> {
     return this.repo
       .createQueryBuilder('op')
       .select([

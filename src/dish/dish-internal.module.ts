@@ -8,6 +8,6 @@ import { DishEntity } from './orm-entities/dish.orm.entity';
 @Module({
   imports: [TypeOrmModule.forFeature([DishEntity])],
   providers: [DishInternalService, DishRepository, DishMapper],
-  exports: [DishInternalService],
+  exports: [DishInternalService, DishRepository],
 })
 export class DishInternalModule {}
