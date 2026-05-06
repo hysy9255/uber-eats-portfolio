@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { SharedService } from 'src/shared/shared.service';
-import { CreateRestaurantAddressData } from '../types/create-restaurant-address-data';
-import { RestaurantAddressDTO } from '../dto/restaurantAddress/restaurant-address.dto';
-import { UpdateRestaurantAddressData } from '../types/update-restaurant-address-data';
-import { ReadRestaurantAddressData } from '../types/read-restaurant-address-data';
-import { UpdateRestaurantAddressDTO } from '../dto/restaurantAddress/update-restaurant-address.dto';
+import { CreateRestaurantAddressData } from '../types/restaurant-address/create-restaurant-address-data';
+import { RestaurantAddressDTO } from '../dto/restaurantAddress/response/restaurant-address.dto';
+import { UpdateRestaurantAddressData } from '../types/restaurant-address/update-restaurant-address-data';
+import { ReadRestaurantAddressData } from '../types/restaurant-address/read-restaurant-address-data';
+import { UpdateRestaurantAddressDTO } from '../dto/restaurantAddress/request/update-restaurant-address.dto';
+import { CreateRestaurantAddressDTO } from '../dto/restaurantAddress/request/create-restaurant-address.dto';
 
 @Injectable()
 export class RestaurantAddressMapper {
@@ -12,12 +13,13 @@ export class RestaurantAddressMapper {
 
   dtoToCreateData(
     restaurantId: string,
-    dto: RestaurantAddressDTO,
+    dto: CreateRestaurantAddressDTO,
   ): CreateRestaurantAddressData {
     return new CreateRestaurantAddressData({
       restaurantAddressId: this.sharedService.generateId(),
       restaurantId,
       ...dto,
+      unit: dto.unit ?? null,
     });
   }
 

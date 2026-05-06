@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { SharedService } from 'src/shared/shared.service';
-import { CreateRestaurantData } from '../types/create-restaurant-data';
-import { UpdateRestaurantData } from '../types/update-restaurant-data';
-import { UpdateRestaurantGeneralInfoDTO } from '../dto/restaurantInfo/update-restaurant-info.request.dto';
-import { RestaurantDTO } from '../dto/restaurantInfo/restaurant.dto';
-import { ReadRestaurantData } from '../types/read-restaurant-data';
-import { CreateRestaurantGeneralInfoDTO } from '../dto/restaurantInfo/create-restaurant-general-info.dto';
+import { CreateRestaurantData } from '../types/restaurant/create-restaurant-data';
+import { UpdateRestaurantData } from '../types/restaurant/update-restaurant-data';
+import { UpdateRestaurantGeneralInfoDTO } from '../dto/restaurantGeneralInfo/request/update-restaurant-general-info.dto';
+import { CreateRestaurantGeneralInfoDTO } from '../dto/restaurantGeneralInfo/request/create-restaurant-general-info.dto';
 
 @Injectable()
 export class RestaurantMapper {
@@ -27,11 +25,5 @@ export class RestaurantMapper {
     dto: UpdateRestaurantGeneralInfoDTO,
   ): UpdateRestaurantData {
     return new UpdateRestaurantData({ restaurantId, ...dto });
-  }
-
-  readDataToDTO(data: ReadRestaurantData): RestaurantDTO {
-    return new RestaurantDTO({
-      ...data,
-    });
   }
 }

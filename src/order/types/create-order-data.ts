@@ -1,12 +1,12 @@
 import { DeliveryType } from 'src/constants/deliveryType';
-import { OrderItem } from '../dto/create-order.dto';
+import { CreateOrderItemDTO } from '../dto/request/create-order-item.dto';
 
 export class CreateOrderData {
   orderId: string;
   clientId: string;
   totalPrice: number;
   restaurantId: string;
-  orderItems: OrderItem[];
+  orderItems: CreateOrderItemDTO[];
   deliveryType: DeliveryType;
   requestToRestaurant?: string;
   requestToDriver?: string;
@@ -16,7 +16,7 @@ export class CreateOrderData {
     clientId: string;
     totalPrice: number;
     restaurantId: string;
-    orderItems: OrderItem[];
+    orderItems: CreateOrderItemDTO[];
     deliveryType: DeliveryType;
     requestToRestaurant?: string;
     requestToDriver?: string;

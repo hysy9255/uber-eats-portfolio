@@ -1,0 +1,33 @@
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { OrderEntity } from './order.orm.entity';
+import { DriverEntity } from 'src/driver/orm-entity/driver.orm.entity';
+
+@Entity('rejectedDeliveryOrders')
+export class RejectedDeliveryOrderEntity {
+  @PrimaryGeneratedColumn('uuid')
+  rejectedDeliveryOrderId: string;
+
+  @Column()
+  orderId: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  driverId: string;
+
+  @ManyToOne(() => DriverEntity, (driver) => driver.rejectedDeliveryOrders, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'driverId' })
+  driver: DriverEntity;
+
+  @ManyToOne(() => OrderEntity, (order) => order.rejectedDeliveryOrders, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'orderId' })
+  order: OrderEntity;
+}

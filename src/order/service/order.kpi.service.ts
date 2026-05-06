@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from '../repository/order.repository';
-import { GetOwnerDashBoardPageDTO } from '../dto/get-owner-dashboard-page.dto';
+import { OwnerDashBoardPageDTO } from '../dto/response/owner-dashboard-page.dto';
 import { buildDailyRevenue } from 'src/utils/buildDailyRevenue';
 import { MenuRankingDTO } from 'src/dish/types/menu-ranking-data';
 import {
@@ -56,7 +56,7 @@ export class OrderKpiService {
   async getOwnerDashBoardPage(
     ownerId: string,
     range: string,
-  ): Promise<GetOwnerDashBoardPageDTO> {
+  ): Promise<OwnerDashBoardPageDTO> {
     const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
 
     const { startDate, endDate } = generateDateRange(range);

@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { OwnerInternalService } from './owner.internal.service';
-import { OwnerRepository } from './owner.repository';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { OwnerEntity } from './owner.orm.entity';
+import { RestaurantModule } from 'src/restaurant/restaurant.module';
+import { DishModule } from 'src/dish/dish.module';
+import { OwnerOnBoardService } from './service/owner.onboard.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OwnerEntity])],
-  providers: [OwnerInternalService, OwnerRepository],
-  exports: [OwnerInternalService],
+  imports: [RestaurantModule, DishModule],
+  providers: [OwnerOnBoardService],
+  exports: [OwnerOnBoardService],
 })
 export class OwnerModule {}

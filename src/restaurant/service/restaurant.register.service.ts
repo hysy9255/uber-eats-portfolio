@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RestaurantRepository } from '../repository/restaurant.repository';
-import { CreateRestaurantSummaryDTO } from '../dto/create-restaurant-summary.dto';
+import { CreateRestaurantDTO } from '../dto/restaurant/create-restaurant.dto';
 import { RestaurantMapper } from '../mapper/restaurant.mapper';
 import { OperatingHoursMapper } from '../mapper/operating-hours.mapper';
 import { RestaurantAddressRepository } from '../repository/restaurant-address.repository';
@@ -20,7 +20,7 @@ export class RestaurantRegisterService {
 
   async register(
     ownerId: string,
-    dto: CreateRestaurantSummaryDTO,
+    dto: CreateRestaurantDTO,
   ): Promise<{ restaurantId: string }> {
     const { generalInfo: info, operatingHours: hours, address } = dto;
     const createRestaurantData = this.restaruantMapper.dtoToCreateData(

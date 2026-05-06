@@ -1,3 +1,4 @@
+import { OrderType } from 'src/constants/orderType';
 import { z } from 'zod';
 
 export const ReadRestaurantDataSchema = z.object({
@@ -16,6 +17,7 @@ export const ReadRestaurantDataSchema = z.object({
   sub2ImgUrl: z.string(),
   bannerImgUrl: z.string(),
   deliveryRadius: z.coerce.number(),
-  prepTime: z.string(),
-  orderType: z.string(),
+  prepTime: z.coerce.number(),
+  // prepTime: z.string(),
+  orderType: z.nativeEnum(OrderType),
 });

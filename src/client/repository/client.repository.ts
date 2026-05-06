@@ -17,6 +17,14 @@ export class ClientRepository {
     );
   }
 
+  async findOnebyUserId(userId: string) {
+    return await this.clientRepository
+      .createQueryBuilder('c')
+      .select(['c.clientId as "clientId"'])
+      .where('c.userId = :userId', { userId })
+      .getRawOne<{ clientId: string }>();
+  }
+
   async findOneByUser(userId: string): Promise<{ clientId: string }> {
     const row = await this.clientRepository
       .createQueryBuilder('c')

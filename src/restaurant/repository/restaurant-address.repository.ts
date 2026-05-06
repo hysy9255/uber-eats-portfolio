@@ -1,10 +1,10 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RestaurantAddressEntity } from '../orm-entities/restaurantAddress.entity';
+import { RestaurantAddressEntity } from '../orm-entity/restaurantAddress.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { ReadRestaurantAddressData } from '../types/read-restaurant-address-data';
-import { CreateRestaurantAddressData } from '../types/create-restaurant-address-data';
-import { UpdateRestaurantAddressData } from '../types/update-restaurant-address-data';
+import { ReadRestaurantAddressData } from '../types/restaurant-address/read-restaurant-address-data';
+import { CreateRestaurantAddressData } from '../types/restaurant-address/create-restaurant-address-data';
+import { UpdateRestaurantAddressData } from '../types/restaurant-address/update-restaurant-address-data';
 import { z } from 'zod';
 
 const ReadRestaurantAddressDataSchema = z.object({

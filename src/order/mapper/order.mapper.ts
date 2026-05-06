@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CreateOrderDTO } from '../dto/create-order.dto';
+import { CreateOrderDTO } from '../dto/request/create-order.dto';
 import { CreateOrderData } from '../types/create-order-data';
 import { SharedService } from 'src/shared/shared.service';
 import { ReadOrderData } from '../types/read-order-data';
-import { OrderDTO } from '../dto/order.dto';
+import { OrderDTO } from '../dto/response/order.dto';
 import { UpdateOrderData } from '../types/update-order-data';
 
 @Injectable()

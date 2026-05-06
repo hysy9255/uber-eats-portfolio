@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateRestaurantDTO } from '../dto/update-restaurant.dto';
 import { RestaurantRepository } from '../repository/restaurant.repository';
 import { OperatingHoursRepository } from '../repository/operating-hours.repository';
 import { RestaurantAddressRepository } from '../repository/restaurant-address.repository';
 import { RestaurantMapper } from '../mapper/restaurant.mapper';
 import { RestaurantAddressMapper } from '../mapper/restaurant-address.mapper';
 import { OperatingHoursMapper } from '../mapper/operating-hours.mapper';
-import { RestaurantLoader } from './restaurant.loader';
+import { UpdateRestaurantDTO } from '../dto/restaurant/update-restaurant.dto';
 
 @Injectable()
 export class RestaurantCommandService {
@@ -18,15 +17,7 @@ export class RestaurantCommandService {
     private readonly restaurantMapper: RestaurantMapper,
     private readonly addressMapper: RestaurantAddressMapper,
     private readonly hoursMapper: OperatingHoursMapper,
-
-    private readonly restaurantLoader: RestaurantLoader,
   ) {}
-
-  async updateRestaurant2(ownerId: string, dto: UpdateRestaurantDTO) {
-    const restaurant = await this.restaurantLoader.load(ownerId);
-    console.log(restaurant);
-    console.log(dto);
-  }
 
   async updateRestaurant(ownerId: string, dto: UpdateRestaurantDTO) {
     const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
@@ -41,7 +32,7 @@ export class RestaurantCommandService {
 
     if (dto.operatingHours) {
       const operatingHoursIdsAndDays =
-        await this.hoursRepo.findIdsAndDaysByRestaurantId(restaurantId);
+        await this.hoursRepo.findIdsAndDaysByRestaurant(restaurantId);
       const updateOperatingHoursData = this.hoursMapper.dtoToUpdateData(
         restaurantId,
         operatingHoursIdsAndDays,

@@ -7,5 +7,5 @@ export type ReadUserData = {
   role: UserRole;
   name: string;
   phoneNumber: string;
-  profileImgUrl: string;
+  profileImgUrl: string | null;
 };

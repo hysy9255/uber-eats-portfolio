@@ -1,0 +1,30 @@
+import { OrderType } from 'src/constants/orderType';
+
+export type RestaurantViewRow = {
+  restaurantId: string;
+  logo: string | null;
+  lbn: string;
+  dba: string;
+  cuisineType: string;
+  storePhone: string;
+  businessEmail: string;
+  instagram: string | null;
+  website: string | null;
+  mainImgUrl: string;
+  sub1ImgUrl: string;
+  sub2ImgUrl: string;
+  bannerImgUrl: string;
+  deliveryRadius: number;
+  prepTime: number;
+  orderType: OrderType;
+  streetAddress: string;
+  unit: string | null;
+  state: string;
+  city: string;
+  zip: string;
+  dayOfWeek: string;
+  openTime: string;
+  closeTime: string;
+  open24Hours: boolean;
+  closed: boolean;
+};

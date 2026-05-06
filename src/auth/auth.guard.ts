@@ -4,13 +4,15 @@ import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 import { UserRole } from 'src/constants/userRole';
 import { AUTH_USER } from 'src/constants/variables';
-import { AuthInternalService } from './auth.internal.service';
+import { ClientRepository } from 'src/client/repository/client.repository';
+import { OwnerRepository } from 'src/owner/repository/owner.repository';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly authService: AuthInternalService,
+    private readonly clientRepo: ClientRepository,
+    private readonly ownerRepo: OwnerRepository,
     private reflector: Reflector,
   ) {}
 
@@ -32,10 +34,15 @@ export class AuthGuard implements CanActivate {
     const { userId, role } = this.jwtService.verifyToken(token);
 
     if (role === UserRole.Client) {
-      const { clientId } = await this.authService.getClientByUserId(userId);
+      const client = await this.clientRepo.findOnebyUserId(userId);
+      if (!client) throw new Error('Client not found');
+      const { clientId } = client;
+
       req[AUTH_USER] = { userId, role, clientId };
     } else if (role === UserRole.Owner) {
-      const { ownerId } = await this.authService.getOwnerByUserId(userId);
+      const owner = await this.ownerRepo.findOnebyUserId(userId);
+      if (!owner) throw new Error('Owner not found');
+      const { ownerId } = owner;
       req[AUTH_USER] = { userId, role, ownerId };
     }
 

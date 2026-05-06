@@ -3,7 +3,7 @@ import { ApiOperation } from '@nestjs/swagger';
 import { RegisterClientDTO } from './dto/register-client.dto';
 import { RegisterOwnerDTO } from './dto/register-owner.dto';
 import { RegisterDriverDTO } from './dto/register-driver.dto';
-import { RegistrationService } from './registration.external.service';
+import { RegistrationService } from './service/registration.service';
 
 @Controller('registration')
 export class RegistrationController {

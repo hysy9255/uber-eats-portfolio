@@ -1,5 +1,5 @@
-import { OrderEntity } from 'src/order/orm-entities/order.orm.entity';
-import { UserEntity } from 'src/user/user.orm.entity';
+import { OrderEntity } from 'src/order/orm-entity/order.orm.entity';
+import { UserEntity } from 'src/user/orm-entity/user.orm.entity';
 import {
   Column,
   Entity,

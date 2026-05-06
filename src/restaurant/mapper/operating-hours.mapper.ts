@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { SharedService } from 'src/shared/shared.service';
-import { CreateOperatingHoursData } from '../types/create-operating-hours-data';
-import { UpdateOperatingHoursDTO } from '../dto/operatingHours/update-operating-hours.request.dto';
-import { UpdateOperatingHoursData } from '../types/update-operating-hours-data';
+import { CreateOperatingHoursData } from '../types/operating-hours/create-operating-hours-data';
+import { UpdateOperatingHoursDTO } from '../dto/operatingHours/request/update-operating-hours.request.dto';
+import { UpdateOperatingHoursData } from '../types/operating-hours/update-operating-hours-data';
 import { DayOfWeek } from 'src/constants/dayOfWeek';
-import { ReadOperatingHoursData } from '../types/read-operating-hours-data';
-import { DayHoursDTO } from '../dto/operatingHours/day-hours.dto';
-import { OperatingHoursDTO } from '../dto/operatingHours/operating-hours.dto';
+import { ReadOperatingHoursData } from '../types/operating-hours/read-operating-hours-data';
+import { DayHoursDTO } from '../dto/operatingHours/response/day-hours.dto';
+import { OperatingHoursDTO } from '../dto/operatingHours/response/operating-hours.dto';
+import { CreateOperatingHoursDTO } from '../dto/operatingHours/request/create-operating-hours.dto';
 
 @Injectable()
 export class OperatingHoursMapper {
@@ -14,7 +15,7 @@ export class OperatingHoursMapper {
 
   dtoToCreateData(
     restuarnatId: string,
-    dto: OperatingHoursDTO,
+    dto: CreateOperatingHoursDTO,
   ): CreateOperatingHoursData[] {
     return Object.keys(dto).map((day) => {
       const cod = new CreateOperatingHoursData();

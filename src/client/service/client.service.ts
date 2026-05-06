@@ -3,7 +3,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ClientRepository } from '../repository/client.repository';
 import { DeliveryAddressRepository } from '../repository/delivery-address.repository';
 import { DeliveryAddressMapper } from '../mapper/delivery-address.mapper';
 import { GetDeliveryAddressDTO } from '../dto/get-delivery-address.dto';
@@ -14,68 +13,67 @@ import { DeleteDeliveryAddressDTO } from '../dto/delete-delivery-address.dto';
 @Injectable()
 export class ClientService {
   constructor(
-    private readonly clientRepo: ClientRepository,
-    private readonly deliveryAddressRepo: DeliveryAddressRepository,
-    private readonly deliveryAddressMapper: DeliveryAddressMapper,
+    private readonly addressRepo: DeliveryAddressRepository,
+    private readonly addressMapper: DeliveryAddressMapper,
   ) {}
 
-  async getDeliveryAddresses(userId: string): Promise<GetDeliveryAddressDTO[]> {
-    const { clientId } = await this.clientRepo.findOneByUser(userId);
-    const readData = await this.deliveryAddressRepo.findAllByClientId(clientId);
-    return readData.map((d) => this.deliveryAddressMapper.readDataToDto(d));
+  async getDeliveryAddresses(
+    clientId: string,
+  ): Promise<GetDeliveryAddressDTO[]> {
+    const data = await this.addressRepo.findByClientId(clientId);
+    return data.map((d) => this.addressMapper.readDataToDto(d));
   }
 
-  async addNewDeliveryAddress(userId: string, dto: CreateDeliveryAddressDTO) {
-    const { clientId } = await this.clientRepo.findOneByUser(userId);
-    const createData = this.deliveryAddressMapper.dtoToCreateData(
-      clientId,
-      dto,
-    );
-    await this.deliveryAddressRepo.save(createData);
-  }
-
-  async setDefaultAddress(userId: string, deliveryAddressId: string) {
-    const { clientId } = await this.clientRepo.findOneByUser(userId);
-    const address = await this.deliveryAddressRepo.findDefaultAddress(clientId);
+  async setDefaultAddress(clientId: string, deliveryAddressId: string) {
+    const address = await this.addressRepo.findDefaultAddress(clientId);
+    if (!address) throw new Error('Address Not found');
     address.isDefault = false;
-    await this.deliveryAddressRepo.updateDefault(
-      this.deliveryAddressMapper.readToSetDefaultAddressData(address),
+    await this.addressRepo.updateDefault(
+      this.addressMapper.readToSetDefaultAddressData(address),
     );
 
     const newDefaultAddress =
-      await this.deliveryAddressRepo.findById(deliveryAddressId);
+      await this.addressRepo.findOneById(deliveryAddressId);
+
+    if (!newDefaultAddress) throw new Error('Address Not found');
 
     if (newDefaultAddress.clientId !== clientId) {
       throw new Error('You are not authorized to set default address');
     }
     newDefaultAddress.isDefault = true;
-    await this.deliveryAddressRepo.updateDefault(
-      this.deliveryAddressMapper.readToSetDefaultAddressData(newDefaultAddress),
+    await this.addressRepo.updateDefault(
+      this.addressMapper.readToSetDefaultAddressData(newDefaultAddress),
     );
   }
 
-  async updateDeliveryAddress(userId: string, dto: UpdateDeliveryAddressDTO) {
-    const { clientId } = await this.clientRepo.findOneByUser(userId);
+  async addNewDeliveryAddress(clientId: string, dto: CreateDeliveryAddressDTO) {
+    const createData = this.addressMapper.dtoToCreateData(clientId, dto);
+    await this.addressRepo.save(createData);
+  }
 
-    const deliveryAddress = await this.deliveryAddressRepo.findById(
+  async updateDeliveryAddress(clientId: string, dto: UpdateDeliveryAddressDTO) {
+    const deliveryAddress = await this.addressRepo.findOneById(
       dto.deliveryAddressId,
     );
+
+    if (!deliveryAddress) throw new Error('Address Not found');
 
     if (deliveryAddress.clientId !== clientId) {
       throw new Error('You are not authorized to update the address');
     }
 
-    const updateData = this.deliveryAddressMapper.dtoToUpdateData(dto);
-    await this.deliveryAddressRepo.update(updateData);
+    const updateData = this.addressMapper.dtoToUpdateData(dto);
+    await this.addressRepo.update(updateData);
   }
 
   async deleteDeliveryAddress(
-    userId: string,
+    clientId: string,
     { deliveryAddressId }: DeleteDeliveryAddressDTO,
   ) {
-    const { clientId } = await this.clientRepo.findOneByUser(userId);
     const deliveryAddress =
-      await this.deliveryAddressRepo.findById(deliveryAddressId);
+      await this.addressRepo.findOneById(deliveryAddressId);
+    if (!deliveryAddress) throw new Error('Address Not found');
+
     if (deliveryAddress.isDefault)
       throw new BadRequestException('Default address cannot be deleted');
     if (deliveryAddress.clientId !== clientId) {
@@ -83,6 +81,6 @@ export class ClientService {
         'You are not authorized to delete the address',
       );
     }
-    await this.deliveryAddressRepo.delete(deliveryAddressId);
+    await this.addressRepo.delete(deliveryAddressId);
   }
 }

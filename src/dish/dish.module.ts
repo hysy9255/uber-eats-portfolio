@@ -1,23 +1,20 @@
 import { Module } from '@nestjs/common';
-import { DishExternalService } from './dish.external.service';
-import { DishRepository } from './dish.repository';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DishEntity } from './orm-entities/dish.orm.entity';
+import { DishService } from './service/dish.service';
 import { DishController } from './dish.controller';
-import { DishMapper } from './dish.mapper';
-import { OwnerModule } from 'src/owner/owner.module';
-import { DishValidationService } from './dish.validation.service';
 import { DishDTOAssembler } from './assembler/dish-dto.assembler';
+import { DishRegisterService } from './service/dish.register.service';
+import { DishMapper } from './mapper/dish.mapper';
+import { DishValidationService } from './service/dish.validation.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DishEntity]), OwnerModule],
   controllers: [DishController],
   providers: [
-    DishExternalService,
-    DishRepository,
+    DishService,
     DishMapper,
     DishValidationService,
     DishDTOAssembler,
+    DishRegisterService,
   ],
+  exports: [DishRegisterService],
 })
 export class DishModule {}

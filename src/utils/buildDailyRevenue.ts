@@ -1,3 +1,4 @@
+import { DailyRevenueDTO } from 'src/order/dto/response/owner-dashboard-page.dto';
 import { ReadOrderData } from 'src/order/types/read-order-data';
 
 function formatLocalDate(date: Date): string {
@@ -8,16 +9,11 @@ function formatLocalDate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export type DailyRevenue = {
-  date: string;
-  revenue: number;
-};
-
 export function buildDailyRevenue(
   orders: ReadOrderData[],
   startDate: Date,
   endDate: Date,
-): DailyRevenue[] {
+): DailyRevenueDTO[] {
   const revenueMap = new Map<string, number>();
 
   for (const order of orders) {
@@ -26,7 +22,7 @@ export function buildDailyRevenue(
     revenueMap.set(dateKey, (revenueMap.get(dateKey) ?? 0) + price);
   }
 
-  const result: DailyRevenue[] = [];
+  const result: DailyRevenueDTO[] = [];
   const current = new Date(startDate);
 
   while (current <= endDate) {

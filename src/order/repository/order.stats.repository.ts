@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderEntity } from '../orm-entities/order.orm.entity';
+import { OrderEntity } from '../orm-entity/order.orm.entity';
 import { Repository } from 'typeorm';
 import { QuantityAndDishName } from 'src/dish/types/menu-ranking-data';
 
@@ -8,7 +8,7 @@ import { QuantityAndDishName } from 'src/dish/types/menu-ranking-data';
 export class OrderStatsRepository {
   constructor(
     @InjectRepository(OrderEntity)
-    private readonly orderRepository: Repository<OrderEntity>,
+    private readonly repo: Repository<OrderEntity>,
   ) {}
 
   async findTopDishesByQuantity(
@@ -16,7 +16,7 @@ export class OrderStatsRepository {
     limit: number,
     orderBy: 'ASC' | 'DESC',
   ): Promise<QuantityAndDishName[]> {
-    const result = await this.orderRepository
+    const result = await this.repo
       .createQueryBuilder('order')
       .leftJoin('order.orderItems', 'oi')
       .leftJoin('oi.dish', 'dish')

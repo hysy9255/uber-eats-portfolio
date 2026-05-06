@@ -1,15 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
-import { RestaurantEntity } from '../orm-entities/restaurants.orm.entity';
-import { ReadRestaurantData } from '../types/read-restaurant-data';
-import { CreateRestaurantData } from '../types/create-restaurant-data';
-import { UpdateRestaurantData } from '../types/update-restaurant-data';
+import { RestaurantEntity } from '../orm-entity/restaurants.orm.entity';
+import { ReadRestaurantData } from '../types/restaurant/read-restaurant-data';
+import { CreateRestaurantData } from '../types/restaurant/create-restaurant-data';
+import { UpdateRestaurantData } from '../types/restaurant/update-restaurant-data';
 import { ReadRestaurantDataSchema } from '../schema/read-restaurant-data.schema';
-import {
-  RestaurantProps,
-  RestaurantPropsSchema,
-} from '../schema/restaurant-props.schema';
+import { RestaurantViewRow } from '../types/restaurant-view-row';
 
 @Injectable()
 export class RestaurantRepository {
@@ -30,29 +27,6 @@ export class RestaurantRepository {
     );
   }
 
-  async findRestaurantAggregate(restaurantId: string) {
-    const rows = await this.restaurantRepository
-      .createQueryBuilder('r')
-      .leftJoin('r.dishes', 'd')
-      .select(['r.restaurantId AS "restaurantId"', 'd.dishId AS "dishId"'])
-      .where('r.restaurantId = :restaurantId', { restaurantId })
-      .getRawMany<{ restaurantId: string; dishId: string }>();
-
-    return rows;
-  }
-
-  async loadRestaurantAggregate(ownerId: string) {
-    const row = await this.baseReadQb()
-      .where('r.ownerId = :ownerId', { ownerId })
-      .getRawOne<RestaurantProps>();
-
-    if (!row) {
-      throw new Error('Restaurant Not Found');
-    }
-
-    return RestaurantPropsSchema.parse(row);
-  }
-
   async findOneByOwner(ownerId: string): Promise<ReadRestaurantData> {
     const row = await this.baseReadQb()
       .where('r.ownerId = :ownerId', { ownerId })
@@ -65,25 +39,24 @@ export class RestaurantRepository {
     return this.parseOne(row);
   }
 
-  async findOneByOrder(orderId: string): Promise<ReadRestaurantData> {
-    const row = await this.baseReadQb()
-      .leftJoin('r.orders', 'o')
-      .where('o.orderId = :orderId', { orderId })
-      .getRawOne<ReadRestaurantData>();
-
-    if (!row) {
-      throw new Error('Restaurant Not Found');
-    }
-
-    return this.parseOne(row);
+  async findByOwner(ownerId: string): Promise<RestaurantViewRow[]> {
+    return await this.baseRestaurantViewQb()
+      .where('r.ownerId = :ownerId', { ownerId })
+      .getRawMany<RestaurantViewRow>();
   }
 
-  async findByOrders(orderIds: string[]): Promise<ReadRestaurantData[]> {
-    const qb = this.baseReadQb().where('o.orderId IN (:...orderIds)', {
-      orderIds,
-    });
-    const rows = await qb.getRawMany();
-    return this.parseMany(rows);
+  async findById(restaurantId: string): Promise<RestaurantViewRow[]> {
+    return await this.baseRestaurantViewQb()
+      .where('r.restaurantId = :restaurantId', { restaurantId })
+      .getRawMany<RestaurantViewRow>();
+  }
+
+  async findNameAndLogoById(restaurantId: string) {
+    return await this.restaurantRepository
+      .createQueryBuilder('r')
+      .select(['r.dba AS "dba"', 'r.logo AS "logo"'])
+      .where('r.restaurantId = :restaurantId', { restaurantId })
+      .getRawOne<{ dba: string; logo: string }>();
   }
 
   async findOneById(restaurantId: string): Promise<ReadRestaurantData> {
@@ -98,14 +71,26 @@ export class RestaurantRepository {
     return this.parseOne(row);
   }
 
-  async find(): Promise<ReadRestaurantData[]> {
-    const qb = this.baseReadQb();
-    const rows = await qb.getRawMany();
-    return this.parseMany(rows);
+  async find(): Promise<RestaurantViewRow[]> {
+    return await this.baseRestaurantViewQb().getRawMany<RestaurantViewRow>();
   }
 
-  async deleteOneById(restaurantId: string) {
-    return this.restaurantRepository.delete({ restaurantId });
+  private baseRestaurantViewQb(): SelectQueryBuilder<RestaurantEntity> {
+    return this.baseReadQb()
+      .leftJoin('r.address', 'a')
+      .leftJoin('r.operatingHours', 'h')
+      .addSelect([
+        'a.streetAddress AS "streetAddress"',
+        'a.unit AS "unit"',
+        'a.state AS "state"',
+        'a.city AS "city"',
+        'a.zip AS "zip"',
+        'h.dayOfWeek AS "dayOfWeek"',
+        'h.openTime AS "openTime"',
+        'h.closeTime AS "closeTime"',
+        'h.open24Hours AS "open24Hours"',
+        'h.closed AS "closed"',
+      ]);
   }
 
   private baseReadQb(): SelectQueryBuilder<RestaurantEntity> {
@@ -114,14 +99,14 @@ export class RestaurantRepository {
       .select([
         'r.restaurantId AS "restaurantId"',
         'r.ownerId AS "ownerId"',
-        'r.logo AS logo',
-        'r.lbn AS lbn',
-        'r.dba AS dba',
+        'r.logo AS "logo"',
+        'r.lbn AS "lbn"',
+        'r.dba AS "dba"',
         'r.cuisineType AS "cuisineType"',
         'r.storePhone AS "storePhone"',
         'r.businessEmail AS "businessEmail"',
-        'r.instagram AS instagram',
-        'r.website AS website',
+        'r.instagram AS "instagram"',
+        'r.website AS "website"',
         'r.mainImgUrl AS "mainImgUrl"',
         'r.sub1ImgUrl AS "sub1ImgUrl"',
         'r.sub2ImgUrl AS "sub2ImgUrl"',

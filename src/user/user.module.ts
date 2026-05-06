@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './user.orm.entity';
-import { UserExternalService } from './service/user.external.service';
-import { UserMapper } from 'src/user/user.mapper';
-import { UserRepository } from './repository/user.repository';
 import { BcryptModule } from 'src/bcrypt/bcrypt.module';
-import { UserController } from './controller/user.controller';
+import { UserRegistrationService } from './service/user.registration.service';
+import { UserService } from './service/user.service';
+import { UserController } from './user.controller';
+import { UserMapper } from './mapper/user.mapper';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity]), BcryptModule],
+  imports: [BcryptModule],
   controllers: [UserController],
-  providers: [UserExternalService, UserMapper, UserRepository],
+  providers: [UserService, UserMapper, UserRegistrationService],
+  exports: [UserRegistrationService],
 })
 export class UserModule {}

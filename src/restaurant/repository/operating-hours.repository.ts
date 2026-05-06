@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OperatingHoursEntity } from '../orm-entities/operatingHours.entity';
+import { OperatingHoursEntity } from '../orm-entity/operatingHours.entity';
 import { Repository } from 'typeorm';
-import { CreateOperatingHoursData } from '../types/create-operating-hours-data';
-import { UpdateOperatingHoursData } from '../types/update-operating-hours-data';
-import { ReadOperatingHoursData } from '../types/read-operating-hours-data';
+import { CreateOperatingHoursData } from '../types/operating-hours/create-operating-hours-data';
+import { UpdateOperatingHoursData } from '../types/operating-hours/update-operating-hours-data';
+import { ReadOperatingHoursData } from '../types/operating-hours/read-operating-hours-data';
 import { DayOfWeek } from 'src/constants/dayOfWeek';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class OperatingHoursRepository {
     return this.repo.save(this.repo.create(data));
   }
 
-  findIdsAndDaysByRestaurantId(
+  findIdsAndDaysByRestaurant(
     restaurantId: string,
   ): Promise<{ id: string; dayOfWeek: DayOfWeek }[]> {
     return this.repo

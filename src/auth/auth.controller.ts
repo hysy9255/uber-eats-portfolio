@@ -1,19 +1,19 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-import { AuthExternalService } from './auth.external.service';
 import { LoginRequestDTO } from 'src/auth/dto/login.request.dto';
 import { LoginResponseDTO } from 'src/auth/dto/login.response.dto';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authExternalService: AuthExternalService) {}
+  constructor(private readonly service: AuthService) {}
 
-  // done
   @ApiResponse({ type: LoginResponseDTO })
-  @ApiOperation({ summary: 'Check availability for account email' })
+  @ApiOperation({ summary: 'Login' })
   @Post('login')
   async login(@Body() dto: LoginRequestDTO): Promise<LoginResponseDTO> {
-    return this.authExternalService.login(dto);
+    console.log('dto', dto);
+    return this.service.login(dto);
   }
 }

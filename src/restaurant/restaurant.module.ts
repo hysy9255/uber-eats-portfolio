@@ -1,23 +1,19 @@
 import { Module } from '@nestjs/common';
-import { RestaurantController } from './controller/restaurant.controller';
 import { RestaurantRepository } from './repository/restaurant.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { OperatingHoursEntity } from './orm-entities/operatingHours.entity';
-import { RestaurantEntity } from './orm-entities/restaurants.orm.entity';
-import { OwnerModule } from 'src/owner/owner.module';
+import { OperatingHoursEntity } from './orm-entity/operatingHours.entity';
+import { RestaurantEntity } from './orm-entity/restaurants.orm.entity';
 import { RestaurantMapper } from './mapper/restaurant.mapper';
-import { RestaurantAddressEntity } from './orm-entities/restaurantAddress.entity';
+import { RestaurantAddressEntity } from './orm-entity/restaurantAddress.entity';
 import { RestaurantAddressRepository } from './repository/restaurant-address.repository';
 import { OperatingHoursRepository } from './repository/operating-hours.repository';
 import { RestaurantAddressMapper } from './mapper/restaurant-address.mapper';
 import { OperatingHoursMapper } from './mapper/operating-hours.mapper';
-import { DishInternalModule } from 'src/dish/dish-internal.module';
-import { RestaurantPageDTOAssembler } from './assembler/restaurant-page-dto.assembler';
-import { BusinessInfoDTOAssembler } from './assembler/business-info-dto.assembler';
-import { RestaurantLoader } from './service/restaurant.loader';
 import { RestaurantCommandService } from './service/restaurant.command.service';
 import { RestaurantQueryService } from './service/restaurant.query.service';
 import { RestaurantRegisterService } from './service/restaurant.register.service';
+import { RestaurantsViewMapper } from './mapper/restaurants-view-mapper';
+import { RestaurantController } from './restaurant.controller';
 
 const respositories = [
   RestaurantRepository,
@@ -29,14 +25,12 @@ const mappers = [
   RestaurantMapper,
   RestaurantAddressMapper,
   OperatingHoursMapper,
+  RestaurantsViewMapper,
 ];
-
-const assemblers = [BusinessInfoDTOAssembler, RestaurantPageDTOAssembler];
 
 const services = [
   RestaurantCommandService,
   RestaurantQueryService,
-  RestaurantLoader,
   RestaurantRegisterService,
 ];
 
@@ -47,13 +41,9 @@ const entities = [
 ];
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature(entities),
-    OwnerModule,
-    DishInternalModule,
-  ],
+  imports: [TypeOrmModule.forFeature(entities)],
   controllers: [RestaurantController],
-  providers: [...respositories, ...mappers, ...assemblers, ...services],
-  exports: [RestaurantRegisterService],
+  providers: [...respositories, ...mappers, ...services],
+  exports: [RestaurantRegisterService, RestaurantRepository],
 })
 export class RestaurantModule {}

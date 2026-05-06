@@ -6,22 +6,19 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { VehicleEntity } from './driver/orm-entities/vehicle.orm.entity';
-import { DriverDocsEntity } from './driver/orm-entities/driver.document.entity';
-import { UserEntity } from './user/user.orm.entity';
-import { OwnerEntity } from './owner/owner.orm.entity';
-import { DriverEntity } from './driver/orm-entities/driver.orm.entity';
-import { RestaurantEntity } from './restaurant/orm-entities/restaurants.orm.entity';
-import { RestaurantAddressEntity } from './restaurant/orm-entities/restaurantAddress.entity';
-import { OperatingHoursEntity } from './restaurant/orm-entities/operatingHours.entity';
-import { OrderEntity } from './order/orm-entities/order.orm.entity';
-import { DishEntity } from './dish/orm-entities/dish.orm.entity';
-import { OrderItemEntity } from './order/orm-entities/order-item.orm.entity';
-import { RejectedDeliveryOrderEntity } from './order/orm-entities/rejected-delivery-order.orm.entity';
+import { VehicleEntity } from './driver/orm-entity/vehicle.orm.entity';
+import { DriverDocsEntity } from './driver/orm-entity/driver.document.entity';
+import { UserEntity } from './user/orm-entity/user.orm.entity';
+import { DriverEntity } from './driver/orm-entity/driver.orm.entity';
+import { RestaurantEntity } from './restaurant/orm-entity/restaurants.orm.entity';
+import { RestaurantAddressEntity } from './restaurant/orm-entity/restaurantAddress.entity';
+import { OperatingHoursEntity } from './restaurant/orm-entity/operatingHours.entity';
+import { OrderEntity } from './order/orm-entity/order.orm.entity';
+import { DishEntity } from './dish/orm-entity/dish.orm.entity';
+import { OrderItemEntity } from './order/orm-entity/order-item.orm.entity';
+import { RejectedDeliveryOrderEntity } from './order/orm-entity/rejected-delivery-order.orm.entity';
 import { JwtMiddleWare } from './jwt/jwt.middleware';
 import { UploadsController } from './uploads/uploads.controller';
-import { UserInternalModule } from './user/user-internal.module';
-import { DishInternalModule } from './dish/dish-internal.module';
 import { DishModule } from './dish/dish.module';
 import { DriverModule } from './driver/driver.module';
 import { OwnerModule } from './owner/owner.module';
@@ -36,9 +33,11 @@ import { UserModule } from './user/user.module';
 import { RestaurantModule } from './restaurant/restaurant.module';
 import { ClientEntity } from './client/orm-entity/client.orm.entity';
 import { DeliveryAddressEntity } from './client/orm-entity/delivery-address.orm.entity';
-import { ClientModule } from './client/module/client.module';
-import { DeliveryAddressSnapshotEntity } from './order/orm-entities/delivery-address-snapshot.orm.entity';
+import { DeliveryAddressSnapshotEntity } from './order/orm-entity/delivery-address-snapshot.orm.entity';
 import { HealthModule } from './health/health.module';
+import { PersistenceModule } from './persistence/persistence.module';
+import { ClientModule } from './client/client.module';
+import { OwnerEntity } from './owner/orm-entity/owner.orm.entity';
 
 @Module({
   imports: [
@@ -83,8 +82,6 @@ import { HealthModule } from './health/health.module';
     OwnerDraftModule,
     RegistrationModule,
     DishModule,
-    DishInternalModule,
-    UserInternalModule,
     UserModule,
     OwnerModule,
     ClientModule,
@@ -92,6 +89,7 @@ import { HealthModule } from './health/health.module';
     RestaurantModule,
     OrderModule,
     HealthModule,
+    PersistenceModule,
   ],
   controllers: [UploadsController],
   providers: [],

@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { GetDishPageDTO } from '../dto/get-dish-page.dto';
+import { DishPageDTO } from '../dto/response/dish-page.dto';
 import { ReadDishData } from '../types/read-dish-data';
-import { ReadRestaurantData } from 'src/restaurant/types/read-restaurant-data';
-import { DishMapper } from '../dish.mapper';
+import { DishMapper } from '../mapper/dish.mapper';
 
 @Injectable()
 export class DishDTOAssembler {
@@ -11,10 +10,10 @@ export class DishDTOAssembler {
   buildDishPage(
     dish: ReadDishData,
     dishes: ReadDishData[],
-    restaurant: ReadRestaurantData,
-  ): GetDishPageDTO {
-    const { dba, logo } = restaurant;
-    const response = new GetDishPageDTO();
+    restaurantNameAndLogo: { dba: string; logo: string },
+  ): DishPageDTO {
+    const { dba, logo } = restaurantNameAndLogo;
+    const response = new DishPageDTO();
     response.restaurantName = dba;
     response.restaurantLogo = logo;
     response.dish = this.dishMapper.readDataToDTO(dish);
