@@ -19,6 +19,8 @@ import { DeleteUserDTO } from './dto/request/delete-user.dto';
 import { AuthUser } from '../auth/types/auth-user';
 import { UserService } from './service/user.service';
 import { AUTH_USER } from 'src/constants/variables';
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from 'src/constants/userRole';
 
 @ApiSecurity('jwt-token')
 @Controller()
@@ -36,6 +38,7 @@ export class UserController {
 
   @ApiOperation({ summary: 'Get me' })
   @UseGuards(AuthGuard)
+  @Roles(UserRole.Owner, UserRole.Client)
   @Get('/users/me')
   getMe(@Req() req: Request): Promise<UserDTO> {
     const { userId } = req[AUTH_USER] as AuthUser;
@@ -44,6 +47,7 @@ export class UserController {
 
   @ApiOperation({ summary: 'Update me' })
   @UseGuards(AuthGuard)
+  @Roles(UserRole.Owner, UserRole.Client)
   @Patch('/me')
   async updateMe(@Req() req: Request, @Body() dto: UpdateUserDTO) {
     const { userId } = req[AUTH_USER] as AuthUser;
@@ -52,6 +56,7 @@ export class UserController {
 
   @ApiOperation({ summary: 'Update my password' })
   @UseGuards(AuthGuard)
+  @Roles(UserRole.Owner, UserRole.Client)
   @Patch('/password')
   async updatePassword(@Req() req: Request, @Body() dto: UpdatePasswordDTO) {
     const { userId } = req[AUTH_USER] as AuthUser;
@@ -60,6 +65,7 @@ export class UserController {
 
   @ApiOperation({ summary: 'Delete me' })
   @UseGuards(AuthGuard)
+  @Roles(UserRole.Owner, UserRole.Client)
   @Delete('/me')
   async deleteMyAccount(@Req() req: Request, @Body() dto: DeleteUserDTO) {
     const { userId } = req[AUTH_USER] as AuthUser;

@@ -37,7 +37,6 @@ export class AuthGuard implements CanActivate {
       const client = await this.clientRepo.findOnebyUserId(userId);
       if (!client) throw new Error('Client not found');
       const { clientId } = client;
-
       req[AUTH_USER] = { userId, role, clientId };
     } else if (role === UserRole.Owner) {
       const owner = await this.ownerRepo.findOnebyUserId(userId);
