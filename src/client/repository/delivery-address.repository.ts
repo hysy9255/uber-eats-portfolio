@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeliveryAddressEntity } from '../orm-entity/delivery-address.orm.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
@@ -15,7 +15,12 @@ export class DeliveryAddressRepository {
   ) {}
 
   async save(data: CreateDeliveryAddressData) {
-    await this.repo.save(this.repo.create(data));
+    try {
+      await this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error saving delivery address:', e);
+      throw new InternalServerErrorException('Failed to save delivery address');
+    }
   }
 
   async update(data: UpdateDeliveryAddressData) {

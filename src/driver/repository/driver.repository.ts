@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DriverEntity } from '../orm-entity/driver.orm.entity';
@@ -19,12 +19,16 @@ export class DriverRepository {
   ) {}
 
   async save(userId: string, driverId: string) {
-    await this.driverRepository.save(
-      this.driverRepository.create({ userId, driverId }),
-    );
+    try {
+      await this.driverRepository.save(
+        this.driverRepository.create({ userId, driverId }),
+      );
+    } catch (e) {
+      console.error('Error saving driver:', e);
+      throw new InternalServerErrorException('Failed to save driver');
+    }
   }
 
-  // done
   async saveDriver(userId: string, driverId: string) {
     await this.driverRepository.save(
       this.driverRepository.create({ userId, driverId }),
@@ -38,23 +42,32 @@ export class DriverRepository {
       .getOne();
   }
 
-  // done
   async saveVehicle(data: CreateVehicleData) {
-    await this.vehicleRepository.save(this.vehicleRepository.create(data));
+    try {
+      await this.vehicleRepository.save(this.vehicleRepository.create(data));
+    } catch (e) {
+      console.error('Error saving vehicle:', e);
+      throw new InternalServerErrorException('Failed to save vehicle');
+    }
   }
 
-  // done
-  async checkLicensePlateAvailability(
-    licensePlate: string,
-  ): Promise<{ available: boolean }> {
-    const row = await this.vehicleRepository.findOneBy({ licensePlate });
-    return { available: !row };
+  async findVehicleByLicensePlate(licensePlate: string) {
+    try {
+      return await this.vehicleRepository.findOneBy({ licensePlate });
+    } catch (e) {
+      console.error('Error finding vehicle by license plate:', e);
+      throw new InternalServerErrorException('Failed to find vehicle');
+    }
   }
 
-  // done
   async saveDriverDocs(data: CreateDriverDocsData) {
-    await this.driverDocsRepository.save(
-      this.driverDocsRepository.create(data),
-    );
+    try {
+      await this.driverDocsRepository.save(
+        this.driverDocsRepository.create(data),
+      );
+    } catch (e) {
+      console.error('Error saving driver documents:', e);
+      throw new InternalServerErrorException('Failed to save driver documents');
+    }
   }
 }

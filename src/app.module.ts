@@ -38,6 +38,8 @@ import { HealthModule } from './health/health.module';
 import { PersistenceModule } from './persistence/persistence.module';
 import { ClientModule } from './client/client.module';
 import { OwnerEntity } from './owner/orm-entity/owner.orm.entity';
+import { addTransactionalDataSource } from 'typeorm-transactional';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
@@ -46,34 +48,44 @@ import { OwnerEntity } from './owner/orm-entity/owner.orm.entity';
       envFilePath: '.env.development.local',
       // envFilePath: '.env',
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DATABASE_HOST,
-      port: 5432,
-      username: process.env.DATABASE_USERNAME,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
-      // ssl: {
-      //   rejectUnauthorized: false,
-      // },
-      entities: [
-        VehicleEntity,
-        DriverDocsEntity,
-        UserEntity,
-        OwnerEntity,
-        DriverEntity,
-        ClientEntity,
-        DeliveryAddressEntity,
-        DeliveryAddressSnapshotEntity,
-        RestaurantEntity,
-        RestaurantAddressEntity,
-        OperatingHoursEntity,
-        OrderEntity,
-        DishEntity,
-        OrderItemEntity,
-        RejectedDeliveryOrderEntity,
-      ],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: 'postgres',
+        host: process.env.DATABASE_HOST,
+        port: 5432,
+        username: process.env.DATABASE_USERNAME,
+        password: process.env.DATABASE_PASSWORD,
+        database: process.env.DATABASE_NAME,
+        // ssl: {
+        //   rejectUnauthorized: false,
+        // },
+        entities: [
+          VehicleEntity,
+          DriverDocsEntity,
+          UserEntity,
+          OwnerEntity,
+          DriverEntity,
+          ClientEntity,
+          DeliveryAddressEntity,
+          DeliveryAddressSnapshotEntity,
+          RestaurantEntity,
+          RestaurantAddressEntity,
+          OperatingHoursEntity,
+          OrderEntity,
+          DishEntity,
+          OrderItemEntity,
+          RejectedDeliveryOrderEntity,
+        ],
+        synchronize: true,
+      }),
+      dataSourceFactory: (options) => {
+        if (!options) {
+          throw new Error('Invalid TypeORM options');
+        }
+        return Promise.resolve(
+          addTransactionalDataSource(new DataSource(options)),
+        );
+      },
     }),
     JwtModule,
     AuthModule,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OperatingHoursEntity } from '../orm-entity/operatingHours.entity';
 import { Repository } from 'typeorm';
@@ -15,7 +15,12 @@ export class OperatingHoursRepository {
   ) {}
 
   save(data: CreateOperatingHoursData[]) {
-    return this.repo.save(this.repo.create(data));
+    try {
+      return this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error saving operating hours:', e);
+      throw new InternalServerErrorException('Failed to save operating hours');
+    }
   }
 
   // done

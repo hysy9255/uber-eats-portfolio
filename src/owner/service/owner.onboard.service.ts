@@ -14,14 +14,14 @@ export class OwnerOnBoardService {
     private readonly dish: DishRegisterService,
   ) {}
 
-  async onBoard(userId: string, { restaurant, dishes }: RegisterRestaurantDTO) {
+  async onBoard(
+    userId: string,
+    { restaurant: rest, dishes }: RegisterRestaurantDTO,
+  ) {
     const ownerId = this.sharedService.generateId();
     await this.ownerRepo.save(userId, ownerId);
 
-    const { restaurantId } = await this.restaurant.register(
-      ownerId,
-      restaurant,
-    );
+    const { restaurantId } = await this.restaurant.register(ownerId, rest);
     if (dishes) await this.dish.register(restaurantId, dishes);
   }
 }

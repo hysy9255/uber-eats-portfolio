@@ -6,6 +6,7 @@ import { RestaurantMapper } from '../mapper/restaurant.mapper';
 import { RestaurantAddressMapper } from '../mapper/restaurant-address.mapper';
 import { OperatingHoursMapper } from '../mapper/operating-hours.mapper';
 import { UpdateRestaurantDTO } from '../dto/restaurant/update-restaurant.dto';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class RestaurantCommandService {
@@ -19,6 +20,7 @@ export class RestaurantCommandService {
     private readonly hoursMapper: OperatingHoursMapper,
   ) {}
 
+  @Transactional()
   async updateRestaurant(ownerId: string, dto: UpdateRestaurantDTO) {
     const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
 

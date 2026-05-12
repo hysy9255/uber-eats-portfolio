@@ -11,26 +11,31 @@ import { ReadDishDataSchema } from '../schema/read-dish-data.schema';
 export class DishRepository {
   constructor(
     @InjectRepository(DishEntity)
-    private readonly dishRepository: Repository<DishEntity>,
+    private readonly repo: Repository<DishEntity>,
   ) {}
 
   async save(data: CreateDishData | CreateDishData[]) {
-    if (Array.isArray(data)) {
-      const entities = this.dishRepository.create(data);
-      await this.dishRepository.save(entities);
-      return;
-    }
+    try {
+      if (Array.isArray(data)) {
+        const entities = this.repo.create(data);
+        await this.repo.save(entities);
+        return;
+      }
 
-    const entity = this.dishRepository.create(data);
-    await this.dishRepository.save(entity);
+      const entity = this.repo.create(data);
+      await this.repo.save(entity);
+    } catch (e) {
+      console.error('Error saving dish:', e);
+      throw new InternalServerErrorException('Failed to save dish information');
+    }
   }
 
   async update(data: UpdateDishData) {
-    await this.dishRepository.save(this.dishRepository.create(data));
+    await this.repo.save(this.repo.create(data));
   }
 
   async delete(id: string) {
-    await this.dishRepository.delete({ dishId: id });
+    await this.repo.delete({ dishId: id });
   }
 
   async findByRestaurant(restaurantId: string): Promise<ReadDishData[]> {
@@ -63,7 +68,7 @@ export class DishRepository {
   }
 
   private baseReadQb(): SelectQueryBuilder<DishEntity> {
-    return this.dishRepository
+    return this.repo
       .createQueryBuilder('d')
       .select([
         'd.dishId AS "dishId"',

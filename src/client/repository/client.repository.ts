@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientEntity } from '../orm-entity/client.orm.entity';
 import { Repository } from 'typeorm';
@@ -11,10 +11,17 @@ export class ClientRepository {
     private readonly clientRepository: Repository<ClientEntity>,
   ) {}
 
-  async save(userId: string, clientId) {
-    await this.clientRepository.save(
-      this.clientRepository.create({ userId, clientId }),
-    );
+  async save(userId: string, clientId: string) {
+    try {
+      await this.clientRepository.save(
+        this.clientRepository.create({ userId, clientId }),
+      );
+    } catch (e) {
+      console.error('Error saving client:', e);
+      throw new InternalServerErrorException(
+        'Failed to save client information',
+      );
+    }
   }
 
   async findOnebyUserId(userId: string) {

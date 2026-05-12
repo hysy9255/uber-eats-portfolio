@@ -11,7 +11,7 @@ export class BcryptService {
     const match = await bcrypt.compare(plainPassword, hashedPassword);
     if (!match) {
       throw new HttpException(
-        { message: 'Incorrect Password' },
+        { message: '입력하신 기존 비밀번호가 틀립니다' },
         HttpStatus.BAD_REQUEST,
       );
     }

@@ -12,19 +12,20 @@ import { RestaurantViewRow } from '../types/restaurant-view-row';
 export class RestaurantRepository {
   constructor(
     @InjectRepository(RestaurantEntity)
-    private readonly restaurantRepository: Repository<RestaurantEntity>,
+    private readonly repo: Repository<RestaurantEntity>,
   ) {}
 
   async save(data: CreateRestaurantData) {
-    await this.restaurantRepository.save(
-      this.restaurantRepository.create(data),
-    );
+    try {
+      await this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error saving restaurant:', e);
+      throw new InternalServerErrorException('Failed to save restaurant');
+    }
   }
 
   async update(data: UpdateRestaurantData) {
-    return this.restaurantRepository.save(
-      this.restaurantRepository.create(data),
-    );
+    return this.repo.save(this.repo.create(data));
   }
 
   async findOneByOwner(ownerId: string): Promise<ReadRestaurantData> {
@@ -52,7 +53,7 @@ export class RestaurantRepository {
   }
 
   async findNameAndLogoById(restaurantId: string) {
-    return await this.restaurantRepository
+    return await this.repo
       .createQueryBuilder('r')
       .select(['r.dba AS "dba"', 'r.logo AS "logo"'])
       .where('r.restaurantId = :restaurantId', { restaurantId })
@@ -94,7 +95,7 @@ export class RestaurantRepository {
   }
 
   private baseReadQb(): SelectQueryBuilder<RestaurantEntity> {
-    return this.restaurantRepository
+    return this.repo
       .createQueryBuilder('r')
       .select([
         'r.restaurantId AS "restaurantId"',

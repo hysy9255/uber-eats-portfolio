@@ -13,7 +13,6 @@ export class AuthController {
   @ApiOperation({ summary: 'Login' })
   @Post('login')
   async login(@Body() dto: LoginRequestDTO): Promise<LoginResponseDTO> {
-    console.log('dto', dto);
     return this.service.login(dto);
   }
 }

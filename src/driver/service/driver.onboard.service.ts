@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { SharedService } from 'src/shared/shared.service';
 import { DriverRepository } from '../repository/driver.repository';
 import { CreateVehicleDTO } from '../dto/create-vehicle.input.dto';
@@ -26,21 +26,18 @@ export class DriverOnBoardService {
   }
 
   private async registerVehicle(driverId: string, dto: CreateVehicleDTO) {
-    const licensePlate = dto.licensePlate;
-    const vehicleExists =
-      await this.driverRepo.checkLicensePlateAvailability(licensePlate);
-    if (vehicleExists) {
-      throw new Error('Given license plate already exists');
+    const vehicle = await this.driverRepo.findVehicleByLicensePlate(
+      dto.licensePlate,
+    );
+    if (vehicle) {
+      throw new ConflictException('Given license plate already exists');
     }
-    const createVehicleData = this.driverMapper.createVehicle(driverId, dto);
-    await this.driverRepo.saveVehicle(createVehicleData);
+    const data = this.driverMapper.createVehicle(driverId, dto);
+    await this.driverRepo.saveVehicle(data);
   }
 
   private async registerDocument(driverId: string, dto: CreateDriverDocsDTO) {
-    const createDriverDocsData = this.driverMapper.createDriverDocs(
-      driverId,
-      dto,
-    );
-    await this.driverRepo.saveDriverDocs(createDriverDocsData);
+    const data = this.driverMapper.createDriverDocs(driverId, dto);
+    await this.driverRepo.saveDriverDocs(data);
   }
 }

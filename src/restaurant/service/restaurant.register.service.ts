@@ -27,13 +27,13 @@ export class RestaurantRegisterService {
       ownerId,
       info,
     );
-    const { restaurantId: id } = createRestaurantData;
-    const cohData = this.hoursMapper.dtoToCreateData(id, hours);
-    const createAddressData = this.addressMapper.dtoToCreateData(id, address);
+    const { restaurantId: rId } = createRestaurantData;
+    const cohData = this.hoursMapper.dtoToCreateData(rId, hours);
+    const createAddressData = this.addressMapper.dtoToCreateData(rId, address);
 
     await this.restaurantRepo.save(createRestaurantData);
     await this.hoursRepo.save(cohData);
     await this.addressRepo.save(createAddressData);
-    return { restaurantId: id };
+    return { restaurantId: rId };
   }
 }

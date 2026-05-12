@@ -6,6 +6,7 @@ import { ClientOnBoardService } from 'src/client/service/client.onboard.service'
 import { RegisterDriverDTO } from '../dto/register-driver.dto';
 import { DriverOnBoardService } from 'src/driver/service/driver.onboard.service';
 import { OwnerOnBoardService } from 'src/owner/service/owner.onboard.service';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class RegistrationService {
@@ -16,16 +17,19 @@ export class RegistrationService {
     private readonly driverOnBoard: DriverOnBoardService,
   ) {}
 
+  @Transactional()
   async registerClient({ user, deliveryInfo }: RegisterClientDTO) {
     const { userId } = await this.user.create(user);
     await this.clientOnBoard.onBoard(userId, deliveryInfo);
   }
 
+  @Transactional()
   async registerOwner({ user, restaurant }: RegisterOwnerDTO) {
     const { userId } = await this.user.create(user);
     await this.ownerOnBoard.onBoard(userId, restaurant);
   }
 
+  @Transactional()
   async registerDriver({ user, vehicle, driverDocuments }: RegisterDriverDTO) {
     const { userId } = await this.user.create(user);
     await this.driverOnBoard.onBoard(userId, vehicle, driverDocuments);

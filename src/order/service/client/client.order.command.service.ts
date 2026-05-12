@@ -9,6 +9,7 @@ import { OrderItemMapper } from '../../mapper/order-item.mapper';
 import { OrderValidationService } from '../internal/order.validation.service';
 import { OrderMapper } from '../../mapper/order.mapper';
 import { OrderPriceCalculator } from '../internal/order-price.calculator';
+import { Transactional } from 'typeorm-transactional';
 
 @Injectable()
 export class ClientOrderCommandService {
@@ -26,6 +27,7 @@ export class ClientOrderCommandService {
     private readonly priceCalculator: OrderPriceCalculator,
   ) {}
 
+  @Transactional()
   async createOrder(
     clientId: string,
     dto: CreateOrderDTO,

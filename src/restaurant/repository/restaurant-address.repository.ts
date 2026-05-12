@@ -24,12 +24,19 @@ export class RestaurantAddressRepository {
     private readonly address: Repository<RestaurantAddressEntity>,
   ) {}
 
-  save(data: CreateRestaurantAddressData) {
-    return this.address.save(this.address.create(data));
+  async save(data: CreateRestaurantAddressData) {
+    try {
+      await this.address.save(this.address.create(data));
+    } catch (e) {
+      console.error('Error saving restaurant address:', e);
+      throw new InternalServerErrorException(
+        'Failed to save restaurant address',
+      );
+    }
   }
 
-  update(data: UpdateRestaurantAddressData) {
-    return this.address.save(this.address.create(data));
+  async update(data: UpdateRestaurantAddressData) {
+    await this.address.save(this.address.create(data));
   }
 
   async findOneByRestaurant(
