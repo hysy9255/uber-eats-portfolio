@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DeliveryAddressSnapshotEntity } from '../orm-entity/delivery-address-snapshot.orm.entity';
@@ -12,8 +12,15 @@ export class DeliveryAddressSnapshotRepository {
   ) {}
 
   async save(data: CreateDeliveryAddressSnapshotData) {
-    await this.deliveryAddressSnapshotRepo.save(
-      this.deliveryAddressSnapshotRepo.create(data),
-    );
+    try {
+      await this.deliveryAddressSnapshotRepo.save(
+        this.deliveryAddressSnapshotRepo.create(data),
+      );
+    } catch (e) {
+      console.error('Error saving delivery address snapshot:', e);
+      throw new InternalServerErrorException(
+        'Failed to save delivery address snapshot',
+      );
+    }
   }
 }

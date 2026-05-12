@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from '../orm-entity/order.orm.entity';
 import { Repository, SelectQueryBuilder } from 'typeorm';
@@ -12,24 +12,39 @@ export class ClientOrderRepository {
     private readonly repo: Repository<OrderEntity>,
   ) {}
 
-  async findByClientId(clientId: string, statuses?: OrderStatus[]) {
-    const rows = this.baseReadQb().where('order.clientId = :clientId', {
-      clientId,
-    });
+  async findByClientId(
+    clientId: string,
+    statuses?: OrderStatus[],
+  ): Promise<ClientOrderDetailRow[]> {
+    try {
+      const rows = this.baseReadQb().where('order.clientId = :clientId', {
+        clientId,
+      });
 
-    if (statuses && statuses.length > 0) {
-      rows.andWhere('order.status IN (:...statuses)', { statuses });
+      if (statuses && statuses.length > 0) {
+        rows.andWhere('order.status IN (:...statuses)', { statuses });
+      }
+
+      return await rows.getRawMany<ClientOrderDetailRow>();
+    } catch (e) {
+      console.error('Error finding order:', e);
+      throw new InternalServerErrorException('Failed to find order');
     }
-
-    return await rows.getRawMany<ClientOrderDetailRow>();
   }
 
-  async findByIdAndClientId(orderId: string, clientId: string) {
-    const rows = this.baseReadQb()
-      .where('order.orderId = :orderId', { orderId })
-      .andWhere('order.clientId = :clientId', { clientId });
-
-    return await rows.getRawMany<ClientOrderDetailRow>();
+  async findByIdAndClientId(
+    orderId: string,
+    clientId: string,
+  ): Promise<ClientOrderDetailRow[]> {
+    try {
+      return await this.baseReadQb()
+        .where('order.orderId = :orderId', { orderId })
+        .andWhere('order.clientId = :clientId', { clientId })
+        .getRawMany<ClientOrderDetailRow>();
+    } catch (e) {
+      console.error('Error finding order:', e);
+      throw new InternalServerErrorException('Failed to find order');
+    }
   }
 
   private baseReadQb(): SelectQueryBuilder<OrderEntity> {

@@ -25,55 +25,88 @@ export class RestaurantRepository {
   }
 
   async update(data: UpdateRestaurantData) {
-    return this.repo.save(this.repo.create(data));
+    try {
+      return this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error updating restaurant:', e);
+      throw new InternalServerErrorException('Failed to update restaurant');
+    }
   }
 
-  async findOneByOwner(ownerId: string): Promise<ReadRestaurantData> {
-    const row = await this.baseReadQb()
-      .where('r.ownerId = :ownerId', { ownerId })
-      .getRawOne<ReadRestaurantData>();
-
-    if (!row) {
-      throw new Error('Restaurant Not Found');
+  async findOneByOwner(
+    ownerId: string,
+  ): Promise<ReadRestaurantData | undefined> {
+    try {
+      return await this.baseReadQb()
+        .where('r.ownerId = :ownerId', { ownerId })
+        .getRawOne<ReadRestaurantData>();
+    } catch (e) {
+      console.error('Error finding restaurant by owner:', e);
+      throw new InternalServerErrorException(
+        'Failed to find restaurant by owner',
+      );
     }
-
-    return this.parseOne(row);
   }
 
   async findByOwner(ownerId: string): Promise<RestaurantViewRow[]> {
-    return await this.baseRestaurantViewQb()
-      .where('r.ownerId = :ownerId', { ownerId })
-      .getRawMany<RestaurantViewRow>();
+    try {
+      return await this.baseRestaurantViewQb()
+        .where('r.ownerId = :ownerId', { ownerId })
+        .getRawMany<RestaurantViewRow>();
+    } catch (e) {
+      console.error('Error finding restaurant by owner', e);
+      throw new InternalServerErrorException(
+        'Failed to find restaurant by owner',
+      );
+    }
   }
 
   async findById(restaurantId: string): Promise<RestaurantViewRow[]> {
-    return await this.baseRestaurantViewQb()
-      .where('r.restaurantId = :restaurantId', { restaurantId })
-      .getRawMany<RestaurantViewRow>();
+    try {
+      return await this.baseRestaurantViewQb()
+        .where('r.restaurantId = :restaurantId', { restaurantId })
+        .getRawMany<RestaurantViewRow>();
+    } catch (e) {
+      console.error('Error finding restaurant by id', e);
+      throw new InternalServerErrorException('Failed to find restaurant by id');
+    }
   }
 
   async findNameAndLogoById(restaurantId: string) {
-    return await this.repo
-      .createQueryBuilder('r')
-      .select(['r.dba AS "dba"', 'r.logo AS "logo"'])
-      .where('r.restaurantId = :restaurantId', { restaurantId })
-      .getRawOne<{ dba: string; logo: string }>();
+    try {
+      return await this.repo
+        .createQueryBuilder('r')
+        .select(['r.dba AS "dba"', 'r.logo AS "logo"'])
+        .where('r.restaurantId = :restaurantId', { restaurantId })
+        .getRawOne<{ dba: string; logo: string }>();
+    } catch (e) {
+      console.error('Error finding Name and Logo by id', e);
+      throw new InternalServerErrorException(
+        'Failed to find name and logo by id',
+      );
+    }
   }
 
-  async findOneById(restaurantId: string): Promise<ReadRestaurantData> {
-    const row = await this.baseReadQb()
-      .where('r.restaurantId = :restaurantId', { restaurantId })
-      .getRawOne<ReadRestaurantData>();
-
-    if (!row) {
-      throw new Error('Restaurant Not Found');
+  async findOneById(
+    restaurantId: string,
+  ): Promise<ReadRestaurantData | undefined> {
+    try {
+      return await this.baseReadQb()
+        .where('r.restaurantId = :restaurantId', { restaurantId })
+        .getRawOne<ReadRestaurantData>();
+    } catch (e) {
+      console.error('Error finding restaurant by id', e);
+      throw new InternalServerErrorException('Failed to find restaurant by id');
     }
-
-    return this.parseOne(row);
   }
 
   async find(): Promise<RestaurantViewRow[]> {
-    return await this.baseRestaurantViewQb().getRawMany<RestaurantViewRow>();
+    try {
+      return await this.baseRestaurantViewQb().getRawMany<RestaurantViewRow>();
+    } catch (e) {
+      console.error('Error finding restaurants', e);
+      throw new InternalServerErrorException('Failed to find restaurants');
+    }
   }
 
   private baseRestaurantViewQb(): SelectQueryBuilder<RestaurantEntity> {

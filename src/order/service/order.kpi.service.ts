@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { OrderRepository } from '../repository/order.repository';
 import { OwnerDashBoardPageDTO } from '../dto/response/owner-dashboard-page.dto';
 import { buildDailyRevenue } from 'src/utils/buildDailyRevenue';
@@ -57,7 +57,10 @@ export class OrderKpiService {
     ownerId: string,
     range: string,
   ): Promise<OwnerDashBoardPageDTO> {
-    const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
+    const rest = await this.restaurantRepo.findOneByOwner(ownerId);
+    if (!rest)
+      throw new NotFoundException('Restaurant is not found by ownerId');
+    const { restaurantId } = rest;
 
     const { startDate, endDate } = generateDateRange(range);
 
@@ -91,7 +94,10 @@ export class OrderKpiService {
     ownerId: string,
     limit: string,
   ): Promise<MenuRankingDTO> {
-    const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
+    const rest = await this.restaurantRepo.findOneByOwner(ownerId);
+    if (!rest)
+      throw new NotFoundException('Restaurant is not found by ownerId');
+    const { restaurantId } = rest;
 
     const topOrders = await this.orderStatsRepo.findTopDishesByQuantity(
       restaurantId,

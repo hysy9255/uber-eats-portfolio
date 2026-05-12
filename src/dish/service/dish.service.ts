@@ -45,9 +45,12 @@ export class DishService {
   }
 
   async createDish(ownerId: string, dto: CreateDishDTO) {
-    const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
+    const rest = await this.restaurantRepo.findOneByOwner(ownerId);
+    if (!rest)
+      throw new NotFoundException('Restaurant not found for the owner');
+
     await this.dishRepo.save(
-      this.dishMapper.dtoToCreateDishData(restaurantId, dto),
+      this.dishMapper.dtoToCreateDishData(rest.restaurantId, dto),
     );
   }
 

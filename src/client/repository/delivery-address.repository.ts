@@ -24,48 +24,101 @@ export class DeliveryAddressRepository {
   }
 
   async update(data: UpdateDeliveryAddressData) {
-    await this.repo.save(this.repo.create(data));
+    try {
+      await this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error updating delivery address:', e);
+      throw new InternalServerErrorException(
+        'Failed to update delivery address',
+      );
+    }
   }
 
   async delete(deliveryAddressId: string) {
-    await this.repo.delete({ deliveryAddressId });
+    try {
+      await this.repo.delete({ deliveryAddressId });
+    } catch (e) {
+      console.error('Error deleting delivery address:', e);
+      throw new InternalServerErrorException(
+        'Failed to delete delivery address',
+      );
+    }
   }
 
   async updateDefault(data: SetDefaultDeliveryAddressData) {
-    await this.repo.save(this.repo.create(data));
+    try {
+      await this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error setting default delivery address:', e);
+      throw new InternalServerErrorException(
+        'Failed to set default delivery address',
+      );
+    }
   }
 
   async findOneById(
     deliveryAddressId: string,
   ): Promise<ReadDeliveryAddressData | undefined> {
-    return await this.baseReadQb()
-      .where('d.deliveryAddressId = :deliveryAddressId', { deliveryAddressId })
-      .getRawOne<ReadDeliveryAddressData>();
+    try {
+      return await this.baseReadQb()
+        .where('d.deliveryAddressId = :deliveryAddressId', {
+          deliveryAddressId,
+        })
+        .getRawOne<ReadDeliveryAddressData>();
+    } catch (e) {
+      console.error('Error finding delivery address by ID:', e);
+      throw new InternalServerErrorException(
+        'Failed to find delivery address by ID',
+      );
+    }
   }
 
   async findOneByIdAndClientId(
     deliveryAddressId: string,
     clientId: string,
   ): Promise<ReadDeliveryAddressData | undefined> {
-    return await this.baseReadQb()
-      .where('d.deliveryAddressId = :deliveryAddressId', { deliveryAddressId })
-      .andWhere('d.clientId = :clientId', { clientId })
-      .getRawOne<ReadDeliveryAddressData>();
+    try {
+      return await this.baseReadQb()
+        .where('d.deliveryAddressId = :deliveryAddressId', {
+          deliveryAddressId,
+        })
+        .andWhere('d.clientId = :clientId', { clientId })
+        .getRawOne<ReadDeliveryAddressData>();
+    } catch (e) {
+      console.error('Error finding delivery address by ID and client ID:', e);
+      throw new InternalServerErrorException(
+        'Failed to find delivery address by ID and client ID',
+      );
+    }
   }
 
   async findDefaultAddress(
     clientId: string,
   ): Promise<ReadDeliveryAddressData | undefined> {
-    return await this.baseReadQb()
-      .where('d.clientId = :clientId', { clientId })
-      .andWhere('d.isDefault = :isDefault', { isDefault: true })
-      .getRawOne<ReadDeliveryAddressData>();
+    try {
+      return await this.baseReadQb()
+        .where('d.clientId = :clientId', { clientId })
+        .andWhere('d.isDefault = :isDefault', { isDefault: true })
+        .getRawOne<ReadDeliveryAddressData>();
+    } catch (e) {
+      console.error('Error finding default delivery address:', e);
+      throw new InternalServerErrorException(
+        'Failed to find default delivery address',
+      );
+    }
   }
 
   async findByClientId(clientId: string): Promise<ReadDeliveryAddressData[]> {
-    return await this.baseReadQb()
-      .where('d.clientId = :clientId', { clientId })
-      .getRawMany<ReadDeliveryAddressData>();
+    try {
+      return await this.baseReadQb()
+        .where('d.clientId = :clientId', { clientId })
+        .getRawMany<ReadDeliveryAddressData>();
+    } catch (e) {
+      console.error('Error finding delivery addresses by client ID:', e);
+      throw new InternalServerErrorException(
+        'Failed to find delivery addresses by client ID',
+      );
+    }
   }
 
   private baseReadQb(): SelectQueryBuilder<DeliveryAddressEntity> {

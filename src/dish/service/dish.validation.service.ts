@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { DishRepository } from '../repository/dish.repository';
 import { RestaurantRepository } from 'src/restaurant/repository/restaurant.repository';
 
@@ -10,7 +10,10 @@ export class DishValidationService {
   ) {}
 
   private async validateDishOwnership(ownerId: string, dishId: string) {
-    const { restaurantId } = await this.restaurant.findOneByOwner(ownerId);
+    const rest = await this.restaurant.findOneByOwner(ownerId);
+    if (!rest) throw new NotFoundException('Restaurant is not found by owner');
+    const { restaurantId } = rest;
+
     const dish = await this.dish.findOneById(dishId);
     if (dish.restaurantId !== restaurantId) {
       throw new Error('This dish does not belong to your restaurant');

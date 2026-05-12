@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RestaurantRepository } from '../repository/restaurant.repository';
 import { OperatingHoursRepository } from '../repository/operating-hours.repository';
 import { RestaurantAddressRepository } from '../repository/restaurant-address.repository';
@@ -22,7 +22,9 @@ export class RestaurantCommandService {
 
   @Transactional()
   async updateRestaurant(ownerId: string, dto: UpdateRestaurantDTO) {
-    const { restaurantId } = await this.restaurantRepo.findOneByOwner(ownerId);
+    const rest = await this.restaurantRepo.findOneByOwner(ownerId);
+    if (!rest) throw new NotFoundException('Restaraunt is not found');
+    const { restaurantId } = rest;
 
     if (dto.generalInfo) {
       const updateRestaurantInfoData = this.restaurantMapper.dtoToUpdateData(

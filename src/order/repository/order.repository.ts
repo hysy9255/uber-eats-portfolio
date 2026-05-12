@@ -16,30 +16,39 @@ export class OrderRepository {
   ) {}
 
   async save(data: CreateOrderData): Promise<{ orderId: string }> {
-    const { orderId } = await this.repo.save(this.repo.create(data));
-    return { orderId };
+    try {
+      const { orderId } = await this.repo.save(this.repo.create(data));
+      return { orderId };
+    } catch (e) {
+      console.error('Error saving order:', e);
+      throw new InternalServerErrorException('Failed to save order');
+    }
   }
 
   async update(data: UpdateOrderData) {
-    await this.repo.save(this.repo.create(data));
+    try {
+      await this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error updating order:', e);
+      throw new InternalServerErrorException('Failed to update order');
+    }
   }
 
   async findOneByIdAndOwnerId(
     orderId: string,
     ownerId: string,
-  ): Promise<ReadOrderData> {
-    const row = await this.baseReadQb()
-      .leftJoin('order.restaurant', 'restaurant')
-      .leftJoin('restaurant.owner', 'owner')
-      .where('order.orderId = :orderId', { orderId })
-      .andWhere('owner.ownerId = :ownerId', { ownerId })
-      .getRawOne<ReadOrderData>();
-
-    if (!row) {
-      throw new Error('Order Not Found');
+  ): Promise<ReadOrderData | undefined> {
+    try {
+      return await this.baseReadQb()
+        .leftJoin('order.restaurant', 'restaurant')
+        .leftJoin('restaurant.owner', 'owner')
+        .where('order.orderId = :orderId', { orderId })
+        .andWhere('owner.ownerId = :ownerId', { ownerId })
+        .getRawOne<ReadOrderData>();
+    } catch (e) {
+      console.error('Error finding order:', e);
+      throw new InternalServerErrorException('Failed to find order');
     }
-
-    return this.parseOne(row);
   }
 
   async findInDateRange(
@@ -48,19 +57,23 @@ export class OrderRepository {
     endDate: Date,
     status?: OrderStatus,
   ): Promise<ReadOrderData[]> {
-    const qb = this.baseReadQb()
-      .where('order.restaurantId = :restaurantId', { restaurantId })
-      .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      });
+    try {
+      const qb = this.baseReadQb()
+        .where('order.restaurantId = :restaurantId', { restaurantId })
+        .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
+          startDate,
+          endDate,
+        });
 
-    if (status) {
-      qb.andWhere('order.status = :status', { status });
+      if (status) {
+        qb.andWhere('order.status = :status', { status });
+      }
+
+      return await qb.getRawMany();
+    } catch (e) {
+      console.error('Error finding orders:', e);
+      throw new InternalServerErrorException('Failed to find orders');
     }
-
-    const rows = await qb.getRawMany();
-    return this.parseMany(rows);
   }
 
   private baseReadQb(): SelectQueryBuilder<OrderEntity> {

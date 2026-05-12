@@ -31,19 +31,40 @@ export class DishRepository {
   }
 
   async update(data: UpdateDishData) {
-    await this.repo.save(this.repo.create(data));
+    try {
+      await this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error updating dish:', e);
+      throw new InternalServerErrorException(
+        'Failed to update dish information',
+      );
+    }
   }
 
   async delete(id: string) {
-    await this.repo.delete({ dishId: id });
+    try {
+      await this.repo.delete({ dishId: id });
+    } catch (e) {
+      console.error('Error deleting dish:', e);
+      throw new InternalServerErrorException(
+        'Failed to delete dish information',
+      );
+    }
   }
 
   async findByRestaurant(restaurantId: string): Promise<ReadDishData[]> {
-    const qb = this.baseReadQb().where('d.restaurantId = :restaurantId', {
-      restaurantId,
-    });
-    const rows = await qb.getRawMany<ReadDishData>();
-    return this.parseMany(rows);
+    try {
+      return await this.baseReadQb()
+        .where('d.restaurantId = :restaurantId', {
+          restaurantId,
+        })
+        .getRawMany<ReadDishData>();
+    } catch (e) {
+      console.error('Error finding dishes by restaurant:', e);
+      throw new InternalServerErrorException(
+        'Failed to find dishes by restaurant',
+      );
+    }
   }
 
   async findOneById(id: string): Promise<ReadDishData> {

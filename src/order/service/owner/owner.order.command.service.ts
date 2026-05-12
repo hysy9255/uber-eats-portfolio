@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { OrderGateway } from '../../order.gateway';
 import { OrderRepository } from '../../repository/order.repository';
 import { OrderMapper } from '../../mapper/order.mapper';
@@ -20,6 +20,8 @@ export class OwnerOrderCommandService {
     newStatus: OrderStatus,
   ) {
     const order = await this.orderRepo.findOneByIdAndOwnerId(orderId, ownerId);
+    if (!order) throw new NotFoundException('Order is not found');
+
     this.orderValidationService.validateForUpdate(order, newStatus);
     order.status = newStatus;
 

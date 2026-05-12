@@ -30,16 +30,14 @@ export class DriverRepository {
   }
 
   async saveDriver(userId: string, driverId: string) {
-    await this.driverRepository.save(
-      this.driverRepository.create({ userId, driverId }),
-    );
-  }
-
-  async getDriverByUserId(userId: string) {
-    return await this.driverRepository
-      .createQueryBuilder('driver')
-      .where('driver.userId = :userId', { userId })
-      .getOne();
+    try {
+      await this.driverRepository.save(
+        this.driverRepository.create({ userId, driverId }),
+      );
+    } catch (e) {
+      console.error('Error saving driver:', e);
+      throw new InternalServerErrorException('Failed to save driver');
+    }
   }
 
   async saveVehicle(data: CreateVehicleData) {

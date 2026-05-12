@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderEntity } from '../orm-entity/order.orm.entity';
 import { Repository } from 'typeorm';
@@ -16,25 +16,30 @@ export class OrderStatsRepository {
     limit: number,
     orderBy: 'ASC' | 'DESC',
   ): Promise<QuantityAndDishName[]> {
-    const result = await this.repo
-      .createQueryBuilder('order')
-      .leftJoin('order.orderItems', 'oi')
-      .leftJoin('oi.dish', 'dish')
-      .select([
-        'oi.dishId AS "dishId"',
-        'SUM(oi.quantity) AS "quantity"',
-        'dish.name AS "dishName"',
-      ])
-      .where('order.restaurantId = :restaurantId', { restaurantId })
-      .groupBy('oi.dishId')
-      .addGroupBy('dish.name')
-      .orderBy('SUM(oi.quantity)', orderBy)
-      .limit(limit)
-      .getRawMany<QuantityAndDishName>();
+    try {
+      const result = await this.repo
+        .createQueryBuilder('order')
+        .leftJoin('order.orderItems', 'oi')
+        .leftJoin('oi.dish', 'dish')
+        .select([
+          'oi.dishId AS "dishId"',
+          'SUM(oi.quantity) AS "quantity"',
+          'dish.name AS "dishName"',
+        ])
+        .where('order.restaurantId = :restaurantId', { restaurantId })
+        .groupBy('oi.dishId')
+        .addGroupBy('dish.name')
+        .orderBy('SUM(oi.quantity)', orderBy)
+        .limit(limit)
+        .getRawMany<QuantityAndDishName>();
 
-    return result.map((item) => ({
-      ...item,
-      quantity: Number(item.quantity),
-    }));
+      return result.map((item) => ({
+        ...item,
+        quantity: Number(item.quantity),
+      }));
+    } catch (e) {
+      console.error('Error finding dishes:', e);
+      throw new InternalServerErrorException('Failed to find dishes');
+    }
   }
 }

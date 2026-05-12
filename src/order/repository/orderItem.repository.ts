@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderItemEntity } from '../orm-entity/order-item.orm.entity';
 import { Repository } from 'typeorm';
@@ -12,6 +12,11 @@ export class OrderItemRepository {
   ) {}
 
   async save(data: CreateOrderItemData[]) {
-    await this.repo.save(this.repo.create(data));
+    try {
+      await this.repo.save(this.repo.create(data));
+    } catch (e) {
+      console.error('Error saving order items:', e);
+      throw new InternalServerErrorException('Failed to save order items');
+    }
   }
 }
