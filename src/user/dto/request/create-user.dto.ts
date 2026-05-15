@@ -4,7 +4,6 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  IsUrl,
   MinLength,
 } from 'class-validator';
 import { UserRole } from 'src/constants/userRole';
@@ -37,6 +36,6 @@ export class CreateUserDTO {
 
   @ApiProperty({ example: 'url', description: 'user profile image url' })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   readonly profileImgUrl?: string;
 }

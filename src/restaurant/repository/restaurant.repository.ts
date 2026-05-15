@@ -5,7 +5,6 @@ import { RestaurantEntity } from '../orm-entity/restaurants.orm.entity';
 import { ReadRestaurantData } from '../types/restaurant/read-restaurant-data';
 import { CreateRestaurantData } from '../types/restaurant/create-restaurant-data';
 import { UpdateRestaurantData } from '../types/restaurant/update-restaurant-data';
-import { ReadRestaurantDataSchema } from '../schema/read-restaurant-data.schema';
 import { RestaurantViewRow } from '../types/restaurant-view-row';
 
 @Injectable()
@@ -149,27 +148,5 @@ export class RestaurantRepository {
         'r.prepTime AS "prepTime"',
         'r.orderType AS "orderType"',
       ]);
-  }
-
-  private parseOne(row: unknown): ReadRestaurantData {
-    const parsed = ReadRestaurantDataSchema.safeParse(row);
-
-    if (!parsed.success) {
-      console.error(parsed.error.issues);
-      throw new InternalServerErrorException('Invalid restaurant read model');
-    }
-
-    return parsed.data;
-  }
-
-  private parseMany(rows: unknown[]): ReadRestaurantData[] {
-    const parsed = ReadRestaurantDataSchema.array().safeParse(rows);
-
-    if (!parsed.success) {
-      console.error(parsed.error.issues);
-      throw new InternalServerErrorException('Invalid restaurant read model');
-    }
-
-    return parsed.data;
   }
 }

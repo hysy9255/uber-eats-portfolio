@@ -16,10 +16,11 @@ export class OwnerOrderRepository {
     try {
       const rows = this.repo
         .createQueryBuilder('order')
-        .leftJoin('order.orderItems', 'orderItem')
-        .leftJoin('orderItem.dish', 'dish')
+        .leftJoin('order.orderItems', 'order_item')
+        .leftJoin('order_item.dish', 'dish')
         .leftJoin('order.deliveryAddressSnapshot', 'snapshot')
         .leftJoin('order.client', 'client')
+        .leftJoin('client.user', 'user')
         .leftJoin('order.restaurant', 'restaurant')
         .select([
           'order.orderId AS "orderId"',
@@ -27,8 +28,8 @@ export class OwnerOrderRepository {
           'order.totalPrice AS "totalPrice"',
           'order.status AS "status"',
           'order.requestToRestaurant AS "requestToRestaurant"',
-          'orderItem.quantity AS "qauntity"',
-          'orderItem.price AS "price"',
+          'order_item.quantity AS "quantity"',
+          'dish.price AS "price"',
           'dish.name AS "name"',
           'dish.dishImgUrl AS "dishImg"',
           'snapshot.streetAddress AS "streetAddress"',
@@ -36,9 +37,9 @@ export class OwnerOrderRepository {
           'snapshot.city AS "city"',
           'snapshot.state AS "state"',
           'snapshot.zip AS "zip"',
-          'client.name AS "clientName"',
+          'user.name AS "clientName"',
           'client.clientId AS "clientId"',
-          'client.phoneNumber AS "phoneNumber"',
+          'user.phoneNumber AS "phoneNumber"',
         ])
         .where('restaurant.ownerId = :ownerId', { ownerId });
 

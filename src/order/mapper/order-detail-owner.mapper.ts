@@ -40,6 +40,7 @@ export class OwnerOrderDetailMapper {
         });
 
         dto.orderItems = [];
+        orderMap.set(row.orderId, dto);
       }
 
       const orderDTO = orderMap.get(row.orderId)!;

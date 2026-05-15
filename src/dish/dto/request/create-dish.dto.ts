@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNumber,
-  IsOptional,
-  IsPositive,
-  IsString,
-  IsUrl,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class CreateDishDTO {
   @ApiProperty({ example: 'Lobster', description: 'dish name' })
@@ -30,6 +24,6 @@ export class CreateDishDTO {
 
   @ApiProperty({ example: 'dish image url', description: 'dish image url' })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   dishImgUrl?: string;
 }

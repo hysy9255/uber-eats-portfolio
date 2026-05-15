@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OrderStatus } from 'src/constants/orderStatus';
 import { OrderForOwnerDTO } from '../../dto/response/order-for-owner.dto';
 import { OwnerOrderDetailMapper } from '../../mapper/order-detail-owner.mapper';
@@ -18,7 +18,7 @@ export class OwnerOrderQueryService {
     const rows = await this.orderRepo.findByOwnerId(ownerId, status);
 
     if (rows.length === 0) {
-      throw new NotFoundException('Orders do not exist');
+      return [];
     }
 
     return this.mapper.toDTO(rows);

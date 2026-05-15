@@ -7,7 +7,6 @@ import {
   IsOptional,
   IsPositive,
   IsString,
-  IsUrl,
   Min,
 } from 'class-validator';
 import { OrderType } from 'src/constants/orderType';
@@ -18,7 +17,7 @@ export class CreateRestaurantGeneralInfoDTO {
     description: 'Restaurant logo image URL',
   })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   logo?: string;
 
   @ApiProperty({
@@ -61,7 +60,7 @@ export class CreateRestaurantGeneralInfoDTO {
     description: 'Restaurant website URL',
   })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   website?: string;
 
   @ApiPropertyOptional({
@@ -69,35 +68,35 @@ export class CreateRestaurantGeneralInfoDTO {
     description: 'Restaurant Instagram URL',
   })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   instagram?: string;
 
   @ApiProperty({
     example: 'https://example.com/main.png',
     description: 'Main restaurant image URL',
   })
-  @IsUrl()
+  @IsString()
   mainImgUrl: string;
 
   @ApiProperty({
     example: 'https://example.com/sub1.png',
     description: 'Sub image URL 1',
   })
-  @IsUrl()
+  @IsString()
   sub1ImgUrl: string;
 
   @ApiProperty({
     example: 'https://example.com/sub2.png',
     description: 'Sub image URL 2',
   })
-  @IsUrl()
+  @IsString()
   sub2ImgUrl: string;
 
   @ApiProperty({
     example: 'https://example.com/banner.png',
     description: 'Restaurant banner image URL',
   })
-  @IsUrl()
+  @IsString()
   bannerImgUrl: string;
 
   @ApiProperty({

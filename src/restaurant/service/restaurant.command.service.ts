@@ -46,8 +46,12 @@ export class RestaurantCommandService {
     }
 
     if (dto.address) {
-      const { restaurantAddressId } =
+      const restaurantAddress =
         await this.addressRepo.findOneByRestaurant(restaurantId);
+      if (!restaurantAddress) {
+        throw new NotFoundException('Restaurant address is not found');
+      }
+      const { restaurantAddressId } = restaurantAddress;
       const updateAddressData = this.addressMapper.dtoToUpdateData(
         restaurantId,
         restaurantAddressId,

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { SharedService } from 'src/shared/shared.service';
 import { CreateOperatingHoursData } from '../types/operating-hours/create-operating-hours-data';
-import { UpdateOperatingHoursDTO } from '../dto/operatingHours/request/update-operating-hours.request.dto';
+import { UpdateOperatingHoursDTO } from '../dto/operatingHours/request/update-operating-hours.dto';
 import { UpdateOperatingHoursData } from '../types/operating-hours/update-operating-hours-data';
 import { DayOfWeek } from 'src/constants/dayOfWeek';
 import { ReadOperatingHoursData } from '../types/operating-hours/read-operating-hours-data';
