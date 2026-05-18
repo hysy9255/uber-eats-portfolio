@@ -45,8 +45,8 @@ import { DataSource } from 'typeorm';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.development.local',
-      // envFilePath: '.env',
+      // envFilePath: '.env.development.local',
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
